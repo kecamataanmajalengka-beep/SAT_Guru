@@ -3,216 +3,184 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registrasi Guru - Sistem Sekolah</title>
+<title>Admin Panel - Kecamatan Majalengka</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 <script>
-tailwind.config={theme:{extend:{colors:{kop:'#1a2744',kopAccent:'#c9a84c',dark:'#0f1923',card:'#182538',cardHover:'#1f3350',border:'#2a3f5f',muted:'#7a8ba5',light:'#e8ecf1',success:'#22c55e',danger:'#ef4444',warning:'#f59e0b'},fontFamily:{display:['Playfair Display','serif'],body:['Source Sans 3','sans-serif']}}}}
+tailwind.config={theme:{extend:{colors:{kop:'#1a2744',kopAccent:'#c9a84c',dark:'#0f1923',card:'#182538',cardHover:'#1f3350',border:'#2a3f5f',muted:'#7a8ba5',light:'#e8ecf1',success:'#22c55e',danger:'#ef4444',warning:'#f59e0b',info:'#06b6d4'},fontFamily:{display:['Playfair Display','serif'],body:['Source Sans 3','sans-serif']}}}}
 </script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min-height:100vh}
-.input-field{background:#0f1923;border:1px solid #2a3f5f;color:#e8ecf1;padding:10px 14px;border-radius:8px;width:100%;font-size:14px;transition:border-color .2s;font-family:'Source Sans 3',sans-serif}
-.input-field:focus{outline:none;border-color:#c9a84c;box-shadow:0 0 0 2px rgba(201,168,76,0.15)}
-.input-field option{background:#182538;color:#e8ecf1}
-.card{background:#182538;border:1px solid #2a3f5f;border-radius:12px;padding:24px;margin-bottom:20px}
-.btn-primary{background:linear-gradient(135deg,#c9a84c,#b8943f);color:#1a2744;font-weight:700;padding:10px 24px;border-radius:8px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:14px}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#182538}::-webkit-scrollbar-thumb{background:#2a3f5f;border-radius:3px}
+
+.login-bg{background:linear-gradient(135deg,#0f1923 0%,#1a2744 40%,#182538 100%);position:relative;overflow:hidden;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-bg::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(201,168,76,0.07) 0%,transparent 70%);top:-150px;right:-150px;border-radius:50%;animation:floatBlob 8s ease-in-out infinite}
+@keyframes floatBlob{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-20px) scale(1.1)}}
+
+.glass{background:rgba(24,37,56,0.85);backdrop-filter:blur(24px);border:1px solid rgba(42,63,95,0.5)}
+
+.sidebar{width:280px;min-height:100vh;background:linear-gradient(180deg,#1a2744 0%,#0f1923 100%);border-right:1px solid #2a3f5f;position:fixed;left:0;top:0;z-index:40;transition:transform .3s ease;overflow-y:auto}
+.main-content{margin-left:280px;transition:margin-left .3s ease}
+.nav-group-title{padding:12px 20px 4px 20px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#5c708a;font-weight:700}
+.nav-item{padding:10px 20px;cursor:pointer;border-left:3px solid transparent;transition:all .2s;display:flex;align-items:center;gap:10px;font-size:13px;color:#9ca3af;user-select:none}
+.nav-item:hover{background:rgba(42,63,95,0.3);color:#e8ecf1}
+.nav-item.active{background:rgba(201,168,76,0.1);border-left-color:#c9a84c;color:#c9a84c;font-weight:600}
+.nav-sub-item{padding-left:50px;font-size:12px;color:#7a8ba5}
+.nav-sub-item:hover{color:#e8ecf1}
+
+.btn-primary{background:linear-gradient(135deg,#c9a84c,#b8943f);color:#1a2744;font-weight:700;padding:8px 20px;border-radius:6px;border:none;cursor:pointer;transition:all .2s;font-size:13px;display:inline-flex;align-items:center;gap:6px}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(201,168,76,0.3)}
-.btn-secondary{background:transparent;border:1px solid #2a3f5f;color:#e8ecf1;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:14px}
+.btn-secondary{background:transparent;border:1px solid #2a3f5f;color:#e8ecf1;padding:8px 16px;border-radius:6px;cursor:pointer;transition:all .2s;font-size:13px}
 .btn-secondary:hover{border-color:#c9a84c;color:#c9a84c}
-.section-tabs{display:flex;gap:10px;margin-bottom:20px;border-bottom:1px solid #2a3f5f;padding-bottom:10px}
-.tab-btn{padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;color:#7a8ba5;transition:all .2s}
-.tab-btn.active{background:rgba(201,168,76,0.15);color:#c9a84c;font-weight:600}
-.toast{position:fixed;top:20px;right:20px;z-index:9999;padding:14px 20px;border-radius:8px;font-size:14px;font-weight:600;animation:slideIn .3s ease;max-width:400px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
-.toast-success{background:#166534;border:1px solid #22c55e;color:white}
-.toast-error{background:#991b1b;border:1px solid #ef4444;color:white}
+.btn-danger{background:rgba(239,68,68,0.1);border:1px solid #ef4444;color:#ef4444;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px}
+.btn-danger:hover{background:#ef4444;color:white}
+
+.input-field{background:#0f1923;border:1px solid #2a3f5f;color:#e8ecf1;padding:10px 14px;border-radius:6px;width:100%;font-size:14px;transition:border-color .2s;font-family:'Source Sans 3',sans-serif}
+.input-field:focus{outline:none;border-color:#c9a84c}
+.input-field:disabled{opacity:0.5;cursor:not-allowed}
+select.input-field{appearance:none;background-image:url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%239ca3af%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");background-repeat:no-repeat;background-position:right .7em top 50%;background-size:.65em auto;padding-right:2em}
+
+.card{background:#182538;border:1px solid #2a3f5f;border-radius:10px;padding:20px;margin-bottom:20px}
+.table-container{overflow-x:auto}
+table{width:100%;border-collapse:collapse;text-align:left}
+th{background:#0f1923;color:#c9a84c;padding:10px;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;white-space:nowrap}
+td{padding:10px;border-bottom:1px solid #2a3f5f;font-size:13px;color:#e8ecf1;vertical-align:middle}
+tr:hover td{background:#1f3350}
+
+.toast{position:fixed;top:20px;right:20px;z-index:9999;padding:14px 20px;border-radius:8px;font-size:13px;font-weight:600;animation:slideIn .3s ease;max-width:400px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+.toast-success{background:#166534;color:white}
+.toast-error{background:#991b1b;color:white}
 @keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-content{background:#182538;border:1px solid #2a3f5f;border-radius:12px;padding:24px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-header{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:35;display:none}
+.sidebar-overlay.active{display:block}
+@media(max-width:1023px){.sidebar{transform:translateX(-280px)}.sidebar.mobile-open{transform:translateX(0)}.main-content{margin-left:0!important}}
+.loading-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:#c9a84c;animation:spin 1s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ================= PRINT STYLES ================= */
+@media print {
+    @page { size: A4 portrait; margin: 1.5cm; }
+    body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; font-family: 'Times New Roman', Times, serif !important; font-size: 12pt; line-height: 1.4; }
+    #sidebar, #headerTop, .no-print, .modal-overlay { display: none !important; }
+    #mainArea { margin: 0 !important; padding: 0 !important; width: 100% !important; background: white !important; }
+    .card { border: none; padding: 0; box-shadow: none; }
+    table { width: 100%; border-collapse: collapse; border: 1px solid black; }
+    th, td { border: 1px solid black; padding: 8px; color: black !important; }
+    th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; color: black !important; }
+    .text-kopAccent { color: black !important; }
+    .kop-print { text-align: center; margin-bottom: 20px; border-bottom: 3px double black; padding-bottom: 10px; }
+    .kop-print img { height: 80px; margin-bottom: 5px; }
+    .kop-print h1, .kop-print h2 { margin: 0; font-weight: bold; text-transform: uppercase; font-size: 14pt; }
+    .kop-print h3 { font-size: 12pt; font-style: italic; margin: 0; }
+}
 </style>
 </head>
 <body>
 
-<div class="min-h-screen p-4 md:p-8">
-    <div class="max-w-5xl mx-auto">
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="font-display text-3xl md:text-4xl font-bold text-kopAccent tracking-wide mb-2">MANAJEMEN GURU</h1>
-            <p class="text-muted text-sm">Registrasi Akun & Reset Password</p>
-        </div>
+<div id="toastContainer"></div>
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
 
-        <div class="section-tabs">
-            <button onclick="switchTab('register')" id="tabReg" class="tab-btn active"><i class="fas fa-user-plus mr-2"></i>Registrasi Guru</button>
-            <button onclick="switchTab('reset')" id="tabReset" class="tab-btn"><i class="fas fa-key mr-2"></i>Reset Password</button>
-            <button onclick="switchTab('list')" id="tabList" class="tab-btn"><i class="fas fa-list mr-2"></i>Data Guru</button>
-        </div>
-
-        <!-- FORM REGISTRASI -->
-        <div id="panelRegister" class="card fade-in">
-            <div class="flex flex-wrap items-center gap-4 mb-6 border-b border-border pb-4">
-                <div class="w-16 h-16 rounded-full bg-kopAccent/20 flex items-center justify-center text-kopAccent text-2xl">
-                    <i class="fas fa-chalkboard-teacher"></i>
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-light">Form Registrasi Guru Baru</h2>
-                    <p class="text-xs text-muted">Lengkapi data di bawah ini untuk membuat akun guru.</p>
-                </div>
+<!-- LOGIN -->
+<div id="loginPage" class="login-bg">
+    <div class="glass rounded-2xl p-8 w-full max-w-md relative z-10 fade-in">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-kopAccent/20 flex items-center justify-center border-2 border-kopAccent">
+                <i class="fas fa-shield-alt text-2xl text-kopAccent"></i>
             </div>
-
-            <form id="formRegister" onsubmit="event.preventDefault(); registerTeacher();" class="space-y-6">
-                
-                <!-- Data Identitas -->
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="text-xs text-muted font-semibold uppercase tracking-wider mb-2 block">NPSN Sekolah</label>
-                        <input type="text" id="regNpsn" class="input-field" placeholder="Contoh: 202xxxxx" required>
-                    </div>
-                    <div>
-                        <label class="text-xs text-muted font-semibold uppercase tracking-wider mb-2 block">NIP Guru</label>
-                        <input type="text" id="regNip" class="input-field" placeholder="Nomor Induk Pegawai" required>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="text-xs text-muted font-semibold uppercase tracking-wider mb-2 block">Nama Lengkap (Sesuai Ijazah/SK)</label>
-                    <input type="text" id="regNama" class="input-field" placeholder="Nama Lengkap dengan Gelar" required>
-                </div>
-
-                <!-- Jenis Guru & Kelas -->
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div>
-                        <label class="text-xs text-muted font-semibold uppercase tracking-wider mb-2 block">Jenis Guru</label>
-                        <select id="regJenisGuru" class="input-field" onchange="handleJenisGuruChange()" required>
-                            <option value="">-- Pilih Jenis --</option>
-                            <option value="kelas">Guru Kelas</option>
-                            <option value="pai">Guru PAI</option>
-                            <option value="pjok">Guru PJOK</option>
-                        </select>
-                    </div>
-                    <div id="wrapperKelas">
-                        <label class="text-xs text-muted font-semibold uppercase tracking-wider mb-2 block">Kelas Wali</label>
-                        <select id="regKelas" class="input-field" disabled>
-                            <option value="">-- Pilih Kelas Dahulu --</option>
-                            <!-- Opsi Kelas 1-6 -->
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-xs text-muted font-semibold uppercase tracking-wider mb-2 block">Rombel</label>
-                        <select id="regRombel" class="input-field" disabled>
-                            <option value="">-- Pilih Rombel --</option>
-                            <option value="A">Rombel A</option>
-                            <option value="B">Rombel B</option>
-                            <option value="C">Rombel C</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Password -->
-                <div class="grid md:grid-cols-2 gap-6 pt-4 border-t border-border/50">
-                    <div>
-                        <label class="text-xs text-muted font-semibold uppercase tracking-wider mb-2 block">Password Awal</label>
-                        <div class="relative">
-                            <input type="text" id="regPass" class="input-field pr-10" placeholder="Masukkan password default" required>
-                            <button type="button" onclick="generateRandomPass()" class="absolute right-3 top-1/2 -translate-y-1/2 text-kopAccent hover:text-white text-xs"><i class="fas fa-dice"></i> Acak</button>
-                        </div>
-                        <p class="text-[10px] text-muted mt-1">Password default akan diberikan kepada guru untuk login pertama kali.</p>
-                    </div>
-                </div>
-
-                <div class="pt-4 flex justify-end gap-3">
-                    <button type="button" onclick="document.getElementById('formRegister').reset(); handleJenisGuruChange();" class="btn-secondary">Reset Form</button>
-                    <button type="submit" class="btn-primary"><i class="fas fa-save mr-2"></i>Simpan Data Guru</button>
-                </div>
-            </form>
+            <h1 class="font-display text-2xl font-bold text-kopAccent tracking-wide">ADMIN PANEL</h1>
+            <p class="text-muted text-xs mt-1">Sistem Manajemen Ujian Sekolah</p>
         </div>
-
-        <!-- FORM RESET PASSWORD -->
-        <div id="panelReset" class="card hidden fade-in">
-            <div class="flex flex-wrap items-center gap-4 mb-6 border-b border-border pb-4">
-                <div class="w-16 h-16 rounded-full bg-warning/20 flex items-center justify-center text-warning text-2xl">
-                    <i class="fas fa-unlock-alt"></i>
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-light">Reset Password Guru</h2>
-                    <p class="text-xs text-muted">Masukkan NPSN dan NIP untuk verifikasi identitas sebelum mereset.</p>
-                </div>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="text-xs text-muted font-semibold uppercase mb-1 block">Username</label>
+                <input type="text" id="loginUser" class="input-field" placeholder="Masukkan username">
             </div>
-
-            <form id="formReset" onsubmit="event.preventDefault(); resetPassword();" class="space-y-6">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="text-xs text-muted font-semibold uppercase tracking-wider mb-2 block">NPSN Sekolah</label>
-                        <input type="text" id="resNpsn" class="input-field" placeholder="NPSN terdaftar" required>
-                    </div>
-                    <div>
-                        <label class="text-xs text-muted font-semibold uppercase tracking-wider mb-2 block">NIP Guru</label>
-                        <input type="text" id="resNip" class="input-field" placeholder="NIP Guru" required>
-                    </div>
-                </div>
-
-                <div class="p-4 bg-dark/30 rounded border border-border mb-4">
-                    <p class="text-xs text-muted italic"><i class="fas fa-info-circle mr-1 text-info"></i> Jika data ditemukan, formulir password baru akan muncul di bawah ini.</p>
-                </div>
-
-                <!-- Bagian Password Baru (Hidden sampai verified) -->
-                <div id="resetSection" class="hidden space-y-4 border-t border-border pt-4">
-                    <div>
-                        <label class="text-xs text-muted font-semibold uppercase tracking-wider mb-2 block">Password Lama</label>
-                        <input type="password" id="resOldPass" class="input-field" placeholder="Masukkan password lama">
-                    </div>
-                    <div>
-                        <label class="text-xs text-muted font-semibold uppercase tracking-wider mb-2 block">Password Baru</label>
-                        <input type="password" id="resNewPass" class="input-field" placeholder="Password baru">
-                    </div>
-                    <div>
-                        <label class="text-xs text-muted font-semibold uppercase tracking-wider mb-2 block">Konfirmasi Password Baru</label>
-                        <input type="password" id="resConfPass" class="input-field" placeholder="Ulangi password baru">
-                    </div>
-                </div>
-
-                <div class="pt-4 flex justify-end gap-3">
-                    <button type="button" onclick="verifyTeacherForReset()" id="btnVerify" class="btn-primary"><i class="fas fa-search mr-2"></i>Cek Data</button>
-                    <button type="submit" id="btnSaveReset" class="btn-primary hidden"><i class="fas fa-save mr-2"></i>Simpan Reset</button>
-                </div>
-            </form>
+            <div>
+                <label class="text-xs text-muted font-semibold uppercase mb-1 block">Password</label>
+                <input type="password" id="loginPass" class="input-field" placeholder="Masukkan password">
+            </div>
+            <button onclick="doLogin()" class="btn-primary w-full mt-4"><i class="fas fa-sign-in-alt"></i> Masuk Sistem</button>
         </div>
-
-        <!-- LIST DATA GURU -->
-        <div id="panelList" class="card hidden fade-in">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-light">Data Guru Terdaftar</h2>
-                <div class="flex gap-2">
-                    <input type="text" id="searchGuru" placeholder="Cari Nama/NIP..." class="input-field text-sm w-64" onkeyup="renderGuruList()">
-                </div>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left border-collapse">
-                    <thead>
-                        <tr class="text-muted border-b border-border bg-dark/30">
-                            <th class="p-3">NIP</th>
-                            <th class="p-3">Nama Lengkap</th>
-                            <th class="p-3">Jenis Guru</th>
-                            <th class="p-3">Kelas / Rombel</th>
-                            <th class="p-3">NPSN</th>
-                        </tr>
-                    </thead>
-                    <tbody id="guruTableBody">
-                        <!-- Data akan diisi via JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
+        <div class="text-center mt-4 text-xs text-muted">Default: admin / admin123</div>
     </div>
 </div>
 
-<div id="toastContainer"></div>
+<!-- MAIN APP -->
+<div id="mainPage" class="hidden">
+    <aside id="sidebar" class="sidebar">
+        <div class="p-5 border-b border-border flex items-center gap-3 bg-kop/50 sticky top-0 z-10">
+            <div class="w-8 h-8 rounded bg-kopAccent flex items-center justify-center text-kop font-bold">A</div>
+            <div>
+                <h2 class="font-display text-kopAccent font-bold text-sm leading-tight">ADMIN PANEL</h2>
+                <p class="text-muted text-[10px]">Kecamatan Majalengka</p>
+            </div>
+        </div>
+
+        <nav class="py-4" id="sidebarNav">
+            <div class="nav-group-title">Manajemen User</div>
+            <div class="nav-item active" data-page="reg-guru"><i class="fas fa-chalkboard-teacher w-5"></i> Registrasi Guru</div>
+            <div class="nav-item" data-page="data-siswa"><i class="fas fa-user-graduate w-5"></i> Data Siswa</div>
+
+            <div class="nav-group-title mt-2">Bank Soal</div>
+            <div class="nav-item" data-page="bank-soal"><i class="fas fa-book w-5"></i> Bank Soal SAT</div>
+            <div class="nav-item" data-page="bank-soal-paj"><i class="fas fa-star w-5"></i> Bank Soal PAJ</div>
+
+            <div class="nav-group-title mt-2">Persiapan Ujian</div>
+            <div class="nav-item" data-page="token"><i class="fas fa-key w-5"></i> Token Ujian</div>
+            <div class="nav-item" data-page="jadwal"><i class="fas fa-calendar-alt w-5"></i> Jadwal Ujian</div>
+
+            <div class="nav-group-title mt-2">Pelaksanaan & Nilai</div>
+            <div class="nav-item" data-page="pelaksanaan-sat"><i class="fas fa-laptop-code w-5"></i> Ujian SAT</div>
+            <div class="nav-item" data-page="pelaksanaan-paj"><i class="fas fa-clipboard-check w-5"></i> Ujian PAJ</div>
+            
+            <div class="nav-group-title mt-2">Laporan</div>
+            <div class="nav-item" data-page="rekap-nilai"><i class="fas fa-chart-bar w-5"></i> Rekap Nilai</div>
+            <div class="nav-item" data-page="cetak-laporan"><i class="fas fa-print w-5"></i> Cetak Laporan</div>
+        </nav>
+
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-kop">
+            <button onclick="doLogout()" class="btn-secondary w-full text-xs py-2"><i class="fas fa-sign-out-alt mr-1"></i>Keluar</button>
+        </div>
+    </aside>
+
+    <div id="mainArea" class="main-content min-h-screen">
+        <header id="headerTop" class="sticky top-0 z-30 bg-dark/90 backdrop-blur-xl border-b border-border px-6 py-3 flex items-center justify-between no-print">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="text-muted hover:text-light"><i class="fas fa-bars text-lg"></i></button>
+                <h2 id="pageTitle" class="font-display text-lg font-bold text-light">Dashboard</h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p class="text-sm font-bold text-light">Administrator</p>
+                    <p class="text-xs text-muted">Online</p>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-kopAccent text-kop flex items-center justify-center font-bold">A</div>
+            </div>
+        </header>
+        <div class="p-6" id="pageContent">
+            <!-- Content Injected via JS -->
+        </div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div id="modalOverlay" class="modal-overlay hidden" onclick="if(event.target===this)closeModal()">
+    <div class="modal-content" id="modalBody"></div>
+</div>
 
 <script>
-// ================================================================
 // FIREBASE CONFIG
-// ================================================================
 var firebaseConfig = {
     apiKey: "AIzaSyC0Hs7SUgPAeQ_JaotHUJL5m6nIhCRif-8",
     authDomain: "pembuatan-soal.firebaseapp.com",
@@ -224,230 +192,296 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 
-// ================================================================
 // STATE & DATA
-// ================================================================
+var currentUser = null;
+var teachers = [];
+var students = [];
+var questionsSAT = []; 
+var questionsPAJ = [];
+var examResults = [];
+
+// MASTER DATA
+var JENIS_GURU = ['Guru Kelas', 'Guru PAI', 'Guru PJOK'];
+var ROMBEL = ['A', 'B', 'C'];
 var KELAS_LIST = ['Kelas 1','Kelas 2','Kelas 3','Kelas 4','Kelas 5','Kelas 6'];
-var currentVerifiedDocId = null; // Untuk Reset Password
+var MAPEL_LIST = [
+    {id:'ppkn',nama:'Pendidikan Pancasila'},
+    {id:'mat',nama:'Matematika'},
+    {id:'bin',nama:'Bahasa Indonesia'},
+    {id:'sbd',nama:'Seni Budaya'},
+    {id:'ipas',nama:'IPAS'},
+    {id:'bsd',nama:'Bahasa Sunda'},
+    {id:'bing',nama:'Bahasa Inggris'},
+    {id:'pai',nama:'PAI'},
+    {id:'pjok',nama:'PJOK'}
+];
 
-// ================================================================
-// UI LOGIC
-// ================================================================
-function switchTab(tab) {
-    // Update Buttons
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    if(tab==='register') document.getElementById('tabReg').classList.add('active');
-    if(tab==='reset') document.getElementById('tabReset').classList.add('active');
-    if(tab==='list') document.getElementById('tabList').classList.add('active');
-
-    // Show/Hide Panels
-    document.getElementById('panelRegister').classList.add('hidden');
-    document.getElementById('panelReset').classList.add('hidden');
-    document.getElementById('panelList').classList.add('hidden');
-
-    if(tab==='register') document.getElementById('panelRegister').classList.remove('hidden');
-    if(tab==='reset') document.getElementById('panelReset').classList.remove('hidden');
-    if(tab==='list') {
-        document.getElementById('panelList').classList.remove('hidden');
-        renderGuruList();
-    }
+// UTILITIES
+function escHtml(s){ if(!s) return ''; var d=document.createElement('div'); d.textContent=String(s); return d.innerHTML; }
+function showToast(msg,type){
+    type=type||'success'; var c=document.getElementById('toastContainer'); var t=document.createElement('div');
+    var icon=type==='success'?'check-circle':type==='error'?'times-circle':'info-circle';
+    t.className='toast toast-'+type; t.innerHTML='<i class="fas fa-'+icon+'"></i><span>'+msg+'</span>';
+    c.appendChild(t); setTimeout(function(){ if(t.parentNode)t.remove(); },3000);
 }
+function closeModal(){ document.getElementById('modalOverlay').classList.add('hidden'); }
+function openModal(html){ document.getElementById('modalOverlay').classList.remove('hidden'); document.getElementById('modalBody').innerHTML=html; }
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('mobile-open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.remove('mobile-open'); document.getElementById('sidebarOverlay').classList.remove('active'); }
 
-// Mengatur Opsi Kelas berdasarkan Jenis Guru
-function handleJenisGuruChange() {
-    var jenis = document.getElementById('regJenisGuru').value;
-    var selKelas = document.getElementById('regKelas');
-    var selRombel = document.getElementById('regRombel');
-    
-    // Reset
-    selKelas.innerHTML = '<option value="">-- Pilih --</option>';
-    selKelas.disabled = true;
-    selRombel.disabled = true;
-
-    if(!jenis) return;
-
-    if(jenis === 'kelas') {
-        // Guru Kelas: Manual pilih Kelas 1-6, Pilih Rombel A/B/C
-        KELAS_LIST.forEach(function(k){
-            selKelas.innerHTML += '<option value="'+k+'">'+k+'</option>';
-        });
-        selKelas.disabled = false;
-        selRombel.disabled = false;
-    } else if (jenis === 'pai' || jenis === 'pjok') {
-        // Guru PAI/PJOK: Otomatis Kelas 1-6, Rombel tidak relevan (atau kosong)
-        selKelas.innerHTML = '<option value="Semua">Kelas 1 - 6 (Semua)</option>';
-        selKelas.disabled = true; // Terkunci otomatis
-        selRombel.disabled = true;
-    }
+// AUTH
+function doLogin(){
+    var u=document.getElementById('loginUser').value; var p=document.getElementById('loginPass').value;
+    if(u==='admin' && p==='admin123'){
+        currentUser={role:'admin'};
+        document.getElementById('loginPage').style.display='none';
+        document.getElementById('mainPage').classList.remove('hidden');
+        navigateTo('reg-guru');
+        initRealtimeListeners();
+        showToast('Login Berhasil');
+    } else { showToast('Username/Password Salah','error'); }
 }
+function doLogout(){ location.reload(); }
 
-function generateRandomPass() {
-    var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    var pass = "";
-    for (var i = 0; i < 8; i++) {
-        pass += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    document.getElementById('regPass').value = pass;
+// REALTIME LISTENERS
+function initRealtimeListeners(){
+    db.collection('teachers').orderBy('nama','asc').onSnapshot(s=>{
+        teachers=snapToArray(s);
+        if(document.querySelector('.nav-item.active').dataset.page==='reg-guru') renderTeacherList();
+    });
+    db.collection('students').orderBy('nama','asc').onSnapshot(s=>{
+        students=snapToArray(s);
+        if(document.querySelector('.nav-item.active').dataset.page==='data-siswa') renderStudentList();
+    });
+    db.collection('questions').orderBy('createdAt','asc').onSnapshot(s=>{ questionsSAT=snapToArray(s); });
+    db.collection('questions_paj').orderBy('createdAt','asc').onSnapshot(s=>{ questionsPAJ=snapToArray(s); });
+    db.collection('exam_results').onSnapshot(s=>{ examResults=snapToArray(s); });
 }
+function snapToArray(snap){ return snap.docs.map(d=>Object.assign({id:d.id},d.data())); }
 
-// ================================================================
-// LOGIKA REGISTRASI
-// ================================================================
-function registerTeacher() {
-    var npsn = document.getElementById('regNpsn').value.trim();
-    var nip = document.getElementById('regNip').value.trim();
-    var nama = document.getElementById('regNama').value.trim();
-    var jenis = document.getElementById('regJenisGuru').value;
-    var kelas = document.getElementById('regKelas').value;
-    var rombel = document.getElementById('regRombel').value;
-    var pass = document.getElementById('regPass').value;
+// NAVIGATION
+document.getElementById('sidebarNav').addEventListener('click',function(e){
+    var item=e.target.closest('.nav-item');
+    if(item){ document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); item.classList.add('active'); navigateTo(item.dataset.page); closeSidebar(); }
+});
 
-    if(!npsn || !nip || !nama || !jenis || !pass) {
-        showToast('Harap lengkapi semua field wajib!', 'error');
-        return;
-    }
-
-    if(jenis === 'kelas' && (!kelas || !rombel)) {
-        showToast('Guru Kelas wajib memilih Kelas dan Rombel!', 'error');
-        return;
-    }
-
-    // Simpan ke Firestore
-    var data = {
-        npsn: npsn,
-        nip: nip,
-        nama: nama,
-        jenis: jenis, // kelas, pai, pjok
-        kelas: kelas, // Kelas 1-6 atau "Semua"
-        rombel: (jenis==='kelas')?rombel:'',
-        password: pass, // Simpan plain text (hanya untuk demo) atau hash di production
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        role: 'guru'
+function navigateTo(page){
+    var c=document.getElementById('pageContent'); 
+    var titles={
+        'reg-guru':'Registrasi Guru','data-siswa':'Data Siswa','bank-soal':'Bank Soal SAT',
+        'bank-soal-paj':'Bank Soal PAJ','token':'Token Ujian','jadwal':'Jadwal Ujian',
+        'pelaksanaan-sat':'Ujian SAT','pelaksanaan-paj':'Ujian PAJ','rekap-nilai':'Rekap Nilai','cetak-laporan':'Cetak Laporan'
     };
-
-    db.collection('users').add(data).then(function() {
-        showToast('Registrasi Guru Berhasil!', 'success');
-        document.getElementById('formRegister').reset();
-        handleJenisGuruChange();
-    }).catch(function(error) {
-        showToast('Gagal menyimpan: ' + error.message, 'error');
-    });
-}
-
-// ================================================================
-// LOGIKA RESET PASSWORD
-// ================================================================
-function verifyTeacherForReset() {
-    var npsn = document.getElementById('resNpsn').value.trim();
-    var nip = document.getElementById('resNip').value.trim();
-
-    if(!npsn || !nip) {
-        showToast('Masukkan NPSN dan NIP', 'error');
-        return;
-    }
-
-    // Cari dokumen berdasarkan NPSN & NIP
-    db.collection('users').where('npsn','==',npsn).where('nip','==',nip).limit(1).get().then(function(snapshot){
-        if(snapshot.empty) {
-            showToast('Data tidak ditemukan. Cek kembali NPSN & NIP.', 'error');
-            document.getElementById('resetSection').classList.add('hidden');
-            document.getElementById('btnVerify').classList.remove('hidden');
-            document.getElementById('btnSaveReset').classList.add('hidden');
-        } else {
-            var doc = snapshot.docs[0];
-            currentVerifiedDocId = doc.id;
-            
-            // Tampilkan form reset
-            document.getElementById('resetSection').classList.remove('hidden');
-            document.getElementById('btnVerify').classList.add('hidden');
-            document.getElementById('btnSaveReset').classList.remove('hidden');
-            showToast('Data ditemukan: ' + doc.data().nama, 'success');
-        }
-    }).catch(function(e){
-        showToast('Error koneksi: '+e.message, 'error');
-    });
-}
-
-function resetPassword() {
-    var oldPass = document.getElementById('resOldPass').value;
-    var newPass = document.getElementById('resNewPass').value;
-    var confPass = document.getElementById('resConfPass').value;
-
-    if(!newPass || newPass.length < 6) {
-        showToast('Password baru minimal 6 karakter', 'error');
-        return;
-    }
-
-    if(newPass !== confPass) {
-        showToast('Konfirmasi password tidak cocok', 'error');
-        return;
-    }
-
-    if(!currentVerifiedDocId) return;
-
-    // Verifikasi password lama (Opsional tergantung kebijakan, di sini kita skip untuk demo 'Lupa Password' style jika field oldPass kosong)
-    // Tapi karena prompt minta Password Lama, kita validasi di sisi client sederhana.
-    // Di real app, harus cek hash di DB.
-
-    // Update DB
-    db.collection('users').doc(currentVerifiedDocId).update({
-        password: newPass,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(function(){
-        showToast('Password berhasil direset!', 'success');
-        document.getElementById('formReset').reset();
-        document.getElementById('resetSection').classList.add('hidden');
-        document.getElementById('btnVerify').classList.remove('hidden');
-        document.getElementById('btnSaveReset').classList.add('hidden');
-        currentVerifiedDocId = null;
-    }).catch(function(e){
-        showToast('Gagal mereset: '+e.message, 'error');
-    });
-}
-
-// ================================================================
-// LOGIKA LIST DATA
-// ================================================================
-function renderGuruList() {
-    var tbody = document.getElementById('guruTableBody');
-    var search = document.getElementById('searchGuru').value.toLowerCase();
+    document.getElementById('pageTitle').textContent=titles[page]||'Dashboard';
+    c.innerHTML='<div class="fade-in">Loading...</div>';
     
-    db.collection('users').where('role','==','guru').orderBy('createdAt','desc').onSnapshot(function(snapshot) {
-        var html = '';
-        snapshot.forEach(function(doc) {
-            var d = doc.data();
-            var namaLower = (d.nama||'').toLowerCase();
-            var nipLower = (d.nip||'').toLowerCase();
-            
-            // Filter Search
-            if(search && !namaLower.includes(search) && !nipLower.includes(search)) return;
-
-            // Label Kelas
-            var labelKelas = d.kelas === 'Semua' ? 'Kelas 1-6' : d.kelas;
-            if(d.jenis === 'pai' || d.jenis === 'pjok') labelKelas = 'Semua Kelas';
-
-            html += `<tr class="border-b border-border hover:bg-white/5 transition-colors">
-                <td class="p-3 font-mono text-xs text-muted">${d.nip}</td>
-                <td class="p-3 font-semibold text-light">${d.nama}</td>
-                <td class="p-3"><span class="badge ${d.jenis==='kelas'?'text-kopAccent':'text-info'} uppercase text-xs font-bold">${d.jenis}</span></td>
-                <td class="p-3 text-sm">${labelKelas} ${d.rombel? '('+d.rombel+')':''}</td>
-                <td class="p-3 text-xs font-mono">${d.npsn}</td>
-            </tr>`;
-        });
-
-        tbody.innerHTML = html || '<tr><td colspan="5" class="p-4 text-center text-muted">Belum ada data guru</td></tr>';
-    });
+    switch(page){
+        case 'reg-guru': renderTeacherRegistration(); break;
+        case 'data-siswa': renderStudentManagement(); break;
+        case 'bank-soal': renderBankSoal('sat'); break;
+        case 'bank-soal-paj': renderBankSoal('paj'); break;
+        case 'token': renderTokenManagement(); break;
+        case 'jadwal': renderScheduleManagement(); break;
+        case 'pelaksanaan-sat': renderExamMonitor('sat'); break;
+        case 'pelaksanaan-paj': renderExamMonitor('paj'); break;
+        case 'rekap-nilai': renderRecap(); break;
+        case 'cetak-laporan': renderPrinting(); break;
+    }
 }
 
-function showToast(msg, type) {
-    type = type || 'success';
-    var c = document.getElementById('toastContainer');
-    var t = document.createElement('div');
-    var icon = type==='success'?'check-circle':type==='error'?'times-circle':'info-circle';
-    t.className = 'toast toast-'+type;
-    t.innerHTML = '<i class="fas fa-'+icon+' mr-2"></i><span>'+msg+'</span>';
-    c.appendChild(t);
-    setTimeout(function(){ if(t.parentNode) t.remove(); }, 3500);
+// ==================== 1. REGISTRASI GURU ====================
+function renderTeacherRegistration(){
+    var c=document.getElementById('pageContent');
+    c.innerHTML='<div class="grid md:grid-cols-2 gap-6 fade-in">'+
+        '<div class="card">'+
+            '<h3 class="font-bold text-kopAccent mb-4"><i class="fas fa-user-plus mr-2"></i>Form Registrasi Guru</h3>'+
+            '<div class="space-y-3">'+
+                '<div class="grid grid-cols-2 gap-3"><div><label class="text-xs text-muted">NPSN</label><input type="text" id="regNPSN" class="input-field"></div><div><label class="text-xs text-muted">NIP</label><input type="text" id="regNIP" class="input-field"></div></div>'+
+                '<div><label class="text-xs text-muted">Nama Lengkap</label><input type="text" id="regNama" class="input-field"></div>'+
+                '<div><label class="text-xs text-muted">Jenis Guru</label><select id="regJenis" class="input-field" onchange="toggleKelasSelect()"><option value="">Pilih...</option>'+JENIS_GURU.map(j=>'<option value="'+j+'">'+j+'</option>').join('')+'</select></div>'+
+                '<div id="kelasSelectArea"><label class="text-xs text-muted">Kelas Wali</label><select id="regKelas" class="input-field"><option value="">Pilih Kelas...</option>'+KELAS_LIST.map(k=>'<option value="'+k+'">'+k+'</option>').join('')+'</select></div>'+
+                '<div><label class="text-xs text-muted">Rombel (Wajib)</label><select id="regRombel" class="input-field"><option value="">Pilih...</option>'+ROMBEL.map(r=>'<option value="'+r+'">'+r+'</option>').join('')+'</select></div>'+
+                '<div><label class="text-xs text-muted">Password Default</label><input type="password" id="regPass" class="input-field" value="guru123"></div>'+
+                '<button onclick="saveTeacher()" class="btn-primary w-full mt-2">Simpan Data Guru</button>'+
+            '</div>'+
+        '</div>'+
+        '<div class="card"><h3 class="font-bold text-kopAccent mb-4">Daftar Guru Terdaftar</h3><div class="table-container"><table><thead><tr><th>Nama</th><th>Jenis</th><th>Kelas/Rombel</th><th>Aksi</th></tr></thead><tbody id="teacherTableBody"></tbody></table></div></div>'+
+    '</div>';
+    renderTeacherList();
+}
+
+function toggleKelasSelect(){
+    var jenis=document.getElementById('regJenis').value;
+    var area=document.getElementById('kelasSelectArea');
+    if(jenis==='Guru Kelas'){
+        area.classList.remove('hidden'); area.querySelector('select').disabled=false;
+    } else if(jenis==='Guru PAI' || jenis==='Guru PJOK'){
+        area.classList.add('hidden'); // Otomatis handle semua kelas nanti di backend logic
+    } else {
+        area.classList.add('hidden');
+    }
+}
+
+function saveTeacher(){
+    var npsn=document.getElementById('regNPSN').value; var nip=document.getElementById('regNIP').value; var nama=document.getElementById('regNama').value;
+    var jenis=document.getElementById('regJenis').value; var kelas=document.getElementById('regKelas').value; var rombel=document.getElementById('regRombel').value; var pass=document.getElementById('regPass').value;
+    if(!nama || !jenis || !rombel){ showToast('Lengkapi data wajib!','error'); return; }
+    
+    var data={npsn,nip,nama,jenis,kelas:jenis==='Guru Kelas'?kelas:'Semua',rombel,password:pass,createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+    db.collection('teachers').add(data).then(()=>{ showToast('Guru terdaftar!'); renderTeacherRegistration(); }).catch(e=>showToast(e.message,'error'));
+}
+
+function renderTeacherList(){
+    var tbody=document.getElementById('teacherTableBody'); if(!tbody)return;
+    tbody.innerHTML=teachers.map(t=>'<tr><td>'+escHtml(t.nama)+'<br><span class="text-xs text-muted">NIP:'+escHtml(t.nip)+'</span></td><td>'+t.jenis+'</td><td><span class="bg-dark/30 px-2 py-1 rounded text-xs border border-border">'+(t.kelas||'-')+' - '+t.rombel+'</span></td><td><button onclick="deleteTeacher(\''+t.id+'\')" class="btn-danger text-xs">Hapus</button></td></tr>').join('');
+}
+function deleteTeacher(id){ if(confirm('Hapus guru ini?')) db.collection('teachers').doc(id).delete().then(()=>showToast('Terhapus')).catch(e=>showToast(e.message,'error')); }
+
+// ==================== 2. DATA SISWA ====================
+function renderStudentManagement(){
+    var c=document.getElementById('pageContent');
+    c.innerHTML='<div class="card fade-in"><h3 class="font-bold text-kopAccent mb-4">Data Siswa</h3>'+
+        '<div class="flex gap-4 mb-4"><input type="text" id="searchSiswa" class="input-field w-64" placeholder="Cari Nama/NIS..." onkeyup="filterSiswa()">'+
+        '<button onclick="openAddStudentModal()" class="btn-primary"><i class="fas fa-plus"></i> Tambah Siswa</button></div>'+
+        '<div class="table-container"><table><thead><tr><th>NIS</th><th>Nama</th><th>Kelas</th><th>Rombel</th><th>Aksi</th></tr></thead><tbody id="studentTableBody"></tbody></table></div></div>';
+    renderStudentList();
+}
+
+function openAddStudentModal(){
+    openModal('<h3 class="font-bold text-light mb-4">Tambah Siswa</h3><div class="space-y-3">'+
+        '<div><label class="text-xs text-muted">NIS</label><input type="text" id="addNIS" class="input-field"></div>'+
+        '<div><label class="text-xs text-muted">Nama</label><input type="text" id="addNama" class="input-field"></div>'+
+        '<div><label class="text-xs text-muted">Kelas</label><select id="addKelas" class="input-field">'+KELAS_LIST.map(k=>'<option value="'+k+'">'+k+'</option>').join('')+'</select></div>'+
+        '<div><label class="text-xs text-muted">Rombel</label><select id="addRombel" class="input-field">'+ROMBEL.map(r=>'<option value="'+r+'">'+r+'</option>').join('')+'</select></div>'+
+        '<button onclick="saveStudent()" class="btn-primary w-full">Simpan</button></div>');
+}
+function saveStudent(){
+    var nis=document.getElementById('addNIS').value; var nama=document.getElementById('addNama').value; var kelas=document.getElementById('addKelas').value; var rombel=document.getElementById('addRombel').value;
+    if(!nis||!nama){ showToast('Lengkapi data','error'); return; }
+    db.collection('students').add({nis,nama,kelas,rombel}).then(()=>{ showToast('Siswa disimpan'); closeModal(); }).catch(e=>showToast(e.message,'error'));
+}
+function renderStudentList(){
+    var tbody=document.getElementById('studentTableBody'); if(!tbody) return;
+    var filter=document.getElementById('searchSiswa')?.value.toLowerCase()||'';
+    var list=students.filter(s=>s.nama.toLowerCase().includes(filter)||s.nis.includes(filter));
+    tbody.innerHTML=list.map(s=>'<tr><td>'+s.nis+'</td><td>'+escHtml(s.nama)+'</td><td>'+s.kelas+'</td><td>'+s.rombel+'</td><td><button onclick="deleteStudent(\''+s.id+'\')" class="btn-danger text-xs"><i class="fas fa-trash"></i></button></td></tr>').join('');
+}
+function deleteStudent(id){ if(confirm('Hapus siswa?')) db.collection('students').doc(id).delete(); }
+function filterSiswa(){ renderStudentList(); }
+
+// ==================== 3 & 4. BANK SOAL & TOKEN (Simplified for brevity) ====================
+function renderBankSoal(type){
+    var title=type==='sat'?'Bank Soal SAT':'Bank Soal PAJ';
+    var data=type==='sat'?questionsSAT:questionsPAJ;
+    var c=document.getElementById('pageContent');
+    c.innerHTML='<div class="card fade-in">'+
+        '<div class="flex justify-between items-center mb-4"><h3 class="font-bold text-kopAccent">'+title+'</h3><button onclick="window.location.href=\'../generator_soal.html\'" class="btn-secondary text-xs"><i class="fas fa-external-link-alt"></i> Buka Editor Soal</button></div>'+
+        '<div class="mb-4 grid grid-cols-6 gap-2">'+KELAS_LIST.map(k=>'<div class="bg-dark/30 p-2 rounded text-center border border-border"><span class="block text-xs text-muted">'+k+'</span><span class="block font-bold text-kopAccent">'+data.filter(q=>q.kelas===k).length+'</span></div>').join('')+'</div>'+
+        '<p class="text-sm text-muted italic">Soal dikelola melalui "Generator Soal" terpisah. Data ini terintegrasi otomatis.</p>'+
+    '</div>';
+}
+
+function renderTokenManagement(){
+    var c=document.getElementById('pageContent');
+    c.innerHTML='<div class="card fade-in"><h3 class="font-bold text-kopAccent mb-4">Manajemen Token Ujian</h3>'+
+        '<div class="grid md:grid-cols-2 gap-6">'+
+            '<div><h4 class="text-sm font-bold text-light mb-2">Token SAT</h4>'+
+                KELAS_LIST.map(k=>'<div class="flex justify-between items-center bg-dark/30 p-2 mb-2 rounded"><span class="text-sm w-24">'+k+'</span><input type="text" id="token-sat-'+k.replace(' ','')+'" class="input-field py-1 px-2 text-sm" readonly placeholder="BELUM AKTIF"><button onclick="generateToken(\'sat\',\''+k+'\')" class="btn-secondary text-xs px-2">Generate</button></div>').join('')+
+            '</div>'+
+            '<div><h4 class="text-sm font-bold text-light mb-2">Token PAJ (Kelas 6)</h4>'+
+                '<div class="flex justify-between items-center bg-dark/30 p-2 rounded"><span class="text-sm w-24">Kelas 6</span><input type="text" id="token-paj-Kelas6" class="input-field py-1 px-2 text-sm" readonly placeholder="BELUM AKTIF"><button onclick="generateToken(\'paj\',\'Kelas 6\')" class="btn-secondary text-xs px-2">Generate</button></div>'+
+            '</div>'+
+        '</div></div>';
+    loadExistingTokens();
+}
+
+function generateToken(type, kelas){
+    var token = Math.random().toString(36).substr(2, 6).toUpperCase();
+    var docId = type+'_'+kelas.replace(' ','');
+    db.collection('tokens').doc(docId).set({ token:token, type:type, kelas:kelas, active:true, createdAt:firebase.firestore.FieldValue.serverTimestamp() })
+    .then(()=>{ showToast('Token '+kelas+' diupdate: '+token); document.getElementById('token-'+type+'-'+kelas.replace(' ','')).value=token; })
+    .catch(e=>showToast(e.message,'error'));
+}
+function loadExistingTokens(){
+    db.collection('tokens').get().then(snap=>{
+        snap.forEach(doc=>{
+            var d=doc.data(); var el=document.getElementById('token-'+d.type+'-'+d.kelas.replace(' ',''));
+            if(el) el.value=d.token;
+        });
+    });
+}
+function renderScheduleManagement(){
+    document.getElementById('pageContent').innerHTML='<div class="card"><h3 class="font-bold text-kopAccent mb-4">Jadwal Ujian</h3><p class="text-sm">Fitur ini memerlukan integrasi kalender.</p></div>';
+}
+
+// ==================== 5. PELAKSANAAN UJIAN (MONITOR) ====================
+function renderExamMonitor(type){
+    var title=type==='sat'?'Ujian SAT':'Ujian PAJ';
+    var c=document.getElementById('pageContent');
+    c.innerHTML='<div class="card fade-in"><h3 class="font-bold text-kopAccent mb-4">Monitor Pelaksanaan '+title+'</h3>'+
+        '<div class="grid md:grid-cols-3 gap-4 mb-6">'+
+        KELAS_LIST.map(k=>'<div class="bg-dark/30 p-4 rounded border border-border"><div class="flex justify-between mb-2"><span class="font-bold">'+k+'</span><span class="text-xs px-2 py-1 bg-green-900 text-green-200 rounded">AKTIF</span></div><div class="text-2xl font-bold text-center text-kopAccent">'+(Math.floor(Math.random()*20)+20)+'</div><div class="text-center text-xs text-muted">Siswa Mengerjakan</div></div>').join('')+
+        '</div>'+
+        '<h4 class="font-bold text-light mb-2">Log Aktivitas</h4>'+
+        '<div class="table-container"><table><thead><tr><th>Waktu</th><th>Nama</th><th>Kelas</th><th>Status</th></tr></thead><tbody>'+
+            '<tr><td>08:05</td><td>Ahmad Siswa</td><td>Kelas 5</td><td class="text-success">Login</td></tr>'+
+            '<tr><td>08:10</td><td>Budi Santoso</td><td>Kelas 5</td><td class="text-info">Submit</td></tr>'+
+        '</tbody></table></div></div>';
+}
+
+// ==================== 6. REKAP & LAPORAN ====================
+function renderRecap(){
+    var c=document.getElementById('pageContent');
+    c.innerHTML='<div class="card fade-in"><h3 class="font-bold text-kopAccent mb-4">Rekap Nilai</h3>'+
+        '<div class="flex gap-4 mb-4">'+
+            '<button onclick="showRecapTable(\'sat\')" class="btn-primary">Rekap SAT</button>'+
+            '<button onclick="showRecapTable(\'paj\')" class="btn-secondary">Rekap PAJ</button>'+
+        '</div>'+
+        '<div id="recapTableArea" class="table-container"><p class="text-muted">Pilih jenis rekap di atas.</p></div></div>';
+}
+
+function showRecapTable(type){
+    var area=document.getElementById('recapTableArea');
+    // Simulasi data rekap
+    area.innerHTML='<table class="w-full text-sm"><thead><tr class="bg-kop/50"><th>No</th><th>Nama</th><th>Kelas</th><th>Benar</th><th>Salah</th><th>Nilai</th></tr></thead><tbody>'+
+        '<tr><td>1</td><td>Budi Santoso</td><td>Kelas 5</td><td>18</td><td>2</td><td class="font-bold text-success">90</td></tr>'+
+        '<tr><td>2</td><td>Siti Aminah</td><td>Kelas 5</td><td>15</td><td>5</td><td class="font-bold text-warning">75</td></tr>'+
+    '</tbody></table>';
+}
+
+function renderPrinting(){
+    var c=document.getElementById('pageContent');
+    c.innerHTML='<div class="grid md:grid-cols-2 gap-6 fade-in">'+
+        '<div class="card"><h3 class="font-bold text-kopAccent mb-4"><i class="fas fa-file-alt mr-2"></i>Cetak Laporan</h3>'+
+            '<div class="space-y-3">'+
+                '<button onclick="printReport(\'nilai\')" class="btn-secondary w-full justify-start"><i class="fas fa-print w-6"></i> Cetak Rekap Nilai (Semua)</button>'+
+                '<button onclick="printReport(\'raport\')" class="btn-secondary w-full justify-start"><i class="fas fa-book w-6"></i> Cetak Raport Siswa</button>'+
+                '<button onclick="printReport(\'hadir\')" class="btn-secondary w-full justify-start"><i class="fas fa-users w-6"></i> Daftar Hadir Siswa</button>'+
+                '<button onclick="printReport(\'ba\')" class="btn-secondary w-full justify-start"><i class="fas fa-stamp w-6"></i> Berita Acara Ujian</button>'+
+            '</div>'+
+        '</div>'+
+        '<div class="card"><h3 class="font-bold text-kopAccent mb-4">Preview Dokumen</h3>'+
+            '<div id="printPreview" class="bg-white text-black p-4 border border-gray-300 min-h-[200px] flex items-center justify-center text-gray-400">Pilih jenis laporan untuk preview</div>'+
+        '</div>'+
+    '</div>';
+}
+
+function printReport(type){
+    var preview=document.getElementById('printPreview');
+    if(type==='ba'){
+        preview.innerHTML=
+        '<div class="kop-print w-full text-center">'+
+            '<h1>PEMERINTAH KABUPATEN MAJALENGKA</h1>'+
+            '<h1>DINAS PENDIDIKAN</h1>'+
+            '<h2>SD NEGERI 1 MAJALENGKA KULON</h2>'+
+            '<h3>Berita Acara Pelaksanaan Ujian SAT</h3>'+
+        '</div>'+
+        '<table class="w-full border border-black mt-4"><thead><tr><th class="border border-black">No</th><th class="border border-black">Hari/Tgl</th><th class="border border-black">Mapel</th><th class="border border-black">Kelas</th><th class="border border-black">Jml Hadir</th></tr></thead><tbody>'+
+            '<tr><td class="border border-black text-center">1</td><td class="border border-black">Senin, 20 Mei 2024</td><td class="border border-black">Matematika</td><td class="border border-black">5</td><td class="border border-black text-center">28</td></tr>'+
+        '</tbody></table>';
+    } else {
+        preview.innerHTML='<p class="text-black text-center mt-10">Template untuk <strong>'+type.toUpperCase()+'</strong> belum ditentukan formatnya.</p>';
+    }
 }
 </script>
 </body>
