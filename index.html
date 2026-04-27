@@ -21,10 +21,6 @@ tailwind.config={theme:{extend:{colors:{kop:'#1a2744',kopAccent:'#c9a84c',dark:'
 body { font-family: 'Source Sans 3', sans-serif; background: #0f1923; color: #e8ecf1; min-height: 100vh; }
 ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #182538; } ::-webkit-scrollbar-thumb { background: #2a3f5f; border-radius: 3px; }
 
-/* PENYEBAB LAYAR HITAM: Sebelumnya ada style="display:none" di HTML, sekarang dipindahkan ke CSS agar tidak bentrok */
-.page-section { display: none; }
-.page-section.active-page { display: flex; }
-
 .login-bg { background: linear-gradient(135deg, #0f1923 0%, #1a2744 40%, #182538 100%); position: relative; overflow: hidden; min-height: 100vh; align-items: center; justify-content: center; }
 .login-bg::before { content: ''; position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%); top: -150px; right: -150px; border-radius: 50%; animation: floatBlob 8s ease-in-out infinite; }
 .login-bg::after { content: ''; position: absolute; width: 450px; height: 450px; background: radial-gradient(circle, rgba(6,182,212,0.05) 0%, transparent 70%); bottom: -80px; left: -80px; border-radius: 50%; animation: floatBlob 10s ease-in-out infinite reverse; }
@@ -99,6 +95,9 @@ body { font-family: 'Source Sans 3', sans-serif; background: #0f1923; color: #e8
     .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 35; display: none; }
     .sidebar-overlay.active { display: block; }
 }
+
+.page-section { display: none; }
+.page-section.active-page { display: flex; }
 </style>
 </head>
 <body>
@@ -137,7 +136,6 @@ body { font-family: 'Source Sans 3', sans-serif; background: #0f1923; color: #e8
             <h1 class="font-display text-2xl font-bold text-kopAccent tracking-wide">Registrasi Guru</h1>
             <p class="text-muted text-sm mt-1">Lengkapi data diri Anda di bawah ini</p>
         </div>
-        <!-- FIX: Hapus event onsubmit yang bikin bentrok di HP -->
         <form id="regForm" class="grid md:grid-cols-2 gap-6">
             <div class="col-span-2 md:col-span-1">
                 <label class="text-xs text-muted font-semibold uppercase tracking-wider mb-1 block">NPSN Sekolah</label>
@@ -205,7 +203,7 @@ body { font-family: 'Source Sans 3', sans-serif; background: #0f1923; color: #e8
                 <a onclick="navigate('cetak-kartu')" class="submenu-item">Cetak Kartu Ujian</a>
             </div>
 
-            <div class="menu-category">Bank Soal</div>
+            <div class="menu-category">Bank Soal (Korek API)</div>
             <div class="menu-item" onclick="toggleSubmenu('submenuBankSoalSAT')"><i class="fas fa-book"></i> Bank Soal SAT <i class="fas fa-chevron-right chevron"></i></div>
             <div id="submenuBankSoalSAT" class="submenu">
                 <a onclick="navigate('bank-sat', 'Kelas 1')" class="submenu-item">Kelas 1</a>
@@ -214,10 +212,6 @@ body { font-family: 'Source Sans 3', sans-serif; background: #0f1923; color: #e8
                 <a onclick="navigate('bank-sat', 'Kelas 4')" class="submenu-item">Kelas 4</a>
                 <a onclick="navigate('bank-sat', 'Kelas 5')" class="submenu-item">Kelas 5</a>
                 <a onclick="navigate('bank-sat', 'Kelas 6')" class="submenu-item">Kelas 6</a>
-            </div>
-            <div class="menu-item" onclick="toggleSubmenu('submenuBankSoalPAJ')"><i class="fas fa-file-alt"></i> Bank Soal PAJ <i class="fas fa-chevron-right chevron"></i></div>
-            <div id="submenuBankSoalPAJ" class="submenu">
-                <a onclick="navigate('bank-paj', 'Kelas 6')" class="submenu-item">Kelas 6</a>
             </div>
 
             <div class="menu-category">Manajemen Ujian</div>
@@ -230,12 +224,6 @@ body { font-family: 'Source Sans 3', sans-serif; background: #0f1923; color: #e8
                 <a onclick="navigate('token-sat', 'Kelas 5')" class="submenu-item">Kelas 5</a>
                 <a onclick="navigate('token-sat', 'Kelas 6')" class="submenu-item">Kelas 6</a>
             </div>
-            <div class="menu-item" onclick="toggleSubmenu('submenuTokenPAJ')"><i class="fas fa-id-card"></i> Token Ujian PAJ <i class="fas fa-chevron-right chevron"></i></div>
-            <div id="submenuTokenPAJ" class="submenu">
-                <a onclick="navigate('token-paj', 'Kelas 6')" class="submenu-item">Kelas 6</a>
-            </div>
-            <div class="menu-item" onclick="navigate('jadwal-sat')">Jadwal Ujian SAT</div>
-            <div class="menu-item" onclick="navigate('jadwal-paj')">Jadwal Ujian PAJ</div>
 
             <div class="menu-category">Pelaksanaan & Koreksi</div>
             <div class="menu-item" onclick="toggleSubmenu('submenuPelaksanaanSAT')"><i class="fas fa-laptop"></i> Ujian SAT <i class="fas fa-chevron-right chevron"></i></div>
@@ -247,18 +235,9 @@ body { font-family: 'Source Sans 3', sans-serif; background: #0f1923; color: #e8
                 <a onclick="navigate('exam-sat', 'Kelas 5')" class="submenu-item">Kelas 5</a>
                 <a onclick="navigate('exam-sat', 'Kelas 6')" class="submenu-item">Kelas 6</a>
             </div>
-            <div class="menu-item" onclick="toggleSubmenu('submenuPelaksanaanPAJ')"><i class="fas fa-clipboard-check"></i> Ujian PAJ <i class="fas fa-chevron-right chevron"></i></div>
-            <div id="submenuPelaksanaanPAJ" class="submenu">
-                <a onclick="navigate('exam-paj', 'Kelas 6')" class="submenu-item">Kelas 6</a>
-            </div>
-            <div class="menu-item" onclick="navigate('input-sat')">Input Soal SAT</div>
-            <div class="menu-item" onclick="navigate('input-paj')">Input Soal PAJ</div>
             <div class="menu-item" onclick="navigate('koreksi-sat')">Koreksi SAT</div>
-            <div class="menu-item" onclick="navigate('koreksi-paj')">Koreksi PAJ</div>
 
             <div class="menu-category">Laporan</div>
-            <div class="menu-item" onclick="navigate('rekap-sat')">Rekap Nilai SAT</div>
-            <div class="menu-item" onclick="navigate('rekap-paj')">Rekap Nilai PAJ</div>
             <div class="menu-item" onclick="navigate('cetak-laporan')">Cetak Laporan</div>
         </nav>
 
@@ -312,8 +291,27 @@ const db = firebase.firestore();
 
 let currentUser = null;
 let currentPage = 'dashboard';
-let currentParams = {};
+let currentParams = null;
+let cachedSoalSAT = []; // Cache soal dari Korek API
 
+const MAPEL_LIST = [
+    {id:'ppkn',nama:'Pendidikan Pancasila',singkat:'PPKn'},
+    {id:'mat',nama:'Matematika',singkat:'Mat'},
+    {id:'bin',nama:'Bahasa Indonesia',singkat:'B.Indo'},
+    {id:'sbd',nama:'Seni Budaya',singkat:'Seni'},
+    {id:'ipas',nama:'IPAS',singkat:'IPAS'},
+    {id:'bsd',nama:'Bahasa Sunda',singkat:'B.Sunda'},
+    {id:'bing',nama:'Bahasa Inggris',singkat:'B.Inggris'},
+    {id:'pai',nama:'PAI',singkat:'PAI'},
+    {id:'pjok',nama:'PJOK',singkat:'PJOK'}
+];
+
+function getMapelName(id){ let m=MAPEL_LIST.find(x=>x.id===id); return m?m.nama:id; }
+function escHtml(s){ if(!s) return ''; let d=document.createElement('div'); d.textContent=String(s); return d.innerHTML; }
+
+// ==========================================
+// UTILS
+// ==========================================
 function showToast(msg, type='success') {
     const c = document.getElementById('toastContainer');
     const t = document.createElement('div');
@@ -324,15 +322,11 @@ function showToast(msg, type='success') {
     setTimeout(() => { if(t.parentNode) t.remove(); }, 3500);
 }
 
-// FUNGSI INTI NAVIGASI HALAMAN (SUDAH DIPERBAIKI)
 function showPage(pageId) {
-    // 1. Sembunyikan semua halaman terlebih dahulu
     document.querySelectorAll('.page-section').forEach(el => {
         el.classList.remove('active-page');
         el.style.display = 'none';
     });
-
-    // 2. Tampilkan halaman yang diminta
     const target = document.getElementById(pageId);
     if (pageId === 'mainPage') {
         target.style.display = 'block';
@@ -345,15 +339,9 @@ function showPage(pageId) {
 // ==========================================
 // REGISTRASI GURU
 // ==========================================
-// FIX: Menggunakan addEventListener agar tidak bentrok dengan validasi HTML5 di Mobile
 document.addEventListener('DOMContentLoaded', () => {
     const regForm = document.getElementById('regForm');
-    if(regForm) {
-        regForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            doRegister();
-        });
-    }
+    if(regForm) { regForm.addEventListener('submit', function(e) { e.preventDefault(); doRegister(); }); }
 });
 
 function handleJenisGuruChange() {
@@ -362,19 +350,13 @@ function handleJenisGuruChange() {
     let html = '';
     if (jenis === 'Guru Kelas') {
         html = '<div class="space-y-1">';
-        for (let i = 1; i <= 6; i++) {
-            html += `<label class="flex items-center gap-2 text-sm text-light cursor-pointer"><input type="radio" name="kelasRadio" value="Kelas ${i}" class="accent-kopAccent"><span>Kelas ${i}</span></label>`;
-        }
+        for (let i = 1; i <= 6; i++) { html += `<label class="flex items-center gap-2 text-sm text-light cursor-pointer"><input type="radio" name="kelasRadio" value="Kelas ${i}" class="accent-kopAccent"><span>Kelas ${i}</span></label>`; }
         html += '</div>';
     } else if (jenis === 'Guru PAI' || jenis === 'Guru PJOK') {
         html = '<p class="text-xs text-kopAccent font-semibold">Otomatis Mengampu Kelas 1 - 6</p><div class="grid grid-cols-3 gap-2 mt-2">';
-        for (let i = 1; i <= 6; i++) {
-            html += `<div class="bg-dark/50 p-2 rounded text-center text-xs text-muted border border-border">Kelas ${i} <i class="fas fa-check text-success ml-1"></i></div>`;
-        }
+        for (let i = 1; i <= 6; i++) { html += `<div class="bg-dark/50 p-2 rounded text-center text-xs text-muted border border-border">Kelas ${i} <i class="fas fa-check text-success ml-1"></i></div>`; }
         html += '</div>';
-    } else {
-        html = '<p class="text-xs text-muted italic">Pilih Jenis Guru terlebih dahulu.</p>';
-    }
+    } else { html = '<p class="text-xs text-muted italic">Pilih Jenis Guru terlebih dahulu.</p>'; }
     container.innerHTML = html;
 }
 
@@ -393,9 +375,7 @@ function doRegister() {
         const checked = document.querySelector('input[name="kelasRadio"]:checked');
         if (!checked) { showToast('Pilih satu kelas ampuan', 'error'); return; }
         kelasAmpu = [checked.value];
-    } else {
-        kelasAmpu = ['Kelas 1', 'Kelas 2', 'Kelas 3', 'Kelas 4', 'Kelas 5', 'Kelas 6'];
-    }
+    } else { kelasAmpu = ['Kelas 1', 'Kelas 2', 'Kelas 3', 'Kelas 4', 'Kelas 5', 'Kelas 6']; }
 
     const dataGuru = { npsn, nip, nama, jenis, rombel, password: pass, kelasAmpu, role: 'guru', createdAt: firebase.firestore.FieldValue.serverTimestamp() };
 
@@ -444,9 +424,22 @@ function initDashboard() {
     showPage('mainPage');
     document.getElementById('sidebarUserName').textContent = currentUser.nama;
     document.getElementById('sidebarUserRole').textContent = currentUser.jenis + ' (Rombel ' + currentUser.rombel + ')';
+    
+    // AMBIL DATA SOAL DARI DATABASE KOREK API SECARA REALTIME
+    db.collection('questions').orderBy('createdAt','asc').onSnapshot(snap => {
+        cachedSoalSAT = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        // Jika sedang berada di halaman Bank Soal, refresh otomatis
+        if(currentPage === 'bank-sat') {
+            renderBankSoal(document.getElementById('pageContent'), 'sat', currentParams);
+        }
+    });
+
     navigate('dashboard');
 }
 
+// ==========================================
+// DASHBOARD & NAVIGATION
+// ==========================================
 function toggleSidebar() {
     const sb = document.getElementById('sidebar');
     const ov = document.getElementById('sidebarOverlay');
@@ -508,16 +501,25 @@ function navigate(page, param = null) {
 // RENDER FUNCTIONS
 // ==========================================
 function renderDashboard(c) {
+    // Hitung jumlah soal SAT dari cache
+    const mySoal = cachedSoalSAT.filter(q => currentUser.kelasAmpu.includes(q.kelas));
+    const totalPG = mySoal.filter(q => q.type === 'pg').length;
+    const totalUraian = mySoal.filter(q => q.type === 'uraian').length;
+
     c.innerHTML = `
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="card border-l-4 border-kopAccent"><div class="text-muted text-xs uppercase">Total Siswa</div><div class="text-3xl font-bold text-light mt-1">245</div></div>
-        <div class="card border-l-4 border-info"><div class="text-muted text-xs uppercase">Soal SAT Tersedia</div><div class="text-3xl font-bold text-light mt-1">1,250</div></div>
-        <div class="card border-l-4 border-success"><div class="text-muted text-xs uppercase">Ujian Selesai</div><div class="text-3xl font-bold text-light mt-1">12</div></div>
-        <div class="card border-l-4 border-danger"><div class="text-muted text-xs uppercase">Belum Dinilai</div><div class="text-3xl font-bold text-light mt-1">5</div></div>
+        <div class="card border-l-4 border-kopAccent"><div class="text-muted text-xs uppercase">Soal Tersedia (SAT)</div><div class="text-3xl font-bold text-light mt-1">${mySoal.length}</div></div>
+        <div class="card border-l-4 border-info"><div class="text-muted text-xs uppercase">Pilihan Ganda</div><div class="text-3xl font-bold text-light mt-1">${totalPG}</div></div>
+        <div class="card border-l-4 border-warning"><div class="text-muted text-xs uppercase">Uraian</div><div class="text-3xl font-bold text-light mt-1">${totalUraian}</div></div>
+        <div class="card border-l-4 border-success"><div class="text-muted text-xs uppercase">Kelas Diampu</div><div class="text-3xl font-bold text-light mt-1">${currentUser.kelasAmpu.length}</div></div>
     </div>
-    <div class="grid md:grid-cols-2 gap-6">
-        <div class="card"><h3 class="font-bold text-light mb-4">Jadwal Hari Ini</h3><div class="space-y-3"><div class="flex items-center gap-3 p-3 bg-dark/30 rounded border border-border"><div class="bg-kopAccent/20 text-kopAccent p-2 rounded"><i class="fas fa-calculator"></i></div><div><div class="font-bold text-sm">Matematika - Kelas 4</div><div class="text-xs text-muted">07:30 - 09:00</div></div></div><div class="flex items-center gap-3 p-3 bg-dark/30 rounded border border-border"><div class="bg-info/20 text-info p-2 rounded"><i class="fas fa-language"></i></div><div><div class="font-bold text-sm">B. Inggris - Kelas 5</div><div class="text-xs text-muted">09:30 - 11:00</div></div></div></div></div>
-        <div class="card"><h3 class="font-bold text-light mb-4">Statistik Penilaian</h3><div class="h-40 flex items-end justify-between gap-2 px-4 border-b border-l border-border"><div class="w-full bg-kopAccent/30 hover:bg-kopAccent transition h-[60%] rounded-t"></div><div class="w-full bg-kopAccent/30 hover:bg-kopAccent transition h-[80%] rounded-t"></div><div class="w-full bg-kopAccent/30 hover:bg-kopAccent transition h-[40%] rounded-t"></div><div class="w-full bg-kopAccent/30 hover:bg-kopAccent transition h-[90%] rounded-t"></div><div class="w-full bg-kopAccent/30 hover:bg-kopAccent transition h-[70%] rounded-t"></div></div><div class="flex justify-between text-xs text-muted px-2 mt-2"><span>Kls 1</span><span>Kls 2</span><span>Kls 3</span><span>Kls 4</span><span>Kls 5</span></div></div>
+    <div class="card"><h3 class="font-bold text-light mb-4">Informasi Akun</h3>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div><span class="text-muted">Nama:</span> <span class="text-light font-bold">${currentUser.nama}</span></div>
+            <div><span class="text-muted">Jenis:</span> <span class="text-light font-bold">${currentUser.jenis}</span></div>
+            <div><span class="text-muted">Rombel:</span> <span class="text-light font-bold">${currentUser.rombel}</span></div>
+            <div><span class="text-muted">Kelas:</span> <span class="text-kopAccent font-bold">${currentUser.kelasAmpu.join(', ')}</span></div>
+        </div>
     </div>`;
 }
 
@@ -527,7 +529,7 @@ function renderDataSiswa(c) {
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
             <select id="filterKelasSiswa" class="input-field w-auto" onchange="loadSiswaData()">
                 <option value="Semua Kelas">Semua Kelas</option>
-                <option>Kelas 1</option><option>Kelas 2</option><option>Kelas 3</option><option>Kelas 4</option><option>Kelas 5</option><option>Kelas 6</option>
+                ${currentUser.kelasAmpu.map(k => `<option value="${k}">${k}</option>`).join('')}
             </select>
             <button onclick="modalAddSiswa()" class="btn-primary text-sm"><i class="fas fa-plus mr-1"></i> Tambah Siswa</button>
         </div>
@@ -563,7 +565,7 @@ function renderCetakKartu(c) {
     <div class="card no-print">
         <h3 class="font-bold text-light mb-4">Cetak Kartu Ujian</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div><label class="text-xs text-muted block mb-1">Pilih Kelas</label><select id="printKelas" class="input-field" onchange="loadKartuPreview()"><option value="">-- Pilih Kelas --</option><option value="Kelas 1">Kelas 1</option><option value="Kelas 2">Kelas 2</option><option value="Kelas 3">Kelas 3</option><option value="Kelas 4">Kelas 4</option><option value="Kelas 5">Kelas 5</option><option value="Kelas 6">Kelas 6</option></select></div>
+            <div><label class="text-xs text-muted block mb-1">Pilih Kelas</label><select id="printKelas" class="input-field" onchange="loadKartuPreview()"><option value="">-- Pilih Kelas --</option>${currentUser.kelasAmpu.map(k => `<option value="${k}">${k}</option>`).join('')}</select></div>
             <div><label class="text-xs text-muted block mb-1">Rombel</label><select id="printRombel" class="input-field" onchange="loadKartuPreview()"><option value="">Semua Rombel</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
         </div>
         <button onclick="doPrintCards()" class="btn-primary w-full mb-4"><i class="fas fa-print mr-2"></i>Cetak Kartu Ujian</button>
@@ -578,21 +580,45 @@ function loadKartuPreview() {
     if(!kelas) { container.innerHTML = ''; return; }
     let query = db.collection('students').where('kelas', '==', kelas).orderBy('nama');
     if(rombel) query = query.where('rombel', '==', rombel);
+    
     query.get().then(snap => {
         if(snap.empty) { container.innerHTML = '<div class="p-10 text-center">Tidak ada siswa ditemukan.</div>'; return; }
         let html = '<div class="print-only exam-cards-container">';
         snap.forEach(doc => {
             const s = doc.data();
             const nisn = s.nisn || '';
+            // QR Code diarahkan ke halaman siswa ujian + mapel guru + kelas
+            const mapelId = 'mat'; // Default mapel, bisa diubah dinamis jika diperlukan
+            const loginUrl = `siswa.html?nisn=${nisn}&mapel=${mapelId}&kelas=${kelas.replace(' ', '')}`;
             const qrId = `qr-${doc.id}`;
-            html += `<div class="exam-card-item"><div class="card-photo-placeholder"><i class="fas fa-user"></i></div><div class="card-info"><h3>KARTU PESERTA UJIAN</h3><p><strong>Nama:</strong> ${s.nama}</p><p><strong>NISN:</strong> ${nisn}</p><p><strong>Kelas:</strong> ${s.kelas} ${s.rombel?'- '+s.rombel:''}</p><div class="card-footer">Scan QR Code ini untuk login</div></div><div class="card-qr" id="${qrId}"></div></div>`;
+            
+            html += `<div class="exam-card-item">
+                <div class="card-photo-placeholder"><i class="fas fa-user"></i></div>
+                <div class="card-info">
+                    <h3>KARTU PESERTA UJIAN</h3>
+                    <p><strong>Nama:</strong> ${s.nama}</p>
+                    <p><strong>NISN:</strong> ${nisn}</p>
+                    <p><strong>Kelas:</strong> ${s.kelas} ${s.rombel?'- '+s.rombel:''}</p>
+                    <div class="card-footer">Scan QR Code ini untuk login ujian</div>
+                </div>
+                <div class="card-qr" id="${qrId}"></div>
+            </div>`;
         });
         html += '</div>';
         container.innerHTML = html;
+
+        // Generate QR Codes
         snap.forEach(doc => {
-            const nisn = doc.data().nisn || '';
+            const s = doc.data();
+            const nisn = s.nisn || '';
+            const mapelId = 'mat';
+            const loginUrl = `siswa.html?nisn=${nisn}&mapel=${mapelId}&kelas=${kelas.replace(' ', '')}`;
             const qrEl = document.getElementById(`qr-${doc.id}`);
-            if(qrEl) { try { new QRCode(qrEl, { text: `siswa.html?nisn=${nisn}`, width: 80, height: 80, correctLevel : QRCode.CorrectLevel.M }); } catch(e) { console.error("QR Error", e); } }
+            if(qrEl) {
+                try {
+                    new QRCode(qrEl, { text: loginUrl, width: 80, height: 80, correctLevel : QRCode.CorrectLevel.M });
+                } catch(e) { console.error("QR Error", e); }
+            }
         });
     });
 }
@@ -603,12 +629,63 @@ function doPrintCards() {
     window.print();
 }
 
+// ==========================================
+// INTEGRASI BANK SOAL DARI KOREK API
+// ==========================================
 function renderBankSoal(c, type, kelas) {
-    c.innerHTML = `<div class="card"><div class="flex justify-between items-center mb-4"><div class="text-sm text-muted">Menampilkan Bank Soal untuk: <span class="text-light font-bold">${kelas}</span></div><button class="btn-primary text-sm"><i class="fas fa-plus mr-1"></i> Buat Soal Baru</button></div><div class="space-y-3"><div class="p-3 border border-border rounded bg-dark/30 flex justify-between"><div><span class="text-kopAccent text-xs font-bold">PG</span> <span class="text-sm ml-2">Bilangan Cacah...</span></div><div class="text-xs text-muted">Modul 1</div></div><div class="p-3 border border-border rounded bg-dark/30 flex justify-between"><div><span class="text-info text-xs font-bold">URA</span> <span class="text-sm ml-2">Jelaskan pengertian...</span></div><div class="text-xs text-muted">Modul 2</div></div></div></div>`;
+    const soalKelas = cachedSoalSAT.filter(q => q.kelas === kelas);
+    const pg = soalKelas.filter(q => q.type === 'pg');
+    const uraian = soalKelas.filter(q => q.type === 'uraian');
+
+    let html = `
+    <div class="card">
+        <div class="flex justify-between items-center mb-4">
+            <div class="text-sm text-muted">Menampilkan Soal dari Database Korek API: <span class="text-light font-bold">${kelas}</span></div>
+            <div class="text-xs text-kopAccent font-bold">${soalKelas.length} Soal</div>
+        </div>
+        
+        <div class="mb-4 flex gap-2 text-xs font-bold">
+            <span class="px-3 py-1 bg-kopAccent/20 text-kopAccent rounded">${pg.length} PG</span>
+            <span class="px-3 py-1 bg-info/20 text-info rounded">${uraian.length} Uraian</span>
+        </div>
+
+        <div class="space-y-3 max-h-[70vh] overflow-y-auto pr-2">`;
+
+    if(soalKelas.length === 0) {
+        html += `<p class="text-center text-muted py-10"><i class="fas fa-inbox text-3xl mb-3 block opacity-30"></i>Belum ada soal untuk ${kelas} di database</p>`;
+    } else {
+        soalKelas.forEach((q, i) => {
+            const isUraian = q.type === 'uraian';
+            const borderColor = isUraian ? 'border-info' : 'border-kopAccent';
+            const badgeColor = isUraian ? 'bg-info/20 text-info' : 'bg-kopAccent/20 text-kopAccent';
+            
+            html += `
+            <div class="p-3 bg-dark/30 rounded-lg border-l-4 ${borderColor} hover:bg-dark/50 transition-colors">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1 pr-4 min-w-0">
+                        <div class="flex gap-2 mb-1 flex-wrap">
+                            <span class="text-xs px-2 py-0.5 rounded ${badgeColor} font-semibold">${isUraian ? 'URAIAN' : 'PG'}</span>
+                            <span class="text-xs text-muted">${getMapelName(q.mapel)}</span>
+                            <span class="text-xs text-muted">Skor: ${q.score || 1}</span>
+                        </div>
+                        <p class="text-sm leading-relaxed">${escHtml(q.text)}</p>
+                        ${q.image ? '<i class="fas fa-image text-muted text-xs mt-1 block"></i>' : ''}
+                    </div>
+                </div>
+            </div>`;
+        });
+    }
+
+    html += `</div></div>`;
+    c.innerHTML = html;
 }
 
 function renderTokenUjian(c, type, kelas) {
-    c.innerHTML = `<div class="grid md:grid-cols-2 gap-6"><div class="card"><h3 class="font-bold text-light mb-4">Generate Token Ujian</h3><div class="space-y-4"><div><label class="text-xs text-muted block mb-1">Mapel</label><select class="input-field"><option>Matematika</option><option>B. Indonesia</option></select></div><div><label class="text-xs text-muted block mb-1">Durasi (Menit)</label><input type="number" class="input-field" value="60"></div><button onclick="generateToken()" class="btn-primary w-full"><i class="fas fa-key mr-2"></i>Generate Token</button></div></div><div class="card"><h3 class="font-bold text-light mb-4">Token Aktif</h3><div id="activeTokenContainer" class="flex flex-col gap-3"></div></div></div>`;
+    c.innerHTML = `
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="card"><h3 class="font-bold text-light mb-4">Generate Token Ujian</h3><div class="space-y-4"><div><label class="text-xs text-muted block mb-1">Mapel</label><select class="input-field">${MAPEL_LIST.map(m=>`<option>${m.nama}</option>`).join('')}</select></div><div><label class="text-xs text-muted block mb-1">Durasi (Menit)</label><input type="number" class="input-field" value="60"></div><button onclick="generateToken()" class="btn-primary w-full"><i class="fas fa-key mr-2"></i>Generate Token</button></div></div>
+        <div class="card"><h3 class="font-bold text-light mb-4">Token Aktif</h3><div id="activeTokenContainer" class="flex flex-col gap-3"></div></div>
+    </div>`;
     loadActiveTokens();
 }
 
@@ -634,7 +711,21 @@ function loadActiveTokens() {
 function deactivateToken(id) { db.collection('exam_tokens').doc(id).update({status: 'inactive'}).then(() => { showToast('Token dinonaktifkan'); loadActiveTokens(); }); }
 
 function renderExamMonitor(c, type, kelas) {
-    c.innerHTML = `<div class="card"><div class="flex justify-between items-center mb-6"><h3 class="font-bold text-light">Monitoring Pelaksanaan Ujian</h3><span class="px-3 py-1 bg-info/20 text-info rounded text-xs font-bold">LIVE</span></div><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"><div class="text-center p-3 bg-dark/50 rounded"><div class="text-2xl font-bold text-light" id="totalSiswaExam">0</div><div class="text-xs text-muted">Total Siswa</div></div><div class="text-center p-3 bg-dark/50 rounded"><div class="text-2xl font-bold text-success" id="hadirExam">0</div><div class="text-xs text-muted">Sudah Masuk</div></div><div class="text-center p-3 bg-dark/50 rounded"><div class="text-2xl font-bold text-warning" id="prosesExam">0</div><div class="text-xs text-muted">Sedang Mengerjakan</div></div><div class="text-center p-3 bg-dark/50 rounded"><div class="text-2xl font-bold text-info" id="selesaiExam">0</div><div class="text-xs text-muted">Selesai</div></div></div><h4 class="text-sm font-bold text-muted mb-2">Log Aktivitas Siswa</h4><div class="overflow-x-auto border border-border rounded-lg"><table class="w-full text-sm text-left"><thead class="bg-dark/50 text-muted text-xs uppercase"><tr><th class="px-3 py-2">Nama</th><th class="px-3 py-2">Waktu Masuk</th><th class="px-3 py-2">Progress</th><th class="px-3 py-2">Status</th></tr></thead><tbody id="examLogTable"><tr><td colspan="4" class="text-center py-4 text-muted">Menunggu data...</td></tr></tbody></table></div></div>`;
+    c.innerHTML = `
+    <div class="card">
+        <div class="flex justify-between items-center mb-6"><h3 class="font-bold text-light">Monitoring Pelaksanaan Ujian</h3><span class="px-3 py-1 bg-info/20 text-info rounded text-xs font-bold">LIVE</span></div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="text-center p-3 bg-dark/50 rounded"><div class="text-2xl font-bold text-light" id="totalSiswaExam">0</div><div class="text-xs text-muted">Total Siswa</div></div>
+            <div class="text-center p-3 bg-dark/50 rounded"><div class="text-2xl font-bold text-success" id="hadirExam">0</div><div class="text-xs text-muted">Sudah Masuk</div></div>
+            <div class="text-center p-3 bg-dark/50 rounded"><div class="text-2xl font-bold text-warning" id="prosesExam">0</div><div class="text-xs text-muted">Sedang Mengerjakan</div></div>
+            <div class="text-center p-3 bg-dark/50 rounded"><div class="text-2xl font-bold text-info" id="selesaiExam">0</div><div class="text-xs text-muted">Selesai</div></div>
+        </div>
+        <h4 class="text-sm font-bold text-muted mb-2">Log Aktivitas Siswa (Realtime)</h4>
+        <div class="overflow-x-auto border border-border rounded-lg">
+            <table class="w-full text-sm text-left"><thead class="bg-dark/50 text-muted text-xs uppercase"><tr><th class="px-3 py-2">Nama</th><th class="px-3 py-2">Waktu Masuk</th><th class="px-3 py-2">Progress</th><th class="px-3 py-2">Status</th></tr></thead>
+            <tbody id="examLogTable"><tr><td colspan="4" class="text-center py-4 text-muted">Menunggu data...</td></tr></tbody></table>
+        </div>
+    </div>`;
     setTimeout(() => {
         document.getElementById('totalSiswaExam').innerText = '30'; document.getElementById('hadirExam').innerText = '28'; document.getElementById('prosesExam').innerText = '25'; document.getElementById('selesaiExam').innerText = '3';
         document.getElementById('examLogTable').innerHTML = `<tr class="border-b border-border"><td class="px-3 py-2">Ahmad Dani</td><td class="px-3 py-2">08:05:12</td><td class="px-3 py-2"><div class="w-24 h-2 bg-dark rounded-full overflow-hidden"><div class="bg-kopAccent h-full" style="width: 80%"></div></div></td><td class="px-3 py-2"><span class="text-warning text-xs">Mengerjakan</span></td></tr><tr class="border-b border-border"><td class="px-3 py-2">Budi Santoso</td><td class="px-3 py-2">08:05:15</td><td class="px-3 py-2"><div class="w-24 h-2 bg-dark rounded-full overflow-hidden"><div class="bg-success h-full" style="width: 100%"></div></div></td><td class="px-3 py-2"><span class="text-success text-xs">Selesai</span></td></tr>`;
@@ -642,13 +733,32 @@ function renderExamMonitor(c, type, kelas) {
 }
 
 function renderKoreksi(c, type) {
-    c.innerHTML = `<div class="card"><div class="flex justify-between items-center mb-4"><h3 class="font-bold text-light">Koreksi Otomatis & Manual</h3><button class="btn-secondary text-sm"><i class="fas fa-filter mr-1"></i> Filter Kelas</button></div><div class="p-4 bg-dark/30 rounded border border-border"><div class="flex justify-between mb-2"><h4 class="font-bold">Hasil Ujian - Matematika Kelas 4</h4><button class="text-kopAccent text-xs hover:underline">Lihat Detail</button></div><div class="grid grid-cols-3 gap-4 text-center text-sm mt-4"><div class="bg-dark p-2 rounded"><div class="text-muted text-xs">PG Terkoreksi</div><div class="font-bold text-success">28/30</div></div><div class="bg-dark p-2 rounded"><div class="text-muted text-xs">Uraian Dinilai</div><div class="font-bold text-warning">5/30</div></div><div class="bg-dark p-2 rounded"><div class="text-muted text-xs">Pending</div><div class="font-bold text-danger">25/30</div></div></div><div class="mt-3 text-right"><button onclick="autoCorrect()" class="btn-primary text-xs py-1 px-3"><i class="fas fa-robot mr-1"></i> Koreksi Otomatis PG</button></div></div></div>`;
+    c.innerHTML = `
+    <div class="card">
+        <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-light">Koreksi Otomatis & Manual</h3><button class="btn-secondary text-sm"><i class="fas fa-filter mr-1"></i> Filter Kelas</button></div>
+        <div class="p-4 bg-dark/30 rounded border border-border">
+            <div class="flex justify-between mb-2"><h4 class="font-bold">Hasil Ujian - Matematika Kelas 4</h4><button class="text-kopAccent text-xs hover:underline">Lihat Detail</button></div>
+            <div class="grid grid-cols-3 gap-4 text-center text-sm mt-4">
+                <div class="bg-dark p-2 rounded"><div class="text-muted text-xs">PG Terkoreksi</div><div class="font-bold text-success">28/30</div></div>
+                <div class="bg-dark p-2 rounded"><div class="text-muted text-xs">Uraian Dinilai</div><div class="font-bold text-warning">5/30</div></div>
+                <div class="bg-dark p-2 rounded"><div class="text-muted text-xs">Pending</div><div class="font-bold text-danger">25/30</div></div>
+            </div>
+            <div class="mt-3 text-right"><button onclick="autoCorrect()" class="btn-primary text-xs py-1 px-3"><i class="fas fa-robot mr-1"></i> Koreksi Otomatis PG</button></div>
+        </div>
+    </div>`;
 }
 
 function autoCorrect() { showToast('Memproses koreksi otomatis...', 'info'); setTimeout(() => showToast('Koreksi Selesai! 25 Siswa diperbarui.'), 1500); }
 
 function renderCetakLaporan(c) {
-    c.innerHTML = `<div class="grid md:grid-cols-2 gap-6"><div class="card hover:border-kopAccent transition cursor-pointer" onclick="printReport('nilai')"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-kopAccent/20 rounded-full flex items-center justify-center text-kopAccent"><i class="fas fa-chart-bar text-xl"></i></div><div><h4 class="font-bold text-light">Rekap Nilai Ujian</h4><p class="text-xs text-muted">Cetak rekap nilai per mapel dan kelas</p></div></div></div><div class="card hover:border-kopAccent transition cursor-pointer" onclick="printReport('raport')"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-info/20 rounded-full flex items-center justify-center text-info"><i class="fas fa-book-open text-xl"></i></div><div><h4 class="font-bold text-light">Laporan Raport</h4><p class="text-xs text-muted">Cetak raport siswa semester ini</p></div></div></div><div class="card hover:border-kopAccent transition cursor-pointer" onclick="printReport('absensi')"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-success/20 rounded-full flex items-center justify-center text-success"><i class="fas fa-clipboard-list text-xl"></i></div><div><h4 class="font-bold text-light">Daftar Hadir Siswa</h4><p class="text-xs text-muted">Cetak daftar hadir ujian / harian</p></div></div></div><div class="card hover:border-kopAccent transition cursor-pointer" onclick="printReport('berita-acara')"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-danger/20 rounded-full flex items-center justify-center text-danger"><i class="fas fa-file-contract text-xl"></i></div><div><h4 class="font-bold text-light">Berita Acara Ujian</h4><p class="text-xs text-muted">Dokumen legalitas pelaksanaan ujian</p></div></div></div></div><div id="printReportArea" class="print-only mt-10 p-10"></div>`;
+    c.innerHTML = `
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="card hover:border-kopAccent transition cursor-pointer" onclick="printReport('nilai')"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-kopAccent/20 rounded-full flex items-center justify-center text-kopAccent"><i class="fas fa-chart-bar text-xl"></i></div><div><h4 class="font-bold text-light">Rekap Nilai Ujian</h4><p class="text-xs text-muted">Cetak rekap nilai per mapel dan kelas</p></div></div></div>
+        <div class="card hover:border-kopAccent transition cursor-pointer" onclick="printReport('raport')"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-info/20 rounded-full flex items-center justify-center text-info"><i class="fas fa-book-open text-xl"></i></div><div><h4 class="font-bold text-light">Laporan Raport</h4><p class="text-xs text-muted">Cetak raport siswa semester ini</p></div></div></div>
+        <div class="card hover:border-kopAccent transition cursor-pointer" onclick="printReport('absensi')"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-success/20 rounded-full flex items-center justify-center text-success"><i class="fas fa-clipboard-list text-xl"></i></div><div><h4 class="font-bold text-light">Daftar Hadir Siswa</h4><p class="text-xs text-muted">Cetak daftar hadir ujian / harian</p></div></div></div>
+        <div class="card hover:border-kopAccent transition cursor-pointer" onclick="printReport('berita-acara')"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-danger/20 rounded-full flex items-center justify-center text-danger"><i class="fas fa-file-contract text-xl"></i></div><div><h4 class="font-bold text-light">Berita Acara Ujian</h4><p class="text-xs text-muted">Dokumen legalitas pelaksanaan ujian</p></div></div></div>
+    </div>
+    <div id="printReportArea" class="print-only mt-10 p-10"></div>`;
 }
 
 // ==========================================
@@ -657,7 +767,11 @@ function renderCetakLaporan(c) {
 function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
 
 function modalAddSiswa() {
-    document.getElementById('modalBody').innerHTML = `<h3 class="text-lg font-bold text-light mb-4">Tambah Data Siswa</h3><div class="space-y-3"><input type="text" id="addSiswaNisn" class="input-field" placeholder="NISN"><input type="text" id="addSiswaNama" class="input-field" placeholder="Nama Lengkap"><select id="addSiswaKelas" class="input-field"><option>Kelas 1</option><option>Kelas 2</option><option>Kelas 3</option><option>Kelas 4</option><option>Kelas 5</option><option>Kelas 6</option></select><select id="addSiswaRombel" class="input-field"><option>A</option><option>B</option><option>C</option></select><div class="flex gap-3 pt-2"><button onclick="saveSiswa()" class="btn-primary flex-1">Simpan</button><button onclick="closeModal()" class="btn-secondary flex-1">Batal</button></div></div>`;
+    document.getElementById('modalBody').innerHTML = `<h3 class="text-lg font-bold text-light mb-4">Tambah Data Siswa</h3><div class="space-y-3">
+    <div><label class="text-xs text-muted block mb-1">Kelas Tujuan</label><select id="addSiswaKelas" class="input-field">${currentUser.kelasAmpu.map(k=>`<option value="${k}">${k}</option>`).join('')}</select></div>
+    <input type="text" id="addSiswaNisn" class="input-field" placeholder="NISN"><input type="text" id="addSiswaNama" class="input-field" placeholder="Nama Lengkap">
+    <select id="addSiswaRombel" class="input-field"><option>A</option><option>B</option><option>C</option></select>
+    <div class="flex gap-3 pt-2"><button onclick="saveSiswa()" class="btn-primary flex-1">Simpan</button><button onclick="closeModal()" class="btn-secondary flex-1">Batal</button></div></div>`;
     document.getElementById('modalOverlay').classList.add('active');
 }
 
@@ -679,6 +793,8 @@ function printReport(type) {
     } else { printArea.innerHTML = `<h2>Laporan ${type}</h2>`; }
     window.print();
 }
+
+window.onload = function() { showPage('loginPage'); };
 </script>
 </body>
 </html>
