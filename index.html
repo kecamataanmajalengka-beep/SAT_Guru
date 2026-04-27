@@ -77,7 +77,6 @@ textarea.input-field{resize:vertical;min-height:40px}
 .print-preview-sheet table.tbl td.c{text-align:center;vertical-align:middle}
 .print-preview-sheet .sl{color:#166534;font-weight:bold}
 .print-preview-sheet .sp{color:#991b1b;font-weight:bold}
-/* Kartu Siswa */
 .kartu-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
 .kartu-item{background:white;color:black;border:2px solid #000;border-radius:8px;padding:14px;text-align:center;page-break-inside:avoid;font-family:'Times New Roman',Times,serif}
 .kartu-item .kartu-sekolah{font-size:8pt;font-weight:bold;text-transform:uppercase;margin-bottom:4px;color:#333}
@@ -108,22 +107,25 @@ textarea.input-field{resize:vertical;min-height:40px}
         <button onclick="switchAuthTab('login')" id="tabLogin" class="text-kopAccent border-b-2 border-kopAccent pb-2 font-bold text-sm flex-1">Masuk</button>
         <button onclick="switchAuthTab('register')" id="tabRegister" class="text-muted hover:text-light pb-2 text-sm flex-1">Registrasi</button>
     </div>
+
+    <!-- FORM LOGIN -->
     <div id="formLogin" class="space-y-4">
-        <div><label class="text-xs text-muted font-semibold uppercase tracking-wider mb-1 block">NIP / Email</label><input type="text" id="loginUser" class="input-field" placeholder="Masukkan NIP atau Email" onkeydown="if(event.key==='Enter')doGuruLogin()"></div>
+        <div><label class="text-xs text-muted font-semibold uppercase tracking-wider mb-1 block">NIP</label><input type="text" id="loginUser" class="input-field" placeholder="Masukkan NIP" onkeydown="if(event.key==='Enter')doGuruLogin()"></div>
         <div><label class="text-xs text-muted font-semibold uppercase tracking-wider mb-1 block">Password</label><div class="relative"><input type="password" id="loginPass" class="input-field pr-10" placeholder="Masukkan password" onkeydown="if(event.key==='Enter')doGuruLogin()"><button onclick="toggleEye('loginPass','loginEye')" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-light" type="button"><i id="loginEye" class="fas fa-eye text-sm"></i></button></div></div>
         <p id="loginErr" class="text-danger text-xs hidden"></p>
         <button onclick="doGuruLogin()" class="btn-primary w-full" type="button"><i class="fas fa-sign-in-alt mr-2"></i>Masuk</button>
         <p class="text-center text-xs text-muted"><a href="javascript:void(0)" onclick="switchAuthTab('reset')" class="text-info hover:underline">Lupa Password?</a></p>
     </div>
+
+    <!-- FORM REGISTER -->
     <div id="formRegister" class="space-y-4 hidden">
         <div class="p-3 bg-info/10 border border-info/30 rounded-lg text-xs text-info"><i class="fas fa-info-circle mr-1"></i>Registrasi hanya sekali per NPSN per peran. Pastikan data benar.</div>
         <div class="grid grid-cols-2 gap-3">
             <div><label class="text-xs text-muted mb-1 block">Nama Guru <span class="text-danger">*</span></label><input type="text" id="regNama" class="input-field" placeholder="Nama lengkap"></div>
             <div><label class="text-xs text-muted mb-1 block">NIP <span class="text-danger">*</span></label><input type="text" id="regNip" class="input-field" placeholder="NIP Anda"></div>
         </div>
-        <div><label class="text-xs text-muted mb-1 block">Email</label><input type="email" id="regEmail" class="input-field" placeholder="email@contoh.com"></div>
         <div class="grid grid-cols-2 gap-3">
-            <div><label class="text-xs text-muted mb-1 block">NPSN <span class="text-danger">*</span></label><input type="text" id="regNpsn" class="input-field" placeholder="8 digit" maxlength="8"></div>
+            <div><label class="text-xs text-muted mb-1 block">NPSN <span class="text-danger">*</span></label><input type="text" id="regNpsn" class="input-field" placeholder="NPSN sekolah" maxlength="10"></div>
             <div><label class="text-xs text-muted mb-1 block">Nama Sekolah <span class="text-danger">*</span></label><input type="text" id="regSekolah" class="input-field" placeholder="Nama sekolah"></div>
         </div>
         <div class="p-3 bg-kopAccent/10 border border-kopAccent/30 rounded-lg">
@@ -149,10 +151,12 @@ textarea.input-field{resize:vertical;min-height:40px}
         <p id="regErr" class="text-danger text-xs hidden"></p>
         <button onclick="doGuruRegister()" class="btn-primary w-full" type="button"><i class="fas fa-user-plus mr-2"></i>Daftar Akun</button>
     </div>
+
+    <!-- FORM RESET -->
     <div id="formReset" class="space-y-4 hidden">
         <div class="p-3 bg-warning/10 border border-warning/30 rounded-lg text-xs text-warning"><i class="fas fa-exclamation-triangle mr-1"></i>Reset password ke <b>guru123</b>. Token juga diacak ulang.</div>
         <div class="grid grid-cols-2 gap-3">
-            <div><label class="text-xs text-muted mb-1 block">NPSN</label><input type="text" id="resetNpsn" class="input-field" maxlength="8"></div>
+            <div><label class="text-xs text-muted mb-1 block">NPSN</label><input type="text" id="resetNpsn" class="input-field" maxlength="10"></div>
             <div><label class="text-xs text-muted mb-1 block">NIP</label><input type="text" id="resetNip" class="input-field"></div>
         </div>
         <p id="resetErr" class="text-danger text-xs hidden"></p>
@@ -214,9 +218,7 @@ var MAPEL_LIST=[
 ];
 var KELAS_LIST=['Kelas 1','Kelas 2','Kelas 3','Kelas 4','Kelas 5','Kelas 6'];
 var ROMBEL_LIST=['A','B','C','D','E'];
-var NPSN_VALID=['20200001','20200002','20200003','20200004','20200005'];
 var MAPEL_KELAS=['ppkn','mat','bin','sbd','ipas','bsd','bing'];
-/* URL panel siswa — ganti dengan URL hosting panel siswa Anda */
 var SISWA_PANEL_URL='https://panel-siswa-korek-api.netlify.app';
 
 function getMN(id){var m=MAPEL_LIST.find(function(x){return x.id===id;});return m?m.nama:id;}
@@ -264,11 +266,10 @@ function onRegRoleChange(){
     else if(role==='pai'||role==='pjok'){ro.classList.remove('hidden');var h='';KELAS_LIST.forEach(function(k){ROMBEL_LIST.forEach(function(r){h+='<label class="flex items-center gap-2 text-sm text-light cursor-pointer"><input type="checkbox" class="regRombelCb accent-yellow-500" value="'+k+'_'+r+'"> '+k+' '+r+'</label>';});});document.getElementById('regRombelChecks').innerHTML=h;}
 }
 
-/* ===================== REGISTRASI ===================== */
+/* ===================== REGISTRASI (tanpa email, tanpa validasi NPSN) ===================== */
 function doGuruRegister(){
     var nama=document.getElementById('regNama').value.trim();
     var nip=document.getElementById('regNip').value.trim();
-    var email=document.getElementById('regEmail').value.trim();
     var npsn=document.getElementById('regNpsn').value.trim();
     var sekolah=document.getElementById('regSekolah').value.trim();
     var role=document.getElementById('regRole').value;
@@ -276,26 +277,25 @@ function doGuruRegister(){
     var pass2=document.getElementById('regPass2').value;
     if(!nama){showErr('regErr','Nama wajib diisi');return;}
     if(!nip||nip.length<5){showErr('regErr','NIP minimal 5 digit');return;}
-    if(!email||email.indexOf('@')<0){showErr('regErr','Email tidak valid');return;}
-    if(!npsn||npsn.length!==8){showErr('regErr','NPSN harus 8 digit');return;}
+    if(!npsn||npsn.length<4){showErr('regErr','NPSN wajib diisi (min. 4 digit)');return;}
     if(!sekolah){showErr('regErr','Nama sekolah wajib diisi');return;}
     if(!role){showErr('regErr','Pilih peran guru');return;}
     if(pass.length<6){showErr('regErr','Password minimal 6 karakter');return;}
     if(pass!==pass2){showErr('regErr','Password tidak cocok');return;}
-    if(NPSN_VALID.indexOf(npsn)<0){showErr('regErr','NPSN tidak terdaftar di sistem');return;}
+    // Tidak ada validasi NPSN — guru bisa daftar dengan NPSN apapun
     var kelas='',rombel='',rombels=[];
     if(role==='kelas'||role==='kelas6'){kelas=document.getElementById('regKelas').value;rombel=document.getElementById('regRombel').value;if(!kelas){showErr('regErr','Pilih kelas');return;}}
     else if(role==='pai'||role==='pjok'){var cbs=document.querySelectorAll('.regRombelCb:checked');if(!cbs.length){showErr('regErr','Pilih minimal satu rombel');return;}cbs.forEach(function(cb){rombels.push(cb.value);});}
     var _stop=false;
-    db.collection('guru_accounts').where('npsn','==',npsn).limit(1).get().then(function(snap){
+    db.collection('guru_accounts').where('npsn','==',npsn).where('role','==',role).limit(1).get().then(function(snap){
         if(_stop)return;
-        if(!snap.empty){showErr('regErr','NPSN ini sudah terdaftar. Gunakan Reset Password.');_stop=true;return;}
+        if(!snap.empty){showErr('regErr','NPSN ini sudah terdaftar untuk peran '+getRoleLabel(role)+'. Gunakan Reset Password jika lupa.');_stop=true;return;}
         return db.collection('guru_accounts').where('nip','==',nip).limit(1).get();
     }).then(function(snap){
         if(_stop)return;
         if(snap&&!snap.empty){showErr('regErr','NIP sudah terdaftar');_stop=true;return;}
         var token=generateToken();
-        var data={nama:nama,nip:nip,email:email,npsn:npsn,sekolah:sekolah,password:pass,token:token,role:role,kkm:70,kelas:kelas,rombel:rombel,rombels:rombels,examSettings:{},createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+        var data={nama:nama,nip:nip,npsn:npsn,sekolah:sekolah,password:pass,token:token,role:role,kkm:70,kelas:kelas,rombel:rombel,rombels:rombels,examSettings:{},createdAt:firebase.firestore.FieldValue.serverTimestamp()};
         var docId=npsn+'_'+role+(kelas?'_'+kelas.replace(' ',''):'')+(rombel?'_'+rombel:'');
         return db.collection('guru_accounts').doc(docId).set(data);
     }).then(function(){
@@ -304,17 +304,15 @@ function doGuruRegister(){
     }).catch(function(e){if(_stop)return;showErr('regErr','Gagal: '+(e.message||''));});
 }
 
-/* ===================== LOGIN ===================== */
+/* ===================== LOGIN (hanya NIP, tanpa email) ===================== */
 function doGuruLogin(){
     var user=document.getElementById('loginUser').value.trim();
     var pass=document.getElementById('loginPass').value;
-    if(!user||!pass){showErr('loginErr','Isi NIP/Email dan Password');return;}
+    if(!user||!pass){showErr('loginErr','Isi NIP dan Password');return;}
     hideErr('loginErr');
+    // Login pakai NIP saja
     db.collection('guru_accounts').where('nip','==',user).limit(1).get().then(function(snap){
-        if(!snap.empty)return snap;
-        return db.collection('guru_accounts').where('email','==',user).limit(1).get();
-    }).then(function(snap){
-        if(!snap||snap.empty!==false||!snap.docs||!snap.docs.length){showErr('loginErr','Akun tidak ditemukan');return;}
+        if(snap.empty){showErr('loginErr','NIP tidak ditemukan');return;}
         var found=null;
         snap.docs.forEach(function(doc){if(doc.data().password===pass)found=doc;});
         if(!found){showErr('loginErr','Password salah');return;}
@@ -327,7 +325,7 @@ function doGuruLogin(){
 function doResetPassword(){
     var npsn=document.getElementById('resetNpsn').value.trim();
     var nip=document.getElementById('resetNip').value.trim();
-    if(!npsn||npsn.length!==8){showErr('resetErr','NPSN harus 8 digit');return;}
+    if(!npsn||npsn.length<4){showErr('resetErr','NPSN wajib diisi');return;}
     if(!nip){showErr('resetErr','NIP wajib diisi');return;}
     hideErr('resetErr');
     db.collection('guru_accounts').where('npsn','==',npsn).where('nip','==',nip).get().then(function(snap){
@@ -421,7 +419,7 @@ function renderSiswaList(){
 }
 function openAddSiswaModal(){
     var ki=getMyKelasRombel(),ko=ki.map(function(k){return'<option value="'+k+'">'+k+'</option>';}).join('');
-    openModal('<h3 class="font-display text-lg font-bold text-light mb-4">Tambah Siswa</h3><div class="space-y-4"><div><label class="text-xs text-muted mb-1 block">Kelas - Rombel</label><select id="addSiswaKR" class="input-field"><option value="">-- Pilih --</option>'+ko+'</select></div><div><label class="text-xs text-muted mb-1 block">NISN <span class="text-danger">*</span></label><input type="text" id="addSiswaNisn" class="input-field" placeholder="10 digit NISN" maxlength="10"></div><div><label class="text-xs text-muted mb-1 block">Nama Siswa <span class="text-danger">*</span></label><input type="text" id="addSiswaNama" class="input-field" placeholder="Nama lengkap siswa"></div><div class="flex gap-3"><button onclick="closeModal()" class="btn-secondary flex-1">Batal</button><button onclick="saveSiswa()" class="btn-primary flex-1"><i class="fas fa-save mr-1"></i>Simpan</button></div></div>');
+    openModal('<h3 class="font-display text-lg font-bold text-light mb-4">Tambah Siswa</h3><div class="space-y-4"><div><label class="text-xs text-muted mb-1 block">Kelas - Rombel</label><select id="addSiswaKR" class="input-field"><option value="">-- Pilih --</option>'+ko+'</select></div><div><label class="text-xs text-muted mb-1 block">NISN <span class="text-danger">*</span></label><input type="text" id="addSiswaNisn" class="input-field" placeholder="NISN siswa" maxlength="10"></div><div><label class="text-xs text-muted mb-1 block">Nama Siswa <span class="text-danger">*</span></label><input type="text" id="addSiswaNama" class="input-field" placeholder="Nama lengkap siswa"></div><div class="flex gap-3"><button onclick="closeModal()" class="btn-secondary flex-1">Batal</button><button onclick="saveSiswa()" class="btn-primary flex-1"><i class="fas fa-save mr-1"></i>Simpan</button></div></div>');
 }
 function saveSiswa(){
     var kr=document.getElementById('addSiswaKR').value,nisn=document.getElementById('addSiswaNisn').value.trim(),nama=document.getElementById('addSiswaNama').value.trim();
@@ -437,7 +435,7 @@ function deleteSiswa(id){if(!confirm('Hapus data siswa ini?'))return;db.collecti
 /* ===================== CETAK KARTU LOGIN ===================== */
 function renderKartu(c){
     var ki=getMyKelasRombel();
-    c.innerHTML='<div class="fade-in card"><h3 class="font-display text-lg font-bold text-light mb-2"><i class="fas fa-id-card mr-2 text-kopAccent"></i>Cetak Kartu Login Siswa</h3><p class="text-sm text-muted mb-4">Kartu berisi NISN, nama, dan barcode. Siswa bisa langsung scan/scan barcode di panel siswa untuk auto-fill NISN.</p><div class="flex flex-wrap gap-4 mb-4 p-4 bg-dark/30 rounded-lg"><div class="w-48"><label class="text-xs text-muted">Filter Kelas</label><select id="kartuFilterKelas" class="input-field" onchange="renderKartuPreview()"><option value="">Semua</option>'+ki.map(function(k){return'<option value="'+k+'">'+k+'</option>';}).join('')+'</select></div></div><div class="flex gap-3 mb-4"><button onclick="doCetakKartu()" class="btn-primary"><i class="fas fa-print mr-2"></i>Cetak Kartu</button></div><div id="kartuPreviewContainer"></div></div>';
+    c.innerHTML='<div class="fade-in card"><h3 class="font-display text-lg font-bold text-light mb-2"><i class="fas fa-id-card mr-2 text-kopAccent"></i>Cetak Kartu Login Siswa</h3><p class="text-sm text-muted mb-4">Kartu berisi NISN, nama, dan barcode untuk login ujian.</p><div class="flex flex-wrap gap-4 mb-4 p-4 bg-dark/30 rounded-lg"><div class="w-48"><label class="text-xs text-muted">Filter Kelas</label><select id="kartuFilterKelas" class="input-field" onchange="renderKartuPreview()"><option value="">Semua</option>'+ki.map(function(k){return'<option value="'+k+'">'+k+'</option>';}).join('')+'</select></div></div><div class="flex gap-3 mb-4"><button onclick="doCetakKartu()" class="btn-primary"><i class="fas fa-print mr-2"></i>Cetak Kartu</button></div><div id="kartuPreviewContainer"></div></div>';
     setTimeout(renderKartuPreview,100);
 }
 function renderKartuPreview(){
@@ -450,7 +448,6 @@ function renderKartuPreview(){
     });
     html+='</div></div></div>';
     ct.innerHTML=html;
-    // Generate barcode
     setTimeout(function(){
         document.querySelectorAll('.kartu-barcode').forEach(function(svg){
             try{JsBarcode(svg,svg.getAttribute('data-nisn'),{format:"CODE128",width:1.5,height:40,margin:2,displayValue:true,fontSize:10,font:"Times New Roman",textMargin:2,lineColor:"#000"});}catch(e){svg.outerHTML='<p style="font-size:9pt;font-family:monospace;color:#000">NISN: '+svg.getAttribute('data-nisn')+'</p>';}
@@ -466,10 +463,7 @@ function doCetakKartu(){
     doc.write(sheet.innerHTML);
     doc.write('<script>setTimeout(function(){document.querySelectorAll(".kartu-barcode").forEach(function(svg){try{JsBarcode(svg,svg.getAttribute("data-nisn"),{format:"CODE128",width:1.5,height:40,margin:2,displayValue:true,fontSize:10,font:"Times New Roman",textMargin:2,lineColor:"#000"});}catch(e){}});},300);<\/script>');
     doc.write('</body></html>');doc.close();
-    setTimeout(function(){
-        try{iframe.contentWindow.focus();iframe.contentWindow.print();}catch(e){}
-        setTimeout(function(){try{document.body.removeChild(iframe);}catch(e){}},3000);
-    },1500);
+    setTimeout(function(){try{iframe.contentWindow.focus();iframe.contentWindow.print();}catch(e){}setTimeout(function(){try{document.body.removeChild(iframe);}catch(e){}},3000);},1500);
 }
 
 /* ===================== LIHAT SOAL ===================== */
