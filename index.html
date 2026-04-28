@@ -3,13 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Guru - Manajemen Ujian & Soal</title>
+<title>Panel Guru - Full Fitur (Simulasi)</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
 <script>
 tailwind.config={theme:{extend:{colors:{kop:'#1a2744',kopAccent:'#c9a84c',dark:'#0f1923',card:'#182538',border:'#2a3f5f',muted:'#7a8ba5',light:'#e8ecf1',success:'#22c55e',danger:'#ef4444',warning:'#f59e0b',info:'#06b6d4'},fontFamily:{display:['Playfair Display','serif'],body:['Source Sans 3','sans-serif']}}}}
 </script>
@@ -33,14 +30,12 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
 .btn-danger{background:rgba(239,68,68,0.15);border:1px solid #ef4444;color:#ef4444;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px}
 .btn-danger:hover{background:#ef4444;color:white}
 
-/* Print & Preview Styles */
+/* Print Styles */
 @media print {
     @page { size: A4 portrait; margin: 1.5cm 2cm 2cm 2cm; }
     body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-family: 'Times New Roman', Times, serif !important; font-size: 12pt; line-height: 1.4; }
     .no-print { display: none !important; }
     .print-page { width: 100%; padding: 0; background: white; color: black; }
-    
-    /* KOP SURAT */
     .kop-surat { text-align: center; padding-bottom: 12px; margin-bottom: 24px; border-bottom: 3px double #000; display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .kop-surat-row { display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; }
     .kop-surat img { height: 75px; width: auto; object-fit: contain; }
@@ -48,49 +43,30 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
     .kop-text h1 { font-family: 'Times New Roman', serif; font-size: 13pt; font-weight: bold; text-transform: uppercase; margin: 0; }
     .kop-text h2 { font-family: 'Times New Roman', serif; font-size: 16pt; font-weight: bold; text-transform: uppercase; margin: 0; }
     .kop-text .kop-sub { font-family: 'Times New Roman', serif; font-size: 10pt; margin-top: 2px; font-style: normal; }
-
     .ujian-title { text-align: center; margin-bottom: 20px; }
-    .ujian-title h3 { font-family: 'Times New Roman', serif; font-size: 14pt; font-weight: bold; text-decoration: underline; text-underline-offset: 3px; text-transform: uppercase; margin: 0; }
+    .ujian-title h3 { font-family: 'Times New Roman', serif; font-size: 14pt; font-weight: bold; text-decoration: underline; text-transform: uppercase; margin: 0; }
     .ujian-title p { font-family: 'Times New Roman', serif; font-size: 12pt; margin: 4px 0 0 0; font-weight: bold; }
-
     .soal-header { margin-bottom: 20px; }
     .soal-header table { width: 100%; font-family: 'Times New Roman', serif; font-size: 12pt; }
     .soal-header td { padding: 2px 0; vertical-align: bottom; }
     .soal-header td.dot-cell { border-bottom: 1px dotted #000; min-width: 200px; }
-
-    .print-tp-section { margin-bottom: 20px; padding: 10px; border-left: 4px solid #000; background-color: #f9f9f9; page-break-inside: avoid; }
-    .print-tp-title { font-family: 'Times New Roman', serif; font-weight: bold; font-size: 11pt; margin-bottom: 2px; }
-    .print-tp-text { font-family: 'Times New Roman', serif; font-size: 11pt; font-style: italic; text-align: left; line-height: 1.4; }
-
     .section-heading { font-family: 'Times New Roman', serif; font-weight: bold; font-size: 12pt; border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 15px; margin-top: 10px; text-align: left; }
     .petunjuk-soal { font-size: 11pt; margin-bottom: 12px; font-style: italic; text-align: left; }
-
-    /* LAYOUT SOAL */
     .soal-item { margin-bottom: 24px; page-break-inside: avoid; width: 100%; display: block; overflow: hidden; }
     .soal-num { float: left; font-weight: bold; font-family: 'Times New Roman', serif; font-size: 12pt; width: 35px; flex-shrink: 0; }
     .soal-text { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.5; text-align: left; display: block; margin-left: 35px; }
-    .soal-img-print { display: block; max-width: 100%; height: auto; max-height: 200px; object-fit: contain; margin: 8px 0; border: 1px solid #ccc; background-color: #eee; }
     .opsi-wrapper { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; row-gap: 6px; margin-left: 35px; }
     .opsi-row { display: flex; align-items: flex-start; gap: 8px; font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.4; text-align: left; }
     .opsi-label { font-weight: bold; min-width: 20px; flex-shrink: 0; }
     .opsi-label::after { content: "."; }
-    .opsi-img-print { max-width: 60px; max-height: 50px; display: inline-block; vertical-align: middle; margin-left: 8px; object-fit: contain; }
     .answer-lines { margin-top: 8px; margin-left: 35px; border: 1px dashed #bbb; height: 80px; border-radius: 4px; background-color: #fafafa; }
     .clearfix::after { content: ""; display: table; clear: both; }
     .ttd-section { display: none; } 
-
-    .print-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-family: 'Times New Roman', serif; font-size: 10pt; table-layout: fixed; }
-    .print-table th, .print-table td { border: 1px solid #000; padding: 6px 8px; text-align: left; vertical-align: top; overflow: hidden; }
-    .print-table th { background-color: #eee !important; -webkit-print-color-adjust: exact; text-align: center; font-weight: bold; font-size: 9pt; text-transform: uppercase; }
-    .print-table td.center { text-align: center; vertical-align: middle; }
-    .print-table td.wrap-text { word-wrap: break-word; white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word; font-size: 9.5pt; }
 }
 
 /* Preview Styles */
 .print-preview-wrap { background: #e5e7eb; padding: 40px; border-radius: 8px; display: flex; justify-content: center; overflow-x: auto; }
 .print-preview-sheet { background: white; color: black; width: 210mm; max-width: 100%; min-height: 297mm; padding: 1.5cm 2cm 2cm 2cm; box-shadow: 0 4px 20px rgba(0,0,0,0.2); font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.4; transform-origin: top center; }
-
-/* Copy Styles untuk Preview */
 .print-preview-sheet .kop-surat { display: flex; flex-direction: column; align-items: center; text-align: center; padding-bottom: 12px; margin-bottom: 24px; border-bottom: 3px double #000; }
 .print-preview-sheet .kop-surat-row { display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; }
 .print-preview-sheet .kop-surat img { height: 75px; width: auto; object-fit: contain; }
@@ -105,30 +81,18 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
 .print-preview-sheet .soal-header table { width: 100%; font-size: 12pt; }
 .print-preview-sheet .soal-header td { padding: 2px 0; vertical-align: bottom; }
 .print-preview-sheet .soal-header td.dot-cell { border-bottom: 1px dotted #000; min-width: 200px; }
-.print-preview-sheet .print-tp-section { margin-bottom: 20px; padding: 10px; border-left: 4px solid #000; background-color: #f9f9f9; }
-.print-preview-sheet .print-tp-title { font-weight: bold; font-size: 11pt; margin-bottom: 2px; }
-.print-preview-sheet .print-tp-text { font-size: 11pt; font-style: italic; text-align: left; }
 .print-preview-sheet .section-heading { font-weight: bold; font-size: 12pt; border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 15px; margin-top: 10px; text-align: left; }
 .print-preview-sheet .petunjuk-soal { font-size: 11pt; margin-bottom: 12px; font-style: italic; text-align: left; }
 .print-preview-sheet .soal-item { margin-bottom: 24px; page-break-inside: avoid; width: 100%; display: block; overflow: hidden; }
 .print-preview-sheet .soal-num { float: left; font-weight: bold; font-size: 12pt; width: 35px; flex-shrink: 0; }
 .print-preview-sheet .soal-text { font-size: 12pt; line-height: 1.5; text-align: left; display: block; margin-left: 35px; margin-bottom: 8px; }
-.print-preview-sheet .soal-img-print { display: block; max-width: 100%; height: auto; max-height: 200px; object-fit: contain; margin: 8px 0; border: 1px solid #ddd; background-color: #f9f9f9; }
 .print-preview-sheet .opsi-wrapper { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; row-gap: 6px; margin-left: 35px; }
 .print-preview-sheet .opsi-row { display: flex; align-items: flex-start; gap: 8px; font-size: 12pt; line-height: 1.4; text-align: left; }
 .print-preview-sheet .opsi-label { font-weight: bold; min-width: 20px; flex-shrink: 0; }
 .print-preview-sheet .opsi-label::after { content: '.'; }
-.print-preview-sheet .opsi-img-print { max-width: 60px; max-height: 50px; display: inline-block; vertical-align: middle; margin-left: 8px; object-fit: contain; border: 1px solid #eee; }
 .print-preview-sheet .answer-lines { margin-top: 8px; margin-left: 35px; border: 1px dashed #ccc; height: 80px; border-radius: 4px; background-color: #fafafa; }
 .print-preview-sheet .ttd-section { display: none; }
 .print-preview-sheet .clearfix::after { content: ""; display: table; clear: both; }
-.print-preview-sheet .print-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 10pt; table-layout: fixed; }
-.print-preview-sheet .print-table th, .print-preview-sheet .print-table td { border: 1px solid #000; padding: 6px 8px; text-align: left; vertical-align: top; overflow: hidden; }
-.print-preview-sheet .print-table th { background-color: #eee; text-align: center; font-weight: bold; font-size: 9pt; text-transform: uppercase; }
-.print-preview-sheet .print-table td.center { text-align: center; vertical-align: middle; }
-.print-preview-sheet .print-table td.wrap-text { word-wrap: break-word; white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word; font-size: 9.5pt;}
-
-.modal-body-content { max-height: 60vh; overflow-y: auto; }
 </style>
 </head>
 <body>
@@ -137,25 +101,21 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
 <div id="loginPage" class="login-bg">
     <div class="glass rounded-2xl p-8 w-full max-w-lg fade-in">
         <div class="text-center mb-6">
-            <h1 class="font-display text-2xl font-bold text-kopAccent tracking-wide">GURU PANEL</h1>
-            <p class="text-muted text-sm">Terintegrasi dengan Database Soal Pusat (Read-Only)</p>
+            <h1 class="font-display text-2xl font-bold text-kopAccent tracking-wide">PANEL GURU</h1>
+            <p class="text-muted text-sm">Sistem Manajemen Ujian Sekolah (Demo Mode)</p>
         </div>
 
         <!-- FORM DAFTAR GURU BARU -->
         <div id="registerForm" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="text-xs text-muted font-semibold uppercase">NPSN Sekolah</label>
-                    <input type="number" id="regNpsn" class="input-field" placeholder="202xxxx">
+                    <label class="text-xs text-muted font-semibold uppercase">NIP Guru</label>
+                    <input type="number" id="regNip" class="input-field" placeholder="Contoh: 12345">
                 </div>
                 <div>
-                    <label class="text-xs text-muted font-semibold uppercase">NIP Guru</label>
-                    <input type="number" id="regNip" class="input-field" placeholder="NIP Anda">
+                    <label class="text-xs text-muted font-semibold uppercase">Nama Lengkap</label>
+                    <input type="text" id="regNama" class="input-field" placeholder="Nama Anda">
                 </div>
-            </div>
-            <div>
-                <label class="text-xs text-muted font-semibold uppercase">Nama Lengkap</label>
-                <input type="text" id="regNama" class="input-field" placeholder="Nama Lengkap + Gelar">
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -194,15 +154,15 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
                 <label class="text-xs text-muted font-semibold uppercase">Password Baru</label>
                 <input type="password" id="regPass" class="input-field" placeholder="Buat password">
             </div>
-            <button onclick="doRegister()" class="btn-primary w-full mt-2">Daftar Guru</button>
+            <button onclick="doRegister()" class="btn-primary w-full mt-2">Daftar Akun Baru</button>
             <p class="text-center text-xs text-muted mt-2">Sudah punya akun? <a href="#" onclick="toggleLoginMode()" class="text-kopAccent hover:underline">Login disini</a></p>
         </div>
 
         <!-- FORM LOGIN GURU -->
         <div id="loginForm" class="space-y-4 hidden">
             <div>
-                <label class="text-xs text-muted font-semibold uppercase">NIP / NPSN</label>
-                <input type="text" id="logUser" class="input-field" placeholder="Masukkan NIP atau NPSN">
+                <label class="text-xs text-muted font-semibold uppercase">NIP Guru</label>
+                <input type="number" id="logUser" class="input-field" placeholder="Masukkan NIP">
             </div>
             <div>
                 <label class="text-xs text-muted font-semibold uppercase">Password</label>
@@ -250,22 +210,7 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
 </div>
 
 <script>
-// --- KONFIGURASI FIREBASE ---
-var firebaseConfig = {
-    apiKey: "AIzaSyC0Hs7SUgPAeQ_JaotHUJL5m6nIhCRif-8",
-    authDomain: "pembuatan-soal.firebaseapp.com",
-    projectId: "pembuatan-soal",
-    storageBucket: "pembuatan-soal.firebasestorage.app",
-    messagingSenderId: "56200686194",
-    appId: "1:56200686194:web:eb2de00c9d152d87bcf0eb"
-};
-
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-var db = firebase.firestore();
-
-// --- DATA MASTER ---
+// --- 1. DATA DUMMY & UTILITAS LOCALSTORAGE ---
 var MAPEL = [
     {id:'ppkn',nama:'Pendidikan Pancasila'},
     {id:'mat',nama:'Matematika'},
@@ -277,20 +222,32 @@ var MAPEL = [
     {id:'pai',nama:'PAI'},
     {id:'pjok',nama:'PJOK'}
 ];
-var KELAS = ['Kelas 1','Kelas 2','Kelas 3','Kelas 4','Kelas 5','Kelas 6'];
 
-// --- STATE ---
+// Inisialisasi Data Dummy jika kosong (Agar user bisa langsung lihat fitur)
+function initData(){
+    if(!localStorage.getItem('soalList')){
+        var dummySoal = [
+            {id:'s1', mapel:'mat', kelas:'Kelas 1', type:'pg', text:'Berapa hasil 5 + 3?', options:['6','7','8','9'], answer:2, indicator:'Operasi hitung penjumlahan', score:2},
+            {id:'s2', mapel:'pai', kelas:'Kelas 4', rombel:'A', type:'pg', text:'Rukun Islam yang pertama adalah...', options:['Sholat','Puasa','Zakat','Syahadat'], answer:3, indicator:'Memahami Rukun Islam', score:2},
+            {id:'s3', mapel:'pjok', kelas:'Kelas 6', rombel:'B', type:'uraian', text:'Jelaskan teknik dasar passing bawah dalam permainan bola voli!', options:[], answer:'Passing bawah adalah cara memukul bola dari bawah dengan dua tangan rapat...', indicator:'Teknik dasar bola voli', score:5}
+        ];
+        localStorage.setItem('soalList', JSON.stringify(dummySoal));
+    }
+    if(!localStorage.getItem('users_guru')) localStorage.setItem('users_guru', JSON.stringify([]));
+    if(!localStorage.getItem('data_siswa')) localStorage.setItem('data_siswa', JSON.stringify([]));
+    if(!localStorage.getItem('token_ujian')) localStorage.setItem('token_ujian', JSON.stringify({})); // Object per mapel
+    if(!localStorage.getItem('jawaban_siswa')) localStorage.setItem('jawaban_siswa', JSON.stringify([]));
+}
+initData();
+
+// --- 2. STATE MANAGEMENT ---
 var currentUser = null;
-var soalList = []; 
-var pajSoalList = [];
-var siswaList = []; 
-var jawabanList = []; 
-var tokenData = null; // Ubah jadi object per mapel: { 'pai': {token:'...', durasi:60}, 'pjok': {...} }
+var tokenData = JSON.parse(localStorage.getItem('token_ujian'));
 
-// --- FUNGSI UTILITAS ---
+// --- 3. FUNGSI UTILITAS ---
 function getMapelName(id){ var m=MAPEL.find(function(x){return x.id===id;}); return m?m.nama:id; }
 
-// Helper: Tentukan Mapel apa saja yang boleh diakses Guru ini
+// Tentukan Mapel apa saja yang boleh diakses Guru ini
 function getTeacherMapels() {
     if (!currentUser) return [];
     if (currentUser.jenis === 'kelas') {
@@ -302,6 +259,46 @@ function getTeacherMapels() {
     }
 }
 
+// Fungsi Helper Refresh Data dari LocalStorage
+function refreshData(){
+    var soalList = JSON.parse(localStorage.getItem('soalList')) || [];
+    var siswaList = JSON.parse(localStorage.getItem('data_siswa')) || [];
+    var jawabanList = JSON.parse(localStorage.getItem('jawaban_siswa')) || [];
+    tokenData = JSON.parse(localStorage.getItem('token_ujian')) || {};
+    return {soalList, siswaList, jawabanList, tokenData};
+}
+
+// --- 4. LOGIKA FILTER SOAL (UPDATED) ---
+function getFilteredQuestions(allQuestions, mapelFilter, typeFilter) {
+    var availableMapels = getTeacherMapels();
+    var result = allQuestions;
+
+    // 1. Filter MAPEL (Berdasarkan Jenis Guru)
+    result = result.filter(s => availableMapels.find(m => m.id === s.mapel));
+
+    // 2. Filter Mapel Tambahan (Jika user pilih mapel spesifik di dropdown)
+    if (mapelFilter) {
+        result = result.filter(s => s.mapel === mapelFilter);
+    }
+
+    // 3. Filter KELAS & ROMBEL (LOGIKA BARU)
+    if (currentUser.jenis === 'kelas') {
+        // Guru Kelas: Hanya lihat kelas ampuannya
+        result = result.filter(s => s.kelas === currentUser.kelas);
+    } else {
+        // Guru PAI/PJOK: Lihat sesuai Kelas & Rombel yang diinput saat register
+        result = result.filter(s => s.kelas === currentUser.kelas && s.rombel === currentUser.rombel);
+    }
+
+    // 4. Filter Tipe Soal
+    if (typeFilter) {
+        result = result.filter(s => s.type === typeFilter);
+    }
+
+    return result;
+}
+
+// --- 5. AUTH GURU ---
 function toggleLoginMode(){
     document.getElementById('registerForm').classList.toggle('hidden');
     document.getElementById('loginForm').classList.toggle('hidden');
@@ -310,129 +307,78 @@ function toggleLoginMode(){
 function handleJenisChange(){
     var jenis = document.getElementById('regJenis').value;
     var wrapK = document.getElementById('wrapperKelas');
-    var wrapR = document.getElementById('wrapperRombel');
     if(jenis === 'kelas'){
         wrapK.classList.remove('hidden');
-        wrapR.classList.remove('hidden');
     } else {
         wrapK.classList.add('hidden');
-        wrapR.classList.remove('hidden');
     }
 }
 
-// --- AUTH GURU ---
 function doRegister(){
-    var npsn = document.getElementById('regNpsn').value;
     var nip = document.getElementById('regNip').value;
     var nama = document.getElementById('regNama').value;
     var jenis = document.getElementById('regJenis').value;
-    var kelas = (jenis==='kelas') ? document.getElementById('regKelas').value : 'Semua';
+    var kelas = (jenis==='kelas') ? document.getElementById('regKelas').value : 'Semua'; // Untuk PAI/PJOK, user bisa pilih kelas nanti di edit profil atau saat register kita tambahkan input manual
     var rombel = document.getElementById('regRombel').value;
     var pass = document.getElementById('regPass').value;
 
-    if(!npsn || !nip || !nama || !pass) return alert("Mohon lengkapi data!");
+    if(!nip || !nama || !pass) return alert("Mohon lengkapi data!");
 
-    db.collection('users_guru').add({
-        npsn: npsn, nip: nip, nama: nama, jenis: jenis, kelas: kelas, rombel: rombel, password: pass, role: 'guru', createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(()=>{
-        alert("Registrasi Berhasil!");
-        doLoginDirect(nip, pass);
-    }).catch(e=>alert("Error: "+e.message));
+    // Simpan ke LocalStorage
+    var users = JSON.parse(localStorage.getItem('users_guru'));
+    if(users.find(u=>u.nip===nip)) return alert("NIP sudah terdaftar!");
+
+    users.push({
+        nip: nip, nama: nama, jenis: jenis, kelas: kelas, rombel: rombel, password: pass
+    });
+    localStorage.setItem('users_guru', JSON.stringify(users));
+    
+    alert("Registrasi Berhasil! Silakan Login.");
+    toggleLoginMode();
 }
 
 function doLogin(){
     var user = document.getElementById('logUser').value;
     var pass = document.getElementById('logPass').value;
-    doLoginDirect(user, pass);
-}
+    
+    var users = JSON.parse(localStorage.getItem('users_guru'));
+    var found = users.find(u => u.nip === user && u.password === pass);
 
-function doLoginDirect(user, pass){
-    db.collection('users_guru').where('nip', '==', user).where('password','==',pass).get()
-    .then(snap=>{
-        if(snap.empty) return alert("Login Gagal! Cek NIP/NPSN dan Password.");
-        var doc = snap.docs[0];
-        currentUser = doc.data();
-        currentUser.id = doc.id;
-        
+    if(found){
+        currentUser = found;
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainPage').classList.remove('hidden');
         document.getElementById('userGreeting').innerText = currentUser.nama;
-        
-        initListeners();
         nav('dashboard');
-    });
+    } else {
+        alert("Login Gagal! Cek NIP dan Password.");
+    }
 }
 
 function doResetPassword(){
     var nip = prompt("Masukkan NIP untuk reset password:");
     if(!nip) return;
-    if(confirm("Set password default menjadi '123456' untuk NIP: " + nip + "?")){
-        db.collection('users_guru').where('nip', '==', nip).get().then(snap=>{
-            if(!snap.empty){
-                snap.docs[0].ref.update({password: '123456'}).then(()=>alert("Password berhasil direset menjadi 123456"));
-            } else {
-                alert("NIP tidak ditemukan.");
-            }
-        });
+    var users = JSON.parse(localStorage.getItem('users_guru'));
+    var idx = users.findIndex(u=>u.nip===nip);
+    if(idx > -1){
+        if(confirm("Set password default menjadi '123456'?")){
+            users[idx].password = '123456';
+            localStorage.setItem('users_guru', JSON.stringify(users));
+            alert("Password berhasil direset.");
+        }
+    } else {
+        alert("NIP tidak ditemukan.");
     }
 }
 
 function logout(){
-    location.reload();
+    currentUser = null;
+    document.getElementById('mainPage').classList.add('hidden');
+    document.getElementById('loginPage').style.display = 'flex';
+    document.getElementById('loginForm').reset();
 }
 
-// --- INISIALISASI DATA ---
-function initListeners(){
-    // 1. Ambil Soal Regular
-    db.collection('questions').orderBy('createdAt','asc')
-    .onSnapshot(function(snap){
-        soalList = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
-        refreshCurrentView();
-    });
-
-    // 2. Ambil Soal PAJ (Khusus Mapel PAI & PJOK)
-    db.collection('questions_paj').orderBy('createdAt','asc')
-    .onSnapshot(function(snap){
-        pajSoalList = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
-        refreshCurrentView();
-    });
-
-    // 3. Ambil Data Siswa
-    db.collection('data_siswa').where('rombel', '==', currentUser.rombel)
-    .onSnapshot(function(snap){
-        siswaList = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
-        if(document.querySelector('.nav-item.active')?.innerText.includes('Data Siswa')) renderSiswa();
-    });
-
-    // 4. Ambil Jawaban Masuk
-    db.collection('jawaban_siswa').orderBy('waktuKirim', 'desc')
-    .onSnapshot(function(snap){
-        jawabanList = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
-        if(document.querySelector('.nav-item.active')?.innerText.includes('Koreksi')) renderKoreksi();
-    });
-
-    // 5. Cek Token Aktif (Ambil semua token, kita filter di dashboard)
-    db.collection('token_ujian').onSnapshot(snap=>{
-        tokenData = {};
-        snap.forEach(doc=>{
-            tokenData[doc.id] = doc.data();
-        });
-        if(document.querySelector('.nav-item.active')?.innerText.includes('Dashboard')) renderDashboard();
-        if(document.querySelector('.nav-item.active')?.innerText.includes('Atur Ujian')) renderUjian();
-    });
-}
-
-// Refresh view jika data berubah
-function refreshCurrentView(){
-    var activeText = document.querySelector('.nav-item.active')?.innerText;
-    if(!activeText) return;
-    if(activeText.includes('Bank Soal')) renderSoalView();
-    else if(activeText.includes('Kisi-Kisi')) renderKisi();
-    else if(activeText.includes('Kunci')) renderKunci();
-    else if(activeText.includes('Cetak Soal')) renderPrint();
-}
-
-// --- NAVIGASI ---
+// --- 6. NAVIGASI ---
 function nav(page){
     document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
     event.currentTarget.classList.add('active');
@@ -448,49 +394,37 @@ function nav(page){
     else if(page==='koreksi') renderKoreksi(c);
 }
 
-// --- DASHBOARD ---
+// --- 7. DASHBOARD ---
 function renderDashboard(c){
-    // Hitung jumlah soal relevan
+    var data = refreshData();
     var availableMapels = getTeacherMapels();
-    var mySoalCount = 0;
-    soalList.forEach(s => {
-        if(availableMapels.find(m => m.id === s.mapel) && (currentUser.jenis==='kelas' ? s.kelas === currentUser.kelas : (s.kelas === currentUser.kelas || s.kelas === currentUser.rombel))) {
-            mySoalCount++;
-        }
-    });
-    pajSoalList.forEach(s => {
-        if(currentUser.jenis === s.mapel && (s.kelas === currentUser.kelas || s.kelas === currentUser.rombel)) {
-            mySoalCount++;
-        }
-    });
-
+    var mySoalCount = getFilteredQuestions(data.soalList, '', '').length;
+    
     c.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 fade-in">'+
         '<div class="card text-center"><div class="text-3xl font-bold text-kopAccent">'+mySoalCount+'</div><div class="text-xs text-muted">Total Soal Relevan</div></div>'+
-        '<div class="card text-center"><div class="text-3xl font-bold text-info">'+siswaList.length+'</div><div class="text-xs text-muted">Total Siswa (Rombel)</div></div>'+
-        '<div class="card text-center"><div class="text-3xl font-bold text-success">'+jawabanList.filter(j=>j.status==='selesai').length+'</div><div class="text-xs text-muted">Jawaban Masuk</div></div>'+
+        '<div class="card text-center"><div class="text-3xl font-bold text-info">'+data.siswaList.length+'</div><div class="text-xs text-muted">Total Siswa (Rombel)</div></div>'+
+        '<div class="card text-center"><div class="text-3xl font-bold text-success">'+data.jawabanList.length+'</div><div class="text-xs text-muted">Jawaban Masuk</div></div>'+
         '<div class="card text-center"><div class="text-3xl font-bold text-warning">'+(availableMapels.length)+'</div><div class="text-xs text-muted">Mapel Diampu</div></div>'+
     '</div>';
 }
 
-// --- DATA SISWA ---
+// --- 8. DATA SISWA ---
 function renderSiswa(c){
-    if(!c) c = document.getElementById('contentArea');
-    // Guru PAI/PJOK lihat SISWA di kelas/rombel ampuan mereka
+    var data = refreshData();
     c.innerHTML = '<div class="card fade-in">'+
         '<h3 class="font-bold text-lg mb-4 border-b border-border pb-2">Data Siswa (Rombel '+currentUser.rombel+')</h3>'+
         '<div class="flex gap-2 mb-4">'+
             '<button onclick="openAddSiswa()" class="btn-primary"><i class="fas fa-user-plus mr-1"></i>Input Siswa</button>'+
-            '<button onclick="printKartu()" class="btn-secondary"><i class="fas fa-id-card mr-1"></i>Cetak Kartu Ujian</button>'+
         '</div>'+
         '<div class="overflow-x-auto"><table class="w-full text-sm text-left">'+
             '<thead class="text-xs text-muted uppercase bg-dark/50"><tr><th class="px-4 py-2">NISN</th><th class="px-4 py-2">Nama</th><th class="px-4 py-2">Kelas</th><th class="px-4 py-2">Rombel</th><th class="px-4 py-2">Aksi</th></tr></thead>'+
             '<tbody id="siswaTableBody"></tbody></table></div></div>';
     
     var tb = document.getElementById('siswaTableBody');
-    if(siswaList.length===0){
+    if(data.siswaList.length===0){
         tb.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-muted">Belum ada data siswa</td></tr>';
     } else {
-        tb.innerHTML = siswaList.map(s=>
+        tb.innerHTML = data.siswaList.map(s=>
             '<tr class="border-b border-border hover:bg-white/5"><td class="px-4 py-3">'+s.nisn+'</td><td class="px-4 py-3">'+s.nama+'</td><td class="px-4 py-3">'+s.kelas+'</td><td class="px-4 py-3">'+s.rombel+'</td><td class="px-4 py-3"><button onclick="deleteSiswa(\''+s.id+'\')" class="text-danger hover:text-white"><i class="fas fa-trash"></i></button></td></tr>'
         ).join('');
     }
@@ -501,7 +435,7 @@ function openAddSiswa(){
         '<input id="inNisn" class="input-field mb-2" placeholder="NISN">'+
         '<input id="inNama" class="input-field mb-2" placeholder="Nama Lengkap">'+
         '<select id="inKelas" class="input-field mb-2">'+
-            KELAS.map(k=>'<option value="'+k+'">'+k+'</option>').join('')+
+            ['Kelas 1','Kelas 2','Kelas 3','Kelas 4','Kelas 5','Kelas 6'].map(k=>'<option value="'+k+'">'+k+'</option>').join('')+
         '</select>'+
         '<input id="inRombel" class="input-field mb-2" value="'+currentUser.rombel+'" readonly>'+
         '<button onclick="saveSiswa()" class="btn-primary w-full">Simpan</button>';
@@ -509,67 +443,37 @@ function openAddSiswa(){
 }
 
 function saveSiswa(){
+    var data = refreshData();
     var nisn = document.getElementById('inNisn').value;
     var nama = document.getElementById('inNama').value;
     var kelas = document.getElementById('inKelas').value;
     if(!nisn || !nama) return alert("Data tidak lengkap");
-    db.collection('data_siswa').add({
-        nisn:nisn, nama:nama, kelas:kelas, rombel:currentUser.rombel, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(()=>{closeModal(); renderSiswa();});
+    
+    data.siswaList.push({
+        id: Date.now().toString(),
+        nisn:nisn, nama:nama, kelas:kelas, rombel:currentUser.rombel
+    });
+    localStorage.setItem('data_siswa', JSON.stringify(data.siswaList));
+    closeModal();
+    renderSiswa();
 }
 
 function deleteSiswa(id){
-    if(confirm("Hapus siswa ini?")) db.collection('data_siswa').doc(id).delete();
+    if(confirm("Hapus siswa ini?")){
+        var data = refreshData();
+        data.siswaList = data.siswaList.filter(s=>s.id!==id);
+        localStorage.setItem('data_siswa', JSON.stringify(data.siswaList));
+        renderSiswa();
+    }
 }
 
-function printKartu(){
-    window.print();
-}
-
-// --- CORE LOGIC FILTER SOAL (UPDATED) ---
-function getFilteredQuestions(mapelFilter, typeFilter) {
-    var availableMapels = getTeacherMapels();
-    var combinedList = soalList.concat(pajSoalList);
-    var result = combinedList;
-
-    // 1. Filter MAPEL (Berdasarkan Jenis Guru)
-    // Jika Guru Kelas: Otomatis buang PAI & PJOK
-    // Jika Guru PAI/PJOK: Otomatis ambil HANYA mapel mereka
-    result = result.filter(s => availableMapels.find(m => m.id === s.mapel));
-
-    // 2. Filter Mapel Tambahan (Jika user pilih mapel spesifik di dropdown)
-    if (mapelFilter) {
-        result = result.filter(s => s.mapel === mapelFilter);
-    }
-
-    // 3. Filter KELAS & ROMBEL (LOGIKA BARU)
-    if (currentUser.jenis === 'kelas') {
-        // Guru Kelas: Hanya lihat kelas ampuannya (Misal Kelas 4)
-        result = result.filter(s => s.kelas === currentUser.kelas);
-    } else {
-        // Guru PAI/PJOK: Lihat sesuai Kelas & Rombel yang diinput saat register
-        // Data soal diasumsikan ada field 'kelas' (misal "Kelas 4") dan field 'rombel' (misal "A")
-        result = result.filter(s => s.kelas === currentUser.kelas && s.rombel === currentUser.rombel);
-    }
-
-    // 4. Filter Tipe Soal
-    if (typeFilter) {
-        result = result.filter(s => s.type === typeFilter);
-    }
-
-    return result;
-}
-
-// --- BANK SOAL (READ ONLY) ---
+// --- 9. BANK SOAL ---
 function renderSoalView(c){
-    if(!c) c = document.getElementById('contentArea');
-    
+    var data = refreshData();
     var availableMapels = getTeacherMapels();
-
+    
     c.innerHTML = '<div class="card fade-in">'+
-        '<h3 class="font-bold text-lg mb-4">Bank Soal (Terintegrasi Admin)</h3>'+
-        '<p class="text-xs text-muted mb-4">Data difilter sesuai Mapel & Kelas/Rombel ampuan Anda.</p>'+
-        
+        '<h3 class="font-bold text-lg mb-4">Bank Soal</h3>'+
         '<div class="flex gap-4 mb-4 items-end">'+
             '<div class="flex-1">'+
                 '<label class="text-xs text-muted font-bold mb-1 block">Filter Mapel</label>'+
@@ -587,20 +491,19 @@ function renderSoalView(c){
                 '</select>'+
             '</div>'+
         '</div>'+
-
         '<div class="overflow-x-auto"><table class="w-full text-sm text-left">'+
             '<thead class="text-xs text-muted uppercase bg-dark/50"><tr><th class="px-4 py-2">Mapel</th><th class="px-4 py-2">Kelas</th><th class="px-4 py-2">Tipe</th><th class="px-4 py-2">Soal</th></tr></thead>'+
             '<tbody id="soalTableBody"></tbody></table></div></div>';
-        
     refreshSoalList();
 }
 
 function refreshSoalList(){
+    var data = refreshData();
     var mapelFilter = document.getElementById('filterMapelSoal').value;
     var typeFilter = document.getElementById('filterTypeSoal').value;
     var tb = document.getElementById('soalTableBody');
-
-    var filteredSoal = getFilteredQuestions(mapelFilter, typeFilter);
+    
+    var filteredSoal = getFilteredQuestions(data.soalList, mapelFilter, typeFilter);
 
     if(filteredSoal.length===0){
         tb.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-muted">Tidak ada soal sesuai filter.</td></tr>';
@@ -616,13 +519,13 @@ function refreshSoalList(){
     }
 }
 
-// --- KISI-KISI (READ ONLY, FILTER MAPEL) ---
+// --- 10. KISI-KISI ---
 function renderKisi(c){
-    if(!c) c = document.getElementById('contentArea');
+    var data = refreshData();
     var availableMapels = getTeacherMapels();
     
     c.innerHTML = '<div class="card fade-in no-print">'+
-        '<h3 class="font-bold text-lg mb-4">Kisi-Kisi Soal (Admin Pusat)</h3>'+
+        '<h3 class="font-bold text-lg mb-4">Kisi-Kisi Soal</h3>'+
         '<div class="flex gap-4 items-end mb-4">'+
             '<div class="flex-1">'+
                 '<label class="text-xs text-muted font-bold mb-1 block">Pilih Mapel</label>'+
@@ -638,27 +541,24 @@ function renderKisi(c){
 }
 
 function refreshKisiPreview(){
+    var data = refreshData();
     var mapelEl = document.getElementById('kisiMapelSelect');
     if(!mapelEl) return;
     var mapelId = mapelEl.value;
     var container = document.getElementById('kisiPreviewContainer');
-
-    // Gunakan fungsi filter terpusat, mapelId wajib ada di sini
-    var data = getFilteredQuestions(mapelId, '');
     
-    // Preview Styles
+    var questions = getFilteredQuestions(data.soalList, mapelId, '');
+    
     var html = '<div class="print-preview-sheet"><div class="print-page">';
     var logoUrl = 'https://www.image2url.com/r2/default/images/1776680731558-aaedfd5c-6674-4989-a7a4-c15f6291acac.jpeg';
 
     html += '<div class="kop-surat"><div class="kop-surat-row"><img src="'+logoUrl+'" alt="Logo"><div class="kop-text"><h1>Pemerintah Kabupaten Majalengka</h1><h1>Dinas Pendidikan</h1><h2>Korek Api Kecamatan Majalengka</h2></div></div><p class="kop-sub">Jl. KH. Abdul Halim No. 123, Kec. Majalengka, Kab. Majalengka 45411</p></div>';
-    
     html += '<div class="ujian-title"><h3>Kisi-Kisi Penulisan Soal</h3><p>'+getMapelName(mapelId)+'</p></div>';
 
     html += '<table class="print-table"><thead><tr><th style="width:30px">No</th><th style="width:50px">No.Soal</th><th style="width:20%">TP</th><th style="width:10%">Diff.</th><th style="width:auto">Indikator Soal</th><th style="width:60px">Tipe</th><th style="width:50px">Skor</th></tr></thead><tbody>';
-    data.forEach(function(q,i){ 
+    questions.forEach(function(q,i){ 
         var diffLabel = q.difficulty || '-';
         var content = (q.indicator || '-');
-        
         html+='<tr>'+
             '<td class="center">'+(i+1)+'</td>'+
             '<td class="center">'+(i+1)+'</td>'+
@@ -670,18 +570,17 @@ function refreshKisiPreview(){
         '</tr>'; 
     });
     html+='</tbody></table>';
-    
     html += '</div></div></div>';
     container.innerHTML = html;
 }
 
-// --- KUNCI JAWABAN (READ ONLY, FILTER MAPEL) ---
+// --- 11. KUNCI JAWABAN ---
 function renderKunci(c){
-    if(!c) c = document.getElementById('contentArea');
+    var data = refreshData();
     var availableMapels = getTeacherMapels();
-
+    
     c.innerHTML = '<div class="card fade-in no-print">'+
-        '<h3 class="font-bold text-lg mb-4">Kunci Jawaban & Pedoman Penskoran (Admin Pusat)</h3>'+
+        '<h3 class="font-bold text-lg mb-4">Kunci Jawaban</h3>'+
         '<div class="flex gap-4 items-end mb-4">'+
             '<div class="flex-1">'+
                 '<label class="text-xs text-muted font-bold mb-1 block">Pilih Mapel</label>'+
@@ -697,15 +596,17 @@ function renderKunci(c){
 }
 
 function refreshKunciPreview(){
+    var data = refreshData();
     var mapelEl = document.getElementById('kunciMapelSelect');
     if(!mapelEl) return;
     var mapelId = mapelEl.value;
     var container = document.getElementById('kunciPreviewContainer');
 
-    var data = getFilteredQuestions(mapelId, '');
-    var pg = data.filter(function(q){return q.type==='pg';}), uraian = data.filter(function(q){return q.type==='uraian';});
+    var questions = getFilteredQuestions(data.soalList, mapelId, '');
+    var pg = questions.filter(function(q){return q.type==='pg';}), uraian = questions.filter(function(q){return q.type==='uraian';});
     var logoUrl='https://www.image2url.com/r2/default/images/1776680731558-aaedfd5c-6674-4989-a7a4-c15f6291acac.jpeg';
     var html='<div class="print-preview-sheet"><div class="print-page"><div class="kop-surat"><img src="'+logoUrl+'" alt="Logo"><div class="kop-text"><h1>Kunci Jawaban & Pedoman Penskoran</h1><h2>'+getMapelName(mapelId)+'</h2></div></div>';
+    
     if(pg.length){
         html+='<div class="section-heading">I. Pilihan Ganda</div><table class="print-table"><thead><tr>';
         for(var col=0;col<3;col++) html+='<th style="width:60px">No</th><th style="width:60px">Kunci</th>';
@@ -727,13 +628,13 @@ function refreshKunciPreview(){
     container.innerHTML = html;
 }
 
-// --- CETAK SOAL (READ ONLY, FILTER MAPEL) ---
+// --- 12. CETAK SOAL ---
 function renderPrint(c){
-    if(!c) c = document.getElementById('contentArea');
+    var data = refreshData();
     var availableMapels = getTeacherMapels();
-
+    
     c.innerHTML = '<div class="card fade-in no-print">'+
-        '<h3 class="font-bold text-lg mb-4">Cetak Soal (Admin Pusat)</h3>'+
+        '<h3 class="font-bold text-lg mb-4">Cetak Soal</h3>'+
         '<div class="flex gap-4 items-end mb-4">'+
             '<div class="flex-1">'+
                 '<label class="text-xs text-muted font-bold mb-1 block">Pilih Mapel</label>'+
@@ -750,22 +651,20 @@ function renderPrint(c){
 }
 
 function refreshPrintPreview(){
+    var data = refreshData();
     var mapelEl = document.getElementById('printMapelSelect');
     if(!mapelEl) return;
     var mapel = mapelEl.value;
     var container = document.getElementById('printPreviewContainer');
 
-    var data = getFilteredQuestions(mapel, '');
-    var pg = data.filter(function(q){ return q.type==='pg'; });
-    var uraian = data.filter(function(q){ return q.type==='uraian'; });
+    var dataSoal = getFilteredQuestions(data.soalList, mapel, '');
+    var pg = dataSoal.filter(function(q){ return q.type==='pg'; });
+    var uraian = dataSoal.filter(function(q){ return q.type==='uraian'; });
     var logoUrl = 'https://www.image2url.com/r2/default/images/1776680731558-aaedfd5c-6674-4989-a7a4-c15f6291acac.jpeg';
 
     var html = '<div class="print-preview-wrap"><div class="print-preview-sheet"><div class="print-page">';
-
     html += '<div class="kop-surat"><div class="kop-surat-row"><img src="'+logoUrl+'" alt="Logo"><div class="kop-text"><h1>Pemerintah Kabupaten Majalengka</h1><h1>Dinas Pendidikan</h1><h2>Korek Api Kecamatan Majalengka</h2></div></div><p class="kop-sub">Jl. KH. Abdul Halim No. 123, Kec. Majalengka, Kab. Majalengka 45411</p></div>';
-
     html += '<div class="ujian-title"><h3>Ujian Sumatif Akhir Tahun</h3><p>'+getMapelName(mapel)+'</p></div>';
-
     html += '<div class="soal-header"><table><tr><td width="100">Nama</td><td width="12">:</td><td class="dot-cell"></td></tr><tr><td>Kelas</td><td>:</td><td>'+(currentUser.kelas||'Semua')+'</td></tr><tr><td>Hari / Tanggal</td><td>:</td><td class="dot-cell"></td></tr></table></div>';
 
     if(pg.length > 0){
@@ -775,19 +674,15 @@ function refreshPrintPreview(){
             html += '<div class="soal-item clearfix">';
             html += '<div class="soal-num">'+(i+1)+'.</div>';
             html += '<div class="soal-text">'+q.text+'</div>';
-            if(q.image) html += '<div style="margin-left:35px"><img src="'+q.image+'" class="soal-img-print"></div>';
-            
             html += '<div class="opsi-wrapper">';
             (q.options||[]).forEach(function(opt, oi){
                 var letter = ['a','b','c','d','e'][oi] || String.fromCharCode(97+oi); 
-                var optImg = (q.optionImages && q.optionImages[oi]) ? '<img src="'+q.optionImages[oi]+'" class="opsi-img-print">' : '';
-                html += '<div class="opsi-row"><span class="opsi-label">'+letter.toUpperCase()+'</span><span>'+opt+'</span>'+optImg+'</div>';
+                html += '<div class="opsi-row"><span class="opsi-label">'+letter.toUpperCase()+'</span><span>'+opt+'</span></div>';
             });
             html += '</div>'; 
             html += '</div>';
         });
     }
-
     if(uraian.length > 0){
         html += '<div class="section-heading" style="margin-top:30px">II. Uraian</div>';
         html += '<p class="petunjuk-soal">Jawablah pertanyaan berikut dengan jelas dan benar!</p>';
@@ -795,87 +690,18 @@ function refreshPrintPreview(){
             html += '<div class="soal-item clearfix">';
             html += '<div class="soal-num">'+(i+1)+'.</div>';
             html += '<div class="soal-text">'+q.text+'</div>';
-            if(q.image) html += '<div style="margin-left:35px"><img src="'+q.image+'" class="soal-img-print"></div>';
             html += '<div class="answer-lines"></div></div>';
         });
     }
-
     html += '<div class="ttd-section"></div>';
     html += '</div></div></div>';
     container.innerHTML = html;
 }
 
-// --- FUNGSI CETAK ---
-function doPrintSoal(){
-    var sheet = document.querySelector('.print-preview-sheet');
-    if(!sheet) return alert("Preview kosong");
-    
-    var iframe = document.createElement('iframe');
-    iframe.style.position='fixed'; iframe.style.left='-9999px'; iframe.style.top='0'; iframe.style.width='210mm'; iframe.style.height='297mm';
-    document.body.appendChild(iframe);
-    var doc=iframe.contentDocument||iframe.contentWindow.document;
-    doc.open();
-    doc.write('<!DOCTYPE html><html><head>');
-    doc.write('<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght+700&display=swap" rel="stylesheet">');
-    doc.write('<style>');
-    doc.write('@page { size: A4 portrait; margin: 1.5cm 2cm 2cm 2cm; }');
-    doc.write('body { margin: 0; padding: 0; font-family: "Times New Roman", Times, serif; font-size: 12pt; line-height: 1.4; color: black; background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }');
-    doc.write('.print-page { padding: 0; }');
-    doc.write('.kop-surat { text-align: center; padding-bottom: 12px; margin-bottom: 24px; border-bottom: 3px double #000; display: flex; flex-direction: column; align-items: center; gap: 8px; }');
-    doc.write('.kop-surat-row { display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; }');
-    doc.write('.kop-surat img { height: 75px; width: auto; object-fit: contain; }');
-    doc.write('.kop-text { text-align: center; line-height: 1.3; flex: 1; }');
-    doc.write('.kop-text h1 { font-family: "Times New Roman", serif; font-size: 13pt; font-weight: bold; text-transform: uppercase; margin: 0; }');
-    doc.write('.kop-text h2 { font-family: "Times New Roman", serif; font-size: 16pt; font-weight: bold; text-transform: uppercase; margin: 0; }');
-    doc.write('.kop-text .kop-sub { font-family: "Times New Roman", serif; font-size: 10pt; margin-top: 2px; font-style: normal; }');
-    doc.write('.ujian-title { text-align: center; margin-bottom: 20px; }');
-    doc.write('.ujian-title h3 { font-family: "Times New Roman", serif; font-size: 14pt; font-weight: bold; text-decoration: underline; text-transform: uppercase; margin: 0; }');
-    doc.write('.ujian-title p { font-family: "Times New Roman", serif; font-size: 12pt; margin: 4px 0 0 0; font-weight: bold; }');
-    doc.write('.soal-header { margin-bottom: 20px; }');
-    doc.write('.soal-header table { width: 100%; font-family: "Times New Roman", serif; font-size: 12pt; }');
-    doc.write('.soal-header td { padding: 2px 0; vertical-align: bottom; }');
-    doc.write('.soal-header td.dot-cell { border-bottom: 1px dotted #000; min-width: 200px; }');
-    doc.write('.section-heading { font-family: "Times New Roman", serif; font-weight: bold; font-size: 12pt; border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 15px; margin-top: 10px; text-align: left; }');
-    doc.write('.petunjuk-soal { font-size: 11pt; margin-bottom: 12px; font-style: italic; text-align: left; }');
-    doc.write('.soal-item { margin-bottom: 24px; page-break-inside: avoid; width: 100%; display: block; overflow: hidden; }');
-    doc.write('.soal-num { float: left; font-weight: bold; font-family: "Times New Roman", serif; font-size: 12pt; width: 35px; flex-shrink: 0; }');
-    doc.write('.soal-text { font-family: "Times New Roman", serif; font-size: 12pt; line-height: 1.5; text-align: left; display: block; margin-left: 35px; }');
-    doc.write('.soal-img-print { display: block; max-width: 100%; height: auto; max-height: 200px; object-fit: contain; margin: 8px 0; border: 1px solid #ccc; background-color: #eee; }');
-    doc.write('.opsi-wrapper { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; row-gap: 6px; margin-left: 35px; }');
-    doc.write('.opsi-row { display: flex; align-items: flex-start; gap: 8px; font-family: "Times New Roman", serif; font-size: 12pt; line-height: 1.4; text-align: left; }');
-    doc.write('.opsi-label { font-weight: bold; min-width: 20px; flex-shrink: 0; }');
-    doc.write('.opsi-label::after { content: "."; }');
-    doc.write('.opsi-img-print { max-width: 60px; max-height: 50px; display: inline-block; vertical-align: middle; margin-left: 8px; object-fit: contain; }');
-    doc.write('.answer-lines { margin-top: 8px; margin-left: 35px; border: 1px dashed #bbb; height: 80px; border-radius: 4px; background-color: #fafafa; }');
-    doc.write('.clearfix::after { content: ""; display: table; clear: both; }');
-    doc.write('.ttd-section { display: none; }'); 
-
-    doc.write('</style></head><body>');
-    doc.write(sheet.innerHTML);
-    doc.write('</body></html>');
-    doc.close();
-
-    setTimeout(function(){
-        var imgs = doc.querySelectorAll('img');
-        var loaded = 0, total = imgs.length;
-        if(total === 0){ iframe.contentWindow.focus(); iframe.contentWindow.print(); setTimeout(function(){ document.body.removeChild(iframe); }, 3000); return; }
-        imgs.forEach(function(img){
-            if(img.complete){ loaded++; checkAll(); } else { img.onload = function(){ loaded++; checkAll(); }; img.onerror = function(){ loaded++; checkAll(); }; }
-        });
-        function checkAll(){
-            if(loaded >= total){
-                setTimeout(function(){ iframe.contentWindow.focus(); iframe.contentWindow.print(); setTimeout(function(){ document.body.removeChild(iframe); }, 3000); }, 500);
-            }
-        }
-        setTimeout(function(){ try{ iframe.contentWindow.focus(); iframe.contentWindow.print(); } catch(e){} setTimeout(function(){ try{ document.body.removeChild(iframe); }catch(e){} }, 3000); }, 5000);
-    }, 300);
-}
-
-// --- ATUR UJIAN & TOKEN (PER MAPEL) ---
+// --- 13. ATUR UJIAN & TOKEN (PER MAPEL) ---
 function renderUjian(c){
-    if(!c) c = document.getElementById('contentArea');
     var availableMapels = getTeacherMapels();
-
+    
     c.innerHTML = '<div class="card fade-in">'+
         '<h3 class="font-bold text-lg mb-4">Atur Ujian</h3>'+
         '<div class="mb-4">'+
@@ -893,7 +719,7 @@ function renderTokenControls(){
     var mapel = document.getElementById('ujianMapelSelect').value;
     var container = document.getElementById('tokenControlsArea');
     
-    // Ambil data token spesifik mapel ini
+    // Ambil data token spesifik mapel ini dari global tokenData
     var myToken = (tokenData && tokenData[mapel]) ? tokenData[mapel] : { token: '', durasi: 60 };
 
     container.innerHTML = 
@@ -918,27 +744,30 @@ function renderTokenControls(){
 
 function setToken(mapelId){
     var t = document.getElementById('tokenInput').value;
-    db.collection('token_ujian').doc(mapelId).set({
-        token: t, 
+    if(!tokenData) tokenData = {};
+    tokenData[mapelId] = {
+        token: t,
         durasi: parseInt(document.getElementById('durasiInput').value)||60,
-        guruId: currentUser.id,
-        mapel: mapelId,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, {merge: true}).then(()=>alert("Token Berhasil Disimpan untuk Mapel: " + getMapelName(mapelId)));
+        guruId: currentUser.id || currentUser.nip,
+        mapel: mapelId
+    };
+    localStorage.setItem('token_ujian', JSON.stringify(tokenData));
+    alert("Token Berhasil Disimpan untuk Mapel: " + getMapelName(mapelId));
+    renderTokenControls();
 }
 
 function setDurasi(mapelId){
+    if(!tokenData || !tokenData[mapelId]) return alert("Set token dulu!");
     var d = document.getElementById('durasiInput').value;
-    db.collection('token_ujian').doc(mapelId).update({durasi: parseInt(d)});
+    tokenData[mapelId].durasi = parseInt(d);
+    localStorage.setItem('token_ujian', JSON.stringify(tokenData));
+    renderTokenControls();
 }
 
-// --- KOREKSI JAWABAN ---
+// --- 14. KOREKSI JAWABAN ---
 function renderKoreksi(c){
-    if(!c) c = document.getElementById('contentArea');
-    
-    // Filter jawaban hanya dari rombel guru
-    var myAnswers = jawabanList.filter(j => j.rombel === currentUser.rombel);
-    // Dan filter mapel yang diampu guru
+    var data = refreshData();
+    var myAnswers = data.jawabanList.filter(j => j.rombel === currentUser.rombel);
     var myMapels = getTeacherMapels().map(m=>m.id);
     myAnswers = myAnswers.filter(j => myMapels.includes(j.mapel));
 
@@ -958,12 +787,9 @@ function renderKoreksi(c){
                         <span class="font-bold text-kopAccent">${j.namaSiswa}</span>
                         <span class="text-xs text-muted ml-2">(${j.kelasSiswa})</span>
                     </div>
-                    <span class="text-xs bg-info/20 text-info px-2 py-1 rounded">${j.waktuKirim?j.waktuKirim.toDate().toLocaleString():''}</span>
+                    <span class="text-xs bg-info/20 text-info px-2 py-1 rounded">${j.waktuKirim||''}</span>
                 </div>
-                
-                <!-- Tampilkan Mapel yang sedang dikoreksi -->
                 <div class="text-xs font-bold text-muted mb-3 uppercase bg-white/5 inline-block px-2 py-1 rounded">Mapel: ${getMapelName(j.mapel)}</div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
                     <div>
                         <h5 class="text-xs font-bold text-muted uppercase">PG (Auto Score)</h5>
@@ -974,7 +800,6 @@ function renderKoreksi(c){
                         <textarea id="essayNote-${j.id}" class="input-field text-xs mt-1" rows="2" placeholder="Catatan koreksi...">${j.essayNote||''}</textarea>
                         <div class="mt-2 flex gap-2">
                             <button onclick="saveKoreksi('${j.id}')" class="btn-primary text-xs py-1 px-2">Simpan Nilai</button>
-                            <button onclick="viewJawaban('${j.id}')" class="btn-secondary text-xs py-1 px-2">Lihat Detail</button>
                         </div>
                     </div>
                 </div>
@@ -984,24 +809,19 @@ function renderKoreksi(c){
 }
 
 function saveKoreksi(id){
+    var data = refreshData();
     var note = document.getElementById('essayNote-'+id).value;
-    db.collection('jawaban_siswa').doc(id).update({
-        essayNote: note,
-        status: 'Dikoreksi',
-        dikoreksiOleh: currentUser.nama
-    }).then(()=>alert("Data koreksi disimpan."));
+    var idx = data.jawabanList.findIndex(j=>j.id===id);
+    if(idx > -1){
+        data.jawabanList[idx].essayNote = note;
+        data.jawabanList[idx].status = 'Dikoreksi';
+        data.jawabanList[idx].dikoreksiOleh = currentUser.nama;
+        localStorage.setItem('jawaban_siswa', JSON.stringify(data.jawabanList));
+        alert("Data koreksi disimpan.");
+    }
 }
 
-function viewJawaban(id){
-    var j = jawabanList.find(x=>x.id===id);
-    if(!j) return;
-    var detailHtml = '<h3 class="font-bold mb-2">Jawaban Detail</h3>';
-    if(j.jawabanPG) detailHtml += '<p class="text-xs">PG: '+JSON.stringify(j.jawabanPG)+'</p>';
-    if(j.jawabanEssay) detailHtml += '<p class="text-xs">Essay: '+JSON.stringify(j.jawabanEssay)+'</p>';
-    openModal(detailHtml);
-}
-
-// --- MODAL SYSTEM ---
+// --- 15. MODAL & PRINT UTILS ---
 function openModal(html){
     document.getElementById('modalOverlay').classList.remove('hidden');
     document.getElementById('modalContent').innerHTML = html;
@@ -1022,6 +842,29 @@ function doPrintGeneric(containerId){
     doc.open();
     doc.write('<!DOCTYPE html><html><head><style>@page{size:A4 portrait;margin:1cm}body{margin:0;padding:0;font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.4;color:black;background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>');
     doc.write(printContent);
+    doc.write('</body></html>');
+    doc.close();
+    setTimeout(function(){
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        setTimeout(function(){document.body.removeChild(iframe);},3000);
+    },500);
+}
+
+function doPrintSoal(){
+    var sheet = document.querySelector('.print-preview-sheet');
+    if(!sheet) return alert("Preview kosong");
+    // Gunakan fungsi generic print
+    var iframe = document.createElement('iframe');
+    iframe.style.position='fixed'; iframe.style.left='-9999px'; iframe.style.top='0'; iframe.style.width='210mm'; iframe.style.height='297mm';
+    document.body.appendChild(iframe);
+    var doc=iframe.contentDocument||iframe.contentWindow.document;
+    doc.open();
+    doc.write('<!DOCTYPE html><html><head>');
+    doc.write('<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght+700&display=swap" rel="stylesheet">');
+    doc.write('<style>@page { size: A4 portrait; margin: 1.5cm 2cm 2cm 2cm; } body { margin: 0; padding: 0; font-family: "Times New Roman", Times, serif; font-size: 12pt; line-height: 1.4; color: black; background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; } .kop-surat { text-align: center; padding-bottom: 12px; margin-bottom: 24px; border-bottom: 3px double #000; } .kop-surat-row { display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; } .kop-surat img { height: 75px; width: auto; object-fit: contain; } .kop-text { text-align: center; line-height: 1.3; flex: 1; } .kop-text h1 { font-family: "Times New Roman", serif; font-size: 13pt; font-weight: bold; text-transform: uppercase; margin: 0; } .kop-text h2 { font-family: "Times New Roman", serif; font-size: 16pt; font-weight: bold; text-transform: uppercase; margin: 0; } .ujian-title { text-align: center; margin-bottom: 20px; } .ujian-title h3 { font-family: "Times New Roman", serif; font-size: 14pt; font-weight: bold; text-decoration: underline; text-transform: uppercase; margin: 0; } .soal-header { margin-bottom: 20px; } .soal-header table { width: 100%; font-family: "Times New Roman", serif; font-size: 12pt; } .soal-header td { padding: 2px 0; vertical-align: bottom; } .soal-header td.dot-cell { border-bottom: 1px dotted #000; min-width: 200px; } .section-heading { font-family: "Times New Roman", serif; font-weight: bold; font-size: 12pt; border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 15px; margin-top: 10px; text-align: left; } .petunjuk-soal { font-size: 11pt; margin-bottom: 12px; font-style: italic; text-align: left; } .soal-item { margin-bottom: 24px; page-break-inside: avoid; width: 100%; display: block; overflow: hidden; } .soal-num { float: left; font-weight: bold; font-family: "Times New Roman", serif; font-size: 12pt; width: 35px; flex-shrink: 0; } .soal-text { font-family: "Times New Roman", serif; font-size: 12pt; line-height: 1.5; text-align: left; display: block; margin-left: 35px; } .opsi-wrapper { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; row-gap: 6px; margin-left: 35px; } .opsi-row { display: flex; align-items: flex-start; gap: 8px; font-family: "Times New Roman", serif; font-size: 12pt; line-height: 1.4; text-align: left; } .opsi-label { font-weight: bold; min-width: 20px; flex-shrink: 0; } .opsi-label::after { content: "."; } .answer-lines { margin-top: 8px; margin-left: 35px; border: 1px dashed #bbb; height: 80px; border-radius: 4px; background-color: #fafafa; } .clearfix::after { content: ""; display: table; clear: both; } .ttd-section { display: none; } </style>');
+    doc.write('</head><body>');
+    doc.write(sheet.innerHTML);
     doc.write('</body></html>');
     doc.close();
     setTimeout(function(){
