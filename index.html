@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistem SAT & PAJ - Kecamatan Majalengka</title>
+<title>SAT & PAJ System - Kecamatan Majalengka (Full Integrated)</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -11,28 +11,33 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-<!-- JSBARCODE & QR (Untuk Kartu Ujian) -->
+<!-- JSBARCODE (Untuk Kartu Ujian) -->
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
 <script>
 tailwind.config={theme:{extend:{colors:{kop:'#1a2744',kopAccent:'#c9a84c',dark:'#0f1923',card:'#182538',cardHover:'#1f3350',border:'#2a3f5f',muted:'#7a8ba5',light:'#e8ecf1',success:'#22c55e',danger:'#ef4444',warning:'#f59e0b',info:'#06b6d4'},fontFamily:{display:['Playfair Display','serif'],body:['Source Sans 3','sans-serif']}}}}
 </script>
 <style>
+/* BASE STYLE */
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min-height:100vh}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#182538}::-webkit-scrollbar-thumb{background:#2a3f5f;border-radius:3px}
 
+/* LOGIN BG */
 .login-bg{background:linear-gradient(135deg,#0f1923 0%,#1a2744 40%,#182538 100%);position:relative;overflow:hidden;min-height:100vh;display:flex;align-items:center;justify-content:center}
 .login-bg::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(201,168,76,0.07) 0%,transparent 70%);top:-150px;right:-150px;border-radius:50%;animation:floatBlob 8s ease-in-out infinite}
 @keyframes floatBlob{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-20px) scale(1.1)}}
 
 .glass{background:rgba(24,37,56,0.9);backdrop-filter:blur(12px);border:1px solid rgba(42,63,95,0.5)}
+
+/* SIDEBAR */
 .sidebar{width:260px;min-height:100vh;background:linear-gradient(180deg,#1a2744 0%,#0f1923 100%);border-right:1px solid #2a3f5f;position:fixed;left:0;top:0;z-index:40;transition:transform .3s ease;overflow-y:auto}
 .main-content{margin-left:260px;transition:margin-left .3s ease}
 .nav-item{padding:11px 20px;cursor:pointer;border-left:3px solid transparent;transition:all .2s;display:flex;align-items:center;gap:12px;font-size:14px;color:#7a8ba5;user-select:none}
 .nav-item:hover{background:rgba(42,63,95,0.3);color:#e8ecf1}
 .nav-item.active{background:rgba(201,168,76,0.08);border-left-color:#c9a84c;color:#c9a84c;font-weight:600}
 
+/* COMPONENTS */
 .btn-primary{background:linear-gradient(135deg,#c9a84c,#b8943f);color:#1a2744;font-weight:700;padding:10px 24px;border-radius:8px;border:none;cursor:pointer;transition:all .2s;font-size:14px}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(201,168,76,0.3)}
 .btn-secondary{background:transparent;border:1px solid #2a3f5f;color:#e8ecf1;padding:8px 16px;border-radius:8px;cursor:pointer;transition:all .2s;font-size:14px}
@@ -48,7 +53,7 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
 .toast-info{background:linear-gradient(135deg,#164e63,#155e75);color:white}
 
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
-.modal-content{background:#182538;border:1px solid #2a3f5f;border-radius:16px;padding:32px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-content{background:#182538;border:1px solid #2a3f5f;border-radius:16px;padding:32px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto}
 
 .sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:35;display:none}
 .sidebar-overlay.active{display:block}
@@ -57,22 +62,64 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
 .fade-in{animation:fadeIn .3s ease forwards}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
+/* ================= PRINT STYLES (ORIGINAL & EXAM CARD) ================= */
 @media print {
-    @page { size: A4 portrait; margin: 0.5cm; }
-    body { background: white !important; color: black !important; font-family: 'Times New Roman', Times, serif !important; }
+    @page { size: A4 portrait; margin: 1.5cm 2cm 2cm 2cm; }
+    body { background: white !important; color: black !important; font-family: 'Times New Roman', Times, serif !important; font-size: 12pt; line-height: 1.4; }
     #sidebar, #mainArea > header, .no-print, #toastContainer, #modalOverlay, #loginPage, .card { display: none !important; }
-    #mainArea { margin: 0 !important; padding: 0 !important; width: 100% !important; background: white !important; overflow: visible !important; }
-    #pageContent { padding: 0 !important; margin: 0 !important; background: white !important; color: black !important; overflow: visible !important; }
-    .print-only { display: block !important; }
+    #mainArea { margin: 0 !important; padding: 0 !important; width: 100% !important; height: auto !important; background: white !important; overflow: visible !important; }
+    #pageContent { padding: 0 !important; margin: 0 !important; width: 100% !important; background: white !important; color: black !important; overflow: visible !important; }
+    .print-page { width: 100%; padding: 0; background: white; color: black; }
     
-    /* Kartu Ujian Print */
+    /* KOP SURAT */
+    .kop-surat { text-align: center; padding-bottom: 12px; margin-bottom: 24px; border-bottom: 3px double #000; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .kop-surat-row { display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; }
+    .kop-surat img { height: 75px; width: auto; object-fit: contain; }
+    .kop-text { text-align: center; line-height: 1.3; flex: 1; }
+    .kop-text h1 { font-family: 'Times New Roman', serif; font-size: 13pt; font-weight: bold; text-transform: uppercase; margin: 0; }
+    .kop-text h2 { font-family: 'Times New Roman', serif; font-size: 16pt; font-weight: bold; text-transform: uppercase; margin: 0; }
+    
+    .ujian-title { text-align: center; margin-bottom: 20px; }
+    .ujian-title h3 { font-family: 'Times New Roman', serif; font-size: 14pt; font-weight: bold; text-decoration: underline; text-transform: uppercase; margin: 0; }
+    
+    /* LAYOUT SOAL */
+    .soal-item { margin-bottom: 24px; page-break-inside: avoid; width: 100%; display: block; overflow: hidden; }
+    .soal-num { float: left; font-weight: bold; font-family: 'Times New Roman', serif; font-size: 12pt; width: 35px; flex-shrink: 0; }
+    .soal-text { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.5; text-align: left; display: block; margin-left: 35px; }
+    .soal-img-print { display: block; max-width: 100%; height: auto; max-height: 200px; object-fit: contain; margin: 8px 0; border: 1px solid #ccc; background-color: #eee; }
+    .opsi-wrapper { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; row-gap: 6px; margin-left: 35px; }
+    .opsi-row { display: flex; align-items: flex-start; gap: 8px; font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.4; text-align: left; }
+    .opsi-label { font-weight: bold; min-width: 20px; flex-shrink: 0; }
+    .opsi-label::after { content: "."; }
+    .opsi-img-print { max-width: 60px; max-height: 50px; display: inline-block; vertical-align: middle; margin-left: 8px; object-fit: contain; }
+    .answer-lines { margin-top: 8px; margin-left: 35px; border: 1px dashed #bbb; height: 80px; border-radius: 4px; background-color: #fafafa; }
+    .clearfix::after { content: ""; display: table; clear: both; }
+    
+    /* TABLES */
+    .print-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-family: 'Times New Roman', serif; font-size: 10pt; table-layout: fixed; }
+    .print-table th, .print-table td { border: 1px solid #000; padding: 6px 8px; text-align: left; vertical-align: top; overflow: hidden; }
+    .print-table th { background-color: #eee !important; text-align: center; font-weight: bold; font-size: 9pt; text-transform: uppercase; }
+    .print-table td.center { text-align: center; vertical-align: middle; }
+    
+    /* KARTU UJIAN PRINT */
     .exam-card { width: 100%; border: 2px solid #000; padding: 20px; margin-bottom: 20px; page-break-inside: avoid; display: flex; flex-direction: column; align-items: center; text-align: center; }
     .exam-card img { max-width: 100%; height: auto; margin: 10px 0; }
     .exam-card-header { font-weight: bold; font-size: 16pt; text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid #000; width: 100%; padding-bottom: 5px; }
-    .exam-card-row { display: flex; width: 100%; justify-content: space-between; margin: 5px 0; font-size: 11pt; }
+    .exam-card-row { display: flex; width: 100%; justify-content: space-between; margin: 10px 0; font-size: 12pt; }
 }
 
-.print-only { display: none; }
+/* PREVIEW STYLES */
+.print-preview-wrap { background: #e5e7eb; padding: 40px; border-radius: 8px; display: flex; justify-content: center; overflow-x: auto; }
+.print-preview-sheet { background: white; color: black; width: 210mm; max-width: 100%; min-height: 297mm; padding: 1.5cm 2cm 2cm 2cm; box-shadow: 0 4px 20px rgba(0,0,0,0.2); font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.4; }
+.print-preview-sheet .kop-surat { display: flex; flex-direction: column; align-items: center; text-align: center; padding-bottom: 12px; margin-bottom: 24px; border-bottom: 3px double #000; }
+.print-preview-sheet .soal-item { margin-bottom: 24px; page-break-inside: avoid; width: 100%; display: block; overflow: hidden; }
+.print-preview-sheet .soal-num { float: left; font-weight: bold; font-size: 12pt; width: 35px; flex-shrink: 0; }
+.print-preview-sheet .soal-text { font-size: 12pt; line-height: 1.5; text-align: left; display: block; margin-left: 35px; margin-bottom: 8px; }
+.print-preview-sheet .opsi-wrapper { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; row-gap: 6px; margin-left: 35px; }
+.print-preview-sheet .opsi-row { display: flex; align-items: flex-start; gap: 8px; font-size: 12pt; line-height: 1.4; text-align: left; }
+.print-preview-sheet .opsi-label { font-weight: bold; min-width: 20px; flex-shrink: 0; }
+.print-preview-sheet .opsi-label::after { content: '.'; } 
+.print-preview-sheet .answer-lines { margin-top: 8px; margin-left: 35px; border: 1px dashed #ccc; height: 80px; border-radius: 4px; background-color: #fafafa; }
 </style>
 </head>
 <body>
@@ -80,7 +127,7 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
 <div id="toastContainer"></div>
 <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
 
-<!-- LOGIN / REGISTER PAGE -->
+<!-- ================= LOGIN / REGISTER PAGE ================= -->
 <div id="loginPage" class="login-bg">
 <div class="glass rounded-2xl p-8 w-full max-w-md relative z-10 fade-in">
     <div class="text-center mb-6">
@@ -91,7 +138,6 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
         <p class="text-muted text-sm">Sistem Ujian Digital Sekolah</p>
     </div>
 
-    <!-- Tab Navigasi -->
     <div class="flex mb-6 border-b border-border">
         <button onclick="switchAuthTab('login')" id="tabLogin" class="flex-1 pb-2 text-center text-sm font-bold text-kopAccent border-b-2 border-kopAccent">MASUK</button>
         <button onclick="switchAuthTab('register')" id="tabRegister" class="flex-1 pb-2 text-center text-sm text-muted hover:text-light">REGISTRASI</button>
@@ -111,42 +157,32 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
     <!-- FORM REGISTRASI -->
     <div id="formRegister" class="hidden space-y-3">
         <div class="grid grid-cols-2 gap-3">
-            <div><label class="text-xs text-muted">NPSN Sekolah</label><input type="text" id="regNpsn" class="input-field" placeholder="Contoh: 202xxx"></div>
+            <div><label class="text-xs text-muted">NPSN Sekolah</label><input type="text" id="regNpsn" class="input-field" placeholder="202xxx"></div>
             <div><label class="text-xs text-muted">NIP Guru</label><input type="text" id="regNip" class="input-field" placeholder="NIP Anda"></div>
         </div>
         <div><label class="text-xs text-muted">Nama Lengkap</label><input type="text" id="regNama" class="input-field" placeholder="Nama Guru"></div>
         <div><label class="text-xs text-muted">Jenis Guru</label><select id="regJenis" class="input-field">
-            <option value="">-- Pilih --</option>
-            <option value="Kelas">Guru Kelas</option>
-            <option value="Mapel">Guru Mata Pelajaran</option>
-            <option value="PAI">Guru PAI</option>
-            <option value="PJOK">Guru PJOK</option>
+            <option value="">-- Pilih --</option><option value="Kelas">Guru Kelas</option><option value="Mapel">Guru Mata Pelajaran</option><option value="PAI">Guru PAI</option><option value="PJOK">Guru PJOK</option>
         </select></div>
-        
         <div class="grid grid-cols-2 gap-3">
             <div><label class="text-xs text-muted">Kelas Ampu</label><select id="regKelas" class="input-field" multiple>
-                <option value="Kelas 1">Kelas 1</option><option value="Kelas 2">Kelas 2</option>
-                <option value="Kelas 3">Kelas 3</option><option value="Kelas 4">Kelas 4</option>
-                <option value="Kelas 5">Kelas 5</option><option value="Kelas 6">Kelas 6</option>
-            </select><p class="text-[10px] text-muted mt-1">Tahan Ctrl/Cmd untuk pilih banyak</p></div>
-            <div><label class="text-xs text-muted">Rombel</label><select id="regRombel" class="input-field">
-                <option value="A">Rombel A</option><option value="B">Rombel B</option><option value="C">Rombel C</option>
-            </select></div>
+                <option value="Kelas 1">Kelas 1</option><option value="Kelas 2">Kelas 2</option><option value="Kelas 3">Kelas 3</option><option value="Kelas 4">Kelas 4</option><option value="Kelas 5">Kelas 5</option><option value="Kelas 6">Kelas 6</option>
+            </select><p class="text-[10px] text-muted mt-1">Tahan Ctrl untuk multi</p></div>
+            <div><label class="text-xs text-muted">Rombel</label><select id="regRombel" class="input-field"><option value="A">Rombel A</option><option value="B">Rombel B</option><option value="C">Rombel C</option></select></div>
         </div>
-
-        <div><label class="text-xs text-muted">Password Baru</label><input type="password" id="regPass" class="input-field"></div>
-        <div><label class="text-xs text-muted">Ulangi Password</label><input type="password" id="regPassConfirm" class="input-field"></div>
-        <button onclick="doRegister()" class="btn-primary w-full mt-2"><i class="fas fa-user-plus mr-2"></i>Daftar Sekarang</button>
+        <div><label class="text-xs text-muted">Password</label><input type="password" id="regPass" class="input-field"></div>
+        <div><label class="text-xs text-muted">Konfirmasi</label><input type="password" id="regPassConfirm" class="input-field"></div>
+        <button onclick="doRegister()" class="btn-primary w-full mt-2"><i class="fas fa-user-plus mr-2"></i>Daftar</button>
     </div>
 </div>
 </div>
 
-<!-- MAIN APP -->
+<!-- ================= MAIN APP ================= -->
 <div id="mainPage" class="hidden">
 <aside id="sidebar" class="sidebar">
     <div class="p-5 border-b border-border flex items-center gap-3">
         <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-kopAccent to-yellow-600 flex items-center justify-center"><i class="fas fa-fire text-kop text-lg"></i></div>
-        <div><h2 class="font-display text-kopAccent font-bold text-sm leading-tight">KOREK API</h2><p class="text-muted text-xs">Sistem Terintegrasi</p></div>
+        <div><h2 class="font-display text-kopAccent font-bold text-sm leading-tight">KOREK API</h2><p class="text-muted text-xs">Full Integrated</p></div>
     </div>
     <nav class="py-4" id="sidebarNav">
         <div class="px-5 mb-2"><span class="text-xs text-muted uppercase tracking-wider font-semibold">Menu Utama</span></div>
@@ -161,7 +197,10 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
         <div class="nav-item paj-item" data-page="exam-paj"><i class="fas fa-graduation-cap w-5 text-center"></i>Ujian PAJ</div>
         <div class="nav-item paj-item" data-page="results-paj"><i class="fas fa-award w-5 text-center"></i>Hasil PAJ</div>
 
-        <!-- Khusus Admin -->
+        <div class="px-5 mt-4 mb-2"><span class="text-xs text-muted uppercase tracking-wider font-semibold">Dokumen Soal (Offline)</span></div>
+        <div class="nav-item" data-page="print-docs"><i class="fas fa-print w-5 text-center"></i>Cetak & Kisi-kisi</div>
+
+        <!-- ADMIN ONLY -->
         <div class="admin-only hidden px-5 mt-4 mb-2"><span class="text-xs text-warning font-semibold uppercase tracking-wider font-semibold">Admin Sekolah</span></div>
         <div class="admin-only hidden nav-item" data-page="manage-users"><i class="fas fa-users-cog w-5 text-center"></i>Kelola Guru</div>
 
@@ -200,6 +239,7 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
+var storage = firebase.storage();
 
 var MAPEL_LIST = [
     {id:'ppkn',nama:'Pendidikan Pancasila'},{id:'mat',nama:'Matematika'},
@@ -214,8 +254,10 @@ function escHtml(s){ if(!s) return ''; var d=document.createElement('div'); d.te
 
 // ================= STATE GLOBAL =================
 var currentUser = null;
+var questions = [];
+var questionsPAJ = [];
 var students = [];
-var unsubS = null;
+var unsubQ = null, unsubPAJ = null, unsubS = null;
 
 // ================= UI HELPERS =================
 function showToast(msg, type){
@@ -240,7 +282,7 @@ function switchAuthTab(tab){
     document.getElementById('tabRegister').className = tab==='register' ? 'flex-1 pb-2 text-center text-sm font-bold text-kopAccent border-b-2 border-kopAccent' : 'flex-1 pb-2 text-center text-sm text-muted hover:text-light';
 }
 
-// ================= REGISTRASI GURU =================
+// ================= AUTH: REGISTER =================
 function doRegister(){
     var npsn = document.getElementById('regNpsn').value.trim();
     var nip = document.getElementById('regNip').value.trim();
@@ -252,37 +294,31 @@ function doRegister(){
     var selectedKelas = Array.from(kelasSelect.selectedOptions).map(opt => opt.value);
     var rombel = document.getElementById('regRombel').value;
 
-    if(!npsn || !nip || !nama || !jenis || !pass) return showToast('Lengkapi semua data wajib','error');
+    if(!npsn || !nip || !nama || !jenis || !pass) return showToast('Lengkapi semua data','error');
     if(pass !== conf) return showToast('Password tidak cocok','error');
-    if(selectedKelas.length === 0) return showToast('Pilih minimal satu kelas ampu','error');
+    if(selectedKelas.length === 0) return showToast('Pilih minimal satu kelas','error');
 
-    // Cek NIP Unik
     db.collection('teachers').where('nip','==',nip).get().then(snap=>{
         if(!snap.empty) return showToast('NIP sudah terdaftar','error');
-        
         db.collection('teachers').add({
-            npsn: npsn, nip: nip, nama: nama, jenis: jenis, 
-            kelas: selectedKelas, rombel: rombel, 
-            password: pass, role: 'teacher', 
+            npsn, nip, nama, jenis, kelas: selectedKelas, rombel, password: pass, role: 'teacher',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         }).then(()=>{
-            showToast('Registrasi Berhasil! Silakan Login.','success');
+            showToast('Registrasi Berhasil!','success');
             switchAuthTab('login');
-            // Reset form
             document.getElementById('regPass').value=''; document.getElementById('regPassConfirm').value='';
-        }).catch(e=>showToast('Gagal: '+e.message,'error'));
+        });
     });
 }
 
-// ================= LOGIN GURU =================
+// ================= AUTH: LOGIN =================
 function doLogin(){
     var nip = document.getElementById('loginNip').value.trim();
     var pass = document.getElementById('loginPass').value;
     var errEl = document.getElementById('loginError');
+    if(!nip || !pass){ errEl.textContent='Isi NIP & Password'; errEl.classList.remove('hidden'); return; }
 
-    if(!nip || !pass){ errEl.textContent='Isi NIP dan Password'; errEl.classList.remove('hidden'); return; }
-
-    // Login Admin (Hardcode sementara untuk demo)
+    // ADMIN HARDCODE
     if(nip === 'admin' && pass === 'admin123'){
         currentUser = { nip: 'admin', nama: 'Super Admin', role: 'admin', kelas: [], isAdmin: true };
         enterMainApp();
@@ -290,12 +326,12 @@ function doLogin(){
     }
 
     db.collection('teachers').where('nip','==',nip).where('password','==',pass).limit(1).get().then(snap=>{
-        if(snap.empty){ errEl.textContent='NIP atau Password salah'; errEl.classList.remove('hidden'); return; }
+        if(snap.empty){ errEl.textContent='Data salah'; errEl.classList.remove('hidden'); return; }
         var d = snap.docs[0].data();
         currentUser = Object.assign({id: snap.docs[0].id}, d);
         currentUser.isAdmin = false;
         enterMainApp();
-    }).catch(e=>{ errEl.textContent='Error koneksi'; errEl.classList.remove('hidden'); });
+    });
 }
 
 function enterMainApp(){
@@ -303,101 +339,68 @@ function enterMainApp(){
     document.getElementById('mainPage').classList.remove('hidden');
     document.getElementById('userName').textContent = currentUser.nama;
     
-    // Tampilkan menu admin jika admin
-    var adminMenus = document.querySelectorAll('.admin-only');
-    adminMenus.forEach(m => m.classList.toggle('hidden', !currentUser.isAdmin));
+    // Toggle Admin Menu
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !currentUser.isAdmin));
 
     initMainApp();
 }
 
 function doLogout(){
     currentUser = null;
-    if(unsubS) unsubS();
+    if(unsubQ) unsubQ(); if(unsubPAJ) unsubPAJ(); if(unsubS) unsubS();
     document.getElementById('mainPage').classList.add('hidden');
     document.getElementById('loginPage').style.display='flex';
     document.getElementById('loginPass').value='';
 }
 
-// ================= FITUR LUPA PASSWORD & RESET =================
+// ================= AUTH: RESET & CHANGE =================
 function showForgotPassword(){
-    openModal(`
-        <h3 class="font-bold text-lg mb-4">Lupa Password</h3>
-        <p class="text-sm text-muted mb-4">Masukkan NIP Anda. Admin Sekolah akan mereset password Anda.</p>
-        <input type="text" id="forgotNip" class="input-field mb-4" placeholder="Masukkan NIP">
-        <button onclick="submitForgotPassword()" class="btn-primary w-full">Kirim Permintaan</button>
-    `);
+    openModal(`<h3 class="font-bold text-lg mb-4">Lupa Password</h3><p class="text-sm text-muted mb-4">Masukkan NIP Anda.</p><input type="text" id="forgotNip" class="input-field mb-4"><button onclick="submitForgotPassword()" class="btn-primary w-full">Kirim Permintaan</button>`);
 }
-
 function submitForgotPassword(){
     var nip = document.getElementById('forgotNip').value;
     if(!nip) return;
-    // Simpan request ke collection 'reset_requests' agar admin bisa melihatnya
-    db.collection('reset_requests').add({
-        nip: nip,
-        status: 'pending',
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(()=>{
-        closeModal();
-        showToast('Permintaan dikirim ke Admin','info');
-    });
+    db.collection('reset_requests').add({ nip, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp() }).then(()=>{ closeModal(); showToast('Permintaan terkirim ke Admin','info'); });
 }
-
 function showChangePassword(){
-    openModal(`
-        <h3 class="font-bold text-lg mb-4">Ganti Password</h3>
-        <input type="password" id="newPass" class="input-field mb-2" placeholder="Password Baru">
-        <input type="password" id="confPass" class="input-field mb-4" placeholder="Ulangi Password">
-        <button onclick="updateMyPassword()" class="btn-primary w-full">Simpan</button>
-    `);
+    openModal(`<h3 class="font-bold text-lg mb-4">Ganti Password</h3><input type="password" id="newPass" class="input-field mb-2"><input type="password" id="confPass" class="input-field mb-4"><button onclick="updateMyPassword()" class="btn-primary w-full">Simpan</button>`);
 }
-
 function updateMyPassword(){
-    var p1 = document.getElementById('newPass').value;
-    var p2 = document.getElementById('confPass').value;
-    if(p1!==p2 || p1.length<4) return showToast('Password tidak valid','error');
-    db.collection('teachers').doc(currentUser.id).update({password: p1}).then(()=>{
-        closeModal(); showToast('Password berhasil diubah');
-    });
+    var p1 = document.getElementById('newPass').value; var p2 = document.getElementById('confPass').value;
+    if(p1!==p2) return showToast('Password tidak cocok','error');
+    db.collection('teachers').doc(currentUser.id).update({password: p1}).then(()=>{ closeModal(); showToast('Password diubah'); });
 }
 
-// ================= MANAJEMEN USER (ADMIN ONLY) =================
+// ================= ADMIN: MANAGE USERS =================
 function renderManageUsers(){
-    if(!currentUser.isAdmin) return;
     var c = document.getElementById('pageContent');
-    c.innerHTML = '<div class="fade-in card"><h3 class="font-bold text-light mb-4">Kelola Guru & Reset Password</h3>'+
-        '<div class="mb-4"><input type="text" id="searchUser" class="input-field" placeholder="Cari Nama / NIP..." onkeyup="renderUserList()"></div>'+
-        '<div class="overflow-x-auto"><table class="w-full text-sm text-left text-muted"><thead class="bg-dark border-b border-border"><tr><th class="p-2">Nama</th><th class="p-2">NIP</th><th class="p-2">Jenis</th><th class="p-2">Kelas</th><th class="p-2">Aksi</th></tr></thead><tbody id="userListBody"></tbody></table></div>'+
-        '</div>';
+    c.innerHTML = `<div class="fade-in card"><h3 class="font-bold text-light mb-4">Kelola Guru</h3><div class="mb-4"><input type="text" id="searchUser" class="input-field" placeholder="Cari Nama/NIP..." onkeyup="renderUserList()"></div><div class="overflow-x-auto"><table class="w-full text-sm text-left text-muted"><thead class="bg-dark border-b border-border"><tr><th class="p-2">Nama</th><th class="p-2">NIP</th><th class="p-2">Kelas</th><th class="p-2">Aksi</th></tr></thead><tbody id="userListBody"></tbody></table></div></div>`;
     db.collection('teachers').onSnapshot(snap=>renderUserList(snap));
 }
-
 function renderUserList(snap){
-    if(!snap) return; // Triggered by listener
+    if(!snap) return;
     var q = document.getElementById('searchUser')?.value.toLowerCase() || '';
     var list = snap.docs.map(d=>Object.assign({id:d.id}, d.data())).filter(u=>!q || u.nama.toLowerCase().includes(q) || u.nip.includes(q));
     var tb = document.getElementById('userListBody');
-    tb.innerHTML = list.map(u=>`
-        <tr class="bg-dark/30 border-b border-border">
-            <td class="p-2 font-semibold text-light">${u.nama}</td>
-            <td class="p-2 font-mono">${u.nip}</td>
-            <td class="p-2">${u.jenis}</td>
-            <td class="p-2">${u.kelas.join(', ')}</td>
-            <td class="p-2">
-                <button onclick="adminResetPass('${u.id}','${u.nama}')" class="text-danger hover:text-white text-xs border border-danger px-2 py-1 rounded">Reset Pass</button>
-            </td>
-        </tr>
-    `).join('');
+    tb.innerHTML = list.map(u=>`<tr class="bg-dark/30 border-b border-border"><td class="p-2 font-semibold text-light">${u.nama}</td><td class="p-2 font-mono">${u.nip}</td><td class="p-2">${u.kelas.join(', ')}</td><td class="p-2"><button onclick="adminResetPass('${u.id}','${u.nama}')" class="text-danger hover:text-white text-xs border border-danger px-2 py-1 rounded">Reset Pass</button></td></tr>`).join('');
 }
-
 function adminResetPass(uid, nama){
-    if(confirm('Reset password untuk '+nama+' menjadi "123456"?')){
-        db.collection('teachers').doc(uid).update({password:'123456'}).then(()=>showToast('Password direset ke 123456'));
-    }
+    if(confirm('Reset password '+nama+' jadi "123456"?')) db.collection('teachers').doc(uid).update({password:'123456'}).then(()=>showToast('Password direset'));
 }
 
-// ================= MAIN NAVIGATION & APP LOGIC =================
+// ================= MAIN INIT & NAVIGATION =================
 function initMainApp(){
-    // Init Data Siswa
+    // Load Questions SAT
+    unsubQ = db.collection('questions').orderBy('createdAt','asc').onSnapshot(snap=>{
+        questions = snap.docs.map(d=>Object.assign({id:d.id}, d.data()));
+        if(document.getElementById('dashboard')) renderDashboard();
+    });
+    // Load Questions PAJ
+    unsubPAJ = db.collection('questions_paj').orderBy('createdAt','asc').onSnapshot(snap=>{
+        questionsPAJ = snap.docs.map(d=>Object.assign({id:d.id}, d.data()));
+        if(document.getElementById('dashboard')) renderDashboard();
+    });
+    // Load Students
     unsubS = db.collection('students').orderBy('nama','asc').onSnapshot(snap=>{
         students = snap.docs.map(d=>Object.assign({id:d.id}, d.data()));
         if(document.getElementById('studentsListContainer')) renderStudentList();
@@ -419,7 +422,8 @@ function navigateTo(page){
         case 'exam-paj': renderExamSetup('paj'); break;
         case 'results-sat': renderResults('sat'); break;
         case 'results-paj': renderResults('paj'); break;
-        default: c.innerHTML='<p class="text-muted">Fitur sedang dimuat...</p>';
+        case 'print-docs': renderPrintDocs(); break;
+        default: c.innerHTML='<p class="text-muted">Loading...</p>';
     }
 }
 
@@ -432,23 +436,23 @@ document.getElementById('sidebarNav').addEventListener('click', e=>{
 function renderDashboard(){
     var c = document.getElementById('pageContent');
     c.innerHTML = `<div class="grid grid-cols-2 md:grid-cols-4 gap-4 fade-in">
-        <div class="card text-center border-l-4 border-kopAccent"><div class="text-3xl font-bold text-kopAccent">0</div><div class="text-xs text-muted">Soal SAT</div></div>
-        <div class="card text-center border-l-4 border-danger"><div class="text-3xl font-bold text-danger">0</div><div class="text-xs text-muted">Soal PAJ</div></div>
+        <div class="card text-center border-l-4 border-kopAccent"><div class="text-3xl font-bold text-kopAccent">${questions.length}</div><div class="text-xs text-muted">Soal SAT</div></div>
+        <div class="card text-center border-l-4 border-danger"><div class="text-3xl font-bold text-danger">${questionsPAJ.length}</div><div class="text-xs text-muted">Soal PAJ</div></div>
         <div class="card text-center border-l-4 border-info"><div class="text-3xl font-bold text-info">${students.length}</div><div class="text-xs text-muted">Total Siswa</div></div>
-        <div class="card text-center border-l-4 border-success"><div class="text-3xl font-bold text-success">OK</div><div class="text-xs text-muted">Sistem</div></div>
+        <div class="card text-center border-l-4 border-success"><div class="text-3xl font-bold text-success">OK</div><div class="text-xs text-muted">Status Sistem</div></div>
     </div>`;
 }
 
-// ================= 2. DATA SISWA =================
+// ================= 2. DATA SISWA & KARTU UJIAN =================
 function renderStudents(){
     var c = document.getElementById('pageContent');
     c.innerHTML = `<div class="fade-in card">
         <div class="flex justify-between items-center mb-4">
             <h3 class="font-display font-bold text-light">Data Siswa</h3>
-            <button onclick="openAddStudentModal()" class="btn-primary text-sm"><i class="fas fa-plus mr-1"></i>Tambah Siswa</button>
+            <button onclick="openAddStudentModal()" class="btn-primary text-sm"><i class="fas fa-plus mr-1"></i>Tambah</button>
         </div>
         <div class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-2">
-            <input type="text" id="searchStudent" class="input-field" placeholder="Cari Nama / NISN..." onkeyup="renderStudentList()">
+            <input type="text" id="searchStudent" class="input-field" placeholder="Cari Nama/NISN..." onkeyup="renderStudentList()">
             <select id="filterKelasSiswa" class="input-field" onchange="renderStudentList()"><option value="">Semua Kelas</option>${KELAS_LIST.map(k=>`<option value="${k}">${k}</option>`).join('')}</select>
         </div>
         <div class="overflow-x-auto"><table class="w-full text-sm text-left text-muted"><thead class="text-xs uppercase bg-dark border-b border-border"><tr><th class="p-2">NISN</th><th class="p-2">Nama</th><th class="p-2">Kelas</th><th class="p-2">Rombel</th><th class="p-2">Aksi</th></tr></thead><tbody id="studentsListContainer"></tbody></table></div>
@@ -477,19 +481,8 @@ function renderStudentList(){
 }
 
 function openAddStudentModal(){
-    openModal(`
-        <h3 class="font-bold mb-4">Input Siswa</h3>
-        <div class="grid gap-3">
-            <input type="hidden" id="sId">
-            <div><label class="text-xs text-muted">Nama Lengkap</label><input id="sNama" class="input-field"></div>
-            <div><label class="text-xs text-muted">NISN</label><input id="sNisn" class="input-field"></div>
-            <div><label class="text-xs text-muted">Kelas</label><select id="sKelas" class="input-field">${KELAS_LIST.map(k=>`<option value="${k}">${k}</option>`).join('')}</select></div>
-            <div><label class="text-xs text-muted">Rombel</label><input id="sRombel" class="input-field"></div>
-            <button onclick="saveStudent()" class="btn-primary w-full">Simpan</button>
-        </div>
-    `);
+    openModal(`<h3 class="font-bold mb-4">Input Siswa</h3><div class="grid gap-3"><input type="hidden" id="sId"><div><label class="text-xs text-muted">Nama</label><input id="sNama" class="input-field"></div><div><label class="text-xs text-muted">NISN</label><input id="sNisn" class="input-field"></div><div><label class="text-xs text-muted">Kelas</label><select id="sKelas" class="input-field">${KELAS_LIST.map(k=>`<option value="${k}">${k}</option>`).join('')}</select></div><div><label class="text-xs text-muted">Rombel</label><input id="sRombel" class="input-field"></div><button onclick="saveStudent()" class="btn-primary w-full">Simpan</button></div>`);
 }
-
 function saveStudent(){
     var id = document.getElementById('sId').value;
     var data = { nama: document.getElementById('sNama').value.trim(), nisn: document.getElementById('sNisn').value.trim(), kelas: document.getElementById('sKelas').value, rombel: document.getElementById('sRombel').value.trim().toUpperCase() };
@@ -501,7 +494,7 @@ function deleteStudent(id){ if(confirm('Hapus?')) db.collection('students').doc(
 function printCard(sid){
     var s = students.find(x=>x.id===sid); if(!s) return;
     var cId = 'bc-'+Date.now();
-    openModal(`<div class="text-center"><canvas id="${cId}"></canvas><p class="mt-2 text-muted">Kartu Ujian: ${s.nama}</p><button onclick="printCardExecute('${cId}','${s.nama}','${s.nisn}','${s.kelas}','${s.rombel}')" class="btn-primary mt-4">Cetak Sekarang</button></div>`);
+    openModal(`<div class="text-center"><canvas id="${cId}"></canvas><p class="mt-2 text-muted">Kartu: ${s.nama}</p><button onclick="printCardExecute('${cId}','${s.nama}','${s.nisn}','${s.kelas}','${s.rombel}')" class="btn-primary mt-4">Cetak</button></div>`);
     setTimeout(()=>JsBarcode("#"+cId, s.nisn, {format:"CODE128",displayValue:true,height:50,width:2,fontSize:14}), 500);
 }
 function printCardExecute(cid, n, nn, k, r){
@@ -511,7 +504,7 @@ function printCardExecute(cid, n, nn, k, r){
     w.document.close(); w.print();
 }
 
-// ================= 3. EXAM SETUP & RESULTS =================
+// ================= 3. EXAM SETUP (TOKEN & TIME) =================
 function renderExamSetup(type){
     var c = document.getElementById('pageContent');
     c.innerHTML = `<div class="fade-in card"><h3 class="font-display font-bold text-light mb-4">Pengaturan Ujian ${type.toUpperCase()}</h3>
@@ -520,7 +513,7 @@ function renderExamSetup(type){
             <div><label class="text-xs text-muted mb-1">Kelas</label><select id="examKelas" class="input-field" onchange="loadExamSettings('${type}')"><option value="">Pilih Kelas</option>${KELAS_LIST.map(k=>`<option value="${k}">${k}</option>`).join('')}</select></div>
         </div>
         <div class="bg-dark/30 p-4 rounded-lg border border-border mb-4">
-            <h4 class="text-sm font-bold mb-2 text-kopAccent">Pengaturan Ujian</h4>
+            <h4 class="text-sm font-bold mb-2 text-kopAccent">Pengaturan</h4>
             <div class="grid grid-cols-2 gap-4">
                 <div><label class="text-xs text-muted mb-1 block">Token</label><input type="text" id="examToken" class="input-field font-mono uppercase"></div>
                 <div><label class="text-xs text-muted mb-1 block">Durasi (Menit)</label><input type="number" id="examTime" class="input-field" value="60"></div>
@@ -543,6 +536,8 @@ function saveExamSettings(type){
     if(!mapel||!kelas) return;
     db.collection('settings').doc(type+'_'+mapel+'_'+kelas).set({token, duration:time, type, mapel, kelas, updatedAt:firebase.firestore.FieldValue.serverTimestamp()}).then(()=>showToast('Pengaturan disimpan'));
 }
+
+// ================= 4. HASIL UJIAN (AUTO GRADING) =================
 function renderResults(type){
     var c = document.getElementById('pageContent');
     c.innerHTML = `<div class="fade-in card"><h3 class="font-display font-bold text-light mb-4">Hasil ${type.toUpperCase()}</h3>
@@ -564,7 +559,128 @@ function renderResultsTable(type){
     });
 }
 
-window.onload = ()=>{ db.collection('teachers').limit(1).get().then(s=>{ if(s.empty) { console.log("DB Ready"); } }); };
+// ================= 5. CETAK DOKUMEN (PRINT PREVIEW) =================
+function renderPrintDocs(){
+    var c = document.getElementById('pageContent');
+    c.innerHTML = `<div class="fade-in no-print">
+        <div class="card mb-6">
+            <h3 class="font-display text-lg font-bold text-light mb-4"><i class="fas fa-print mr-2 text-kopAccent"></i>Cetak Soal (Mode Offline)</h3>
+            <div class="flex flex-wrap gap-4 items-end">
+                <div class="w-44"><label class="text-xs text-muted mb-1 block">Mapel</label><select id="pMapelPrint" class="input-field" onchange="refreshPrintPreview()">${MAPEL_LIST.map(m=>`<option value="${m.id}">${m.nama}</option>`).join('')}</select></div>
+                <div class="w-44"><label class="text-xs text-muted mb-1 block">Kelas</label><select id="pKelasPrint" class="input-field" onchange="refreshPrintPreview()"><option value="">Pilih Kelas</option>${KELAS_LIST.map(k=>`<option value="${k}">${k}</option>`).join('')}</select></div>
+                <div class="w-auto"><label class="text-xs text-muted mb-1 block">Tipe</label><select id="pTypePrint" class="input-field" onchange="refreshPrintPreview()"><option value="sat">Soal SAT</option><option value="paj">Soal PAJ</option></select></div>
+            </div>
+            <div class="mt-4 grid md:grid-cols-2 gap-4">
+                <div><label class="text-xs text-muted mb-1 block">Tujuan Pembelajaran</label><textarea id="printTPGlobal" class="input-field" rows="2" placeholder="Tujuan umum..."></textarea></div>
+            </div>
+            <div class="mt-4"><button onclick="doPrintSoal()" class="btn-primary"><i class="fas fa-print mr-2"></i>Cetak / PDF</button></div>
+        </div>
+        <div id="printPreviewContainer"></div>
+    </div>`;
+    setTimeout(refreshPrintPreview, 100);
+}
+
+function doPrintSoal(){
+    var sheet = document.querySelector('.print-preview-sheet');
+    if(!sheet){ showToast('Preview kosong','error'); return; }
+    var iframe = document.createElement('iframe');
+    iframe.style.position='fixed'; iframe.style.left='-9999px'; iframe.style.top='0'; iframe.style.width='210mm'; iframe.style.height='297mm';
+    document.body.appendChild(iframe);
+    var doc=iframe.contentDocument||iframe.contentWindow.document;
+    doc.open();
+    doc.write('<!DOCTYPE html><html><head><style>');
+    doc.write('@page{size:A4 portrait;margin:1.5cm 2cm 2cm 2cm}');
+    doc.write('body{margin:0;padding:0;font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.4;color:black;background:white;-webkit-print-color-adjust:exact}');
+    doc.write('.print-page{padding:0}');
+    doc.write('.kop-surat{text-align:center;padding-bottom:12px;margin-bottom:24px;border-bottom:3px double #000}');
+    doc.write('.kop-surat img{height:75px;width:auto}');
+    doc.write('.ujian-title{text-align:center;margin-bottom:20px}');
+    doc.write('.ujian-title h3{font-size:14pt;font-weight:bold;text-decoration:underline;text-transform:uppercase}');
+    doc.write('.soal-item{margin-bottom:24px;page-break-inside:avoid;width:100%;display:block;overflow:hidden}');
+    doc.write('.soal-num{float:left;font-weight:bold;font-size:12pt;width:35px}');
+    doc.write('.soal-text{font-size:12pt;line-height:1.5;text-align:left;display:block;margin-left:35px}');
+    doc.write('.opsi-wrapper{margin-top:8px;display:grid;grid-template-columns:1fr 1fr;column-gap:24px;margin-left:35px}');
+    doc.write('.opsi-row{display:flex;align-items:flex-start;gap:8px;font-size:12pt}');
+    doc.write('.opsi-label{font-weight:bold;min-width:20px}');
+    doc.write('.opsi-label::after{content:"."}');
+    doc.write('.answer-lines{margin-top:8px;margin-left:35px;border:1px dashed #bbb;height:80px;background:#fafafa}');
+    doc.write('.clearfix::after{content:"";display:table;clear:both}');
+    doc.write('</style></head><body>');
+    doc.write(sheet.innerHTML);
+    doc.write('</body></html>');
+    doc.close();
+    setTimeout(function(){
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        setTimeout(function(){document.body.removeChild(iframe);},3000);
+    },500);
+}
+
+function refreshPrintPreview(){
+    var mapelEl = document.getElementById('pMapelPrint');
+    var kelasEl = document.getElementById('pKelasPrint');
+    var typeEl = document.getElementById('pTypePrint');
+    if(!mapelEl || !kelasEl) return;
+    
+    var mapel = mapelEl.value;
+    var kelas = kelasEl.value;
+    var type = typeEl ? typeEl.value : 'sat';
+    var container = document.getElementById('printPreviewContainer');
+    
+    if(!mapel || !kelas){ container.innerHTML='<p class="text-center text-muted py-20">Pilih Mapel & Kelas</p>'; return; }
+    
+    var globalTP = (document.getElementById('printTPGlobal').value || '').trim();
+    var dataSource = type==='paj' ? questionsPAJ : questions;
+    var data = dataSource.filter(q=>q.mapel===mapel && q.kelas===kelas);
+    var pg = data.filter(q=>q.type==='pg');
+    var uraian = data.filter(q=>q.type==='uraian');
+    var logoUrl = 'https://www.image2url.com/r2/default/images/1776680731558-aaedfd5c-6674-4989-a7a4-c15f6291acac.jpeg';
+    
+    var html = '<div class="print-preview-wrap"><div class="print-preview-sheet"><div class="print-page">';
+    html += '<div class="kop-surat"><div class="kop-surat-row"><img src="'+logoUrl+'" alt="Logo"><div class="kop-text"><h1>Pemerintah Kabupaten Majalengka</h1><h2>Korek Api Kecamatan Majalengka</h2></div></div></div>';
+    
+    var examTitle = type==='paj' ? 'Penilaian Akhir Jenjang (PAJ)' : 'Sumatif Akhir Tahun (SAT)';
+    html += '<div class="ujian-title"><h3>'+examTitle+'</h3><p>'+getMapelName(mapel)+' — '+kelas+'</p></div>';
+
+    if(globalTP){
+        html += '<div style="margin-bottom:20px;padding:10px;border-left:4px solid #000;background:#f9f9f9"><strong>Tujuan Pembelajaran:</strong><br><i>'+escHtml(globalTP)+'</i></div>';
+    }
+    
+    if(pg.length > 0){
+        html += '<div style="font-weight:bold;margin-bottom:15px;border-bottom:2px solid #000;">I. Pilihan Ganda</div>';
+        html += '<p style="font-style:italic;margin-bottom:12px;">Pilihlah satu jawaban yang paling tepat!</p>';
+        pg.forEach(function(q, i){
+            html += '<div class="soal-item clearfix">';
+            html += '<div class="soal-num">'+(i+1)+'.</div>';
+            html += '<div class="soal-text">'+escHtml(q.text)+'</div>';
+            if(q.image) html += '<div style="margin-left:35px"><img src="'+q.image+'" class="soal-img-print"></div>';
+            html += '<div class="opsi-wrapper">';
+            (q.options||[]).forEach(function(opt, oi){
+                var letter = String.fromCharCode(97+oi);
+                var optImg = (q.optionImages && q.optionImages[oi]) ? '<img src="'+q.optionImages[oi]+'" class="opsi-img-print">' : '';
+                html += '<div class="opsi-row"><span class="opsi-label">'+letter+'</span><span>'+escHtml(opt)+'</span>'+optImg+'</div>';
+            });
+            html += '</div>';
+            html += '</div>';
+        });
+    }
+    
+    if(uraian.length > 0){
+        html += '<div style="font-weight:bold;margin-bottom:15px;margin-top:30px;border-bottom:2px solid #000;">II. Uraian</div>';
+        html += '<p style="font-style:italic;margin-bottom:12px;">Jawablah pertanyaan berikut dengan jelas dan benar!</p>';
+        uraian.forEach(function(q, i){
+            html += '<div class="soal-item clearfix">';
+            html += '<div class="soal-num">'+(i+1)+'.</div>';
+            html += '<div class="soal-text">'+escHtml(q.text)+'</div>';
+            if(q.image) html += '<div style="margin-left:35px"><img src="'+q.image+'" class="soal-img-print"></div>';
+            html += '<div class="answer-lines"></div></div>';
+        });
+    }
+    html += '</div></div></div>';
+    container.innerHTML = html;
+}
+
+window.onload = initApp; // Dummy init if needed, logic is handled via window.onload or manual call in script
 </script>
 </body>
 </html>
