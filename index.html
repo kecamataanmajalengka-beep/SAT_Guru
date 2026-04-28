@@ -45,6 +45,8 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
 .input-field{background:#0f1923;border:1px solid #2a3f5f;color:#e8ecf1;padding:10px 14px;border-radius:8px;width:100%;font-size:14px;transition:border-color .2s}
 .input-field:focus{outline:none;border-color:#c9a84c}
 .input-field option{background:#182538;color:#e8ecf1}
+.input-field:disabled{background:#2a3f5f;color:#7a8ba5;cursor:not-allowed}
+
 .card{background:#182538;border:1px solid #2a3f5f;border-radius:12px;padding:24px}
 
 .toast{position:fixed;top:20px;right:20px;z-index:9999;padding:14px 24px;border-radius:10px;font-size:14px;font-weight:600;animation:slideIn .3s ease;max-width:400px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
@@ -62,7 +64,18 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
 .fade-in{animation:fadeIn .3s ease forwards}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-/* ================= PRINT STYLES (ORIGINAL & EXAM CARD) ================= */
+/* Custom Checkbox for Class Selection */
+.class-checkbox-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.class-checkbox-item { 
+    display: flex; align-items: center; gap: 6px; 
+    background: rgba(255,255,255,0.05); padding: 8px; 
+    border-radius: 6px; border: 1px solid transparent; cursor: pointer; 
+    font-size: 13px; transition: all 0.2s;
+}
+.class-checkbox-item:hover { background: rgba(255,255,255,0.1); }
+.class-checkbox-item input:checked + span { color: #c9a84c; font-weight: bold; }
+
+/* ================= PRINT STYLES ================= */
 @media print {
     @page { size: A4 portrait; margin: 1.5cm 2cm 2cm 2cm; }
     body { background: white !important; color: black !important; font-family: 'Times New Roman', Times, serif !important; font-size: 12pt; line-height: 1.4; }
@@ -94,18 +107,6 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
     .opsi-img-print { max-width: 60px; max-height: 50px; display: inline-block; vertical-align: middle; margin-left: 8px; object-fit: contain; }
     .answer-lines { margin-top: 8px; margin-left: 35px; border: 1px dashed #bbb; height: 80px; border-radius: 4px; background-color: #fafafa; }
     .clearfix::after { content: ""; display: table; clear: both; }
-    
-    /* TABLES */
-    .print-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-family: 'Times New Roman', serif; font-size: 10pt; table-layout: fixed; }
-    .print-table th, .print-table td { border: 1px solid #000; padding: 6px 8px; text-align: left; vertical-align: top; overflow: hidden; }
-    .print-table th { background-color: #eee !important; text-align: center; font-weight: bold; font-size: 9pt; text-transform: uppercase; }
-    .print-table td.center { text-align: center; vertical-align: middle; }
-    
-    /* KARTU UJIAN PRINT */
-    .exam-card { width: 100%; border: 2px solid #000; padding: 20px; margin-bottom: 20px; page-break-inside: avoid; display: flex; flex-direction: column; align-items: center; text-align: center; }
-    .exam-card img { max-width: 100%; height: auto; margin: 10px 0; }
-    .exam-card-header { font-weight: bold; font-size: 16pt; text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid #000; width: 100%; padding-bottom: 5px; }
-    .exam-card-row { display: flex; width: 100%; justify-content: space-between; margin: 10px 0; font-size: 12pt; }
 }
 
 /* PREVIEW STYLES */
@@ -161,15 +162,44 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
             <div><label class="text-xs text-muted">NIP Guru</label><input type="text" id="regNip" class="input-field" placeholder="NIP Anda"></div>
         </div>
         <div><label class="text-xs text-muted">Nama Lengkap</label><input type="text" id="regNama" class="input-field" placeholder="Nama Guru"></div>
-        <div><label class="text-xs text-muted">Jenis Guru</label><select id="regJenis" class="input-field">
-            <option value="">-- Pilih --</option><option value="Kelas">Guru Kelas</option><option value="Mapel">Guru Mata Pelajaran</option><option value="PAI">Guru PAI</option><option value="PJOK">Guru PJOK</option>
-        </select></div>
-        <div class="grid grid-cols-2 gap-3">
-            <div><label class="text-xs text-muted">Kelas Ampu</label><select id="regKelas" class="input-field" multiple>
-                <option value="Kelas 1">Kelas 1</option><option value="Kelas 2">Kelas 2</option><option value="Kelas 3">Kelas 3</option><option value="Kelas 4">Kelas 4</option><option value="Kelas 5">Kelas 5</option><option value="Kelas 6">Kelas 6</option>
-            </select><p class="text-[10px] text-muted mt-1">Tahan Ctrl untuk multi</p></div>
-            <div><label class="text-xs text-muted">Rombel</label><select id="regRombel" class="input-field"><option value="A">Rombel A</option><option value="B">Rombel B</option><option value="C">Rombel C</option></select></div>
+        
+        <div><label class="text-xs text-muted">Jenis Guru</label>
+            <select id="regJenis" class="input-field" onchange="handleJenisChange()">
+                <option value="">-- Pilih Jenis Guru --</option>
+                <option value="Kelas">Guru Kelas</option>
+                <option value="PAI">Guru PAI</option>
+                <option value="PJOK">Guru PJOK</option>
+            </select>
         </div>
+
+        <!-- AREA KELAS (Dinamis) -->
+        <div id="kelasContainer">
+            <label class="text-xs text-muted">Kelas Ampu</label>
+            <!-- Checkbox untuk Guru Kelas (Default) -->
+            <div id="kelasCheckboxes" class="class-checkbox-group mt-1">
+                <label class="class-checkbox-item"><input type="checkbox" name="regKelas" value="Kelas 1"> <span>Kelas 1</span></label>
+                <label class="class-checkbox-item"><input type="checkbox" name="regKelas" value="Kelas 2"> <span>Kelas 2</span></label>
+                <label class="class-checkbox-item"><input type="checkbox" name="regKelas" value="Kelas 3"> <span>Kelas 3</span></label>
+                <label class="class-checkbox-item"><input type="checkbox" name="regKelas" value="Kelas 4"> <span>Kelas 4</span></label>
+                <label class="class-checkbox-item"><input type="checkbox" name="regKelas" value="Kelas 5"> <span>Kelas 5</span></label>
+                <label class="class-checkbox-item"><input type="checkbox" name="regKelas" value="Kelas 6"> <span>Kelas 6</span></label>
+            </div>
+            <!-- Input Text Read-only untuk Guru PAI/PJOK -->
+            <div id="kelasAutoText" class="hidden">
+                <input type="text" id="regKelasAuto" class="input-field" value="Semua Kelas (1-6)" disabled>
+                <p class="text-[10px] text-info mt-1">Otomatis mengajar semua kelas</p>
+            </div>
+        </div>
+
+        <div><label class="text-xs text-muted">Rombel</label>
+            <select id="regRombel" class="input-field">
+                <option value="">-- Pilih Rombel --</option>
+                <option value="A">Rombel A</option>
+                <option value="B">Rombel B</option>
+                <option value="C">Rombel C</option>
+            </select>
+        </div>
+
         <div><label class="text-xs text-muted">Password</label><input type="password" id="regPass" class="input-field"></div>
         <div><label class="text-xs text-muted">Konfirmasi</label><input type="password" id="regPassConfirm" class="input-field"></div>
         <button onclick="doRegister()" class="btn-primary w-full mt-2"><i class="fas fa-user-plus mr-2"></i>Daftar</button>
@@ -282,6 +312,27 @@ function switchAuthTab(tab){
     document.getElementById('tabRegister').className = tab==='register' ? 'flex-1 pb-2 text-center text-sm font-bold text-kopAccent border-b-2 border-kopAccent' : 'flex-1 pb-2 text-center text-sm text-muted hover:text-light';
 }
 
+// ================= REGISTRASI LOGIC BARU =================
+function handleJenisChange(){
+    var jenis = document.getElementById('regJenis').value;
+    var checkboxArea = document.getElementById('kelasCheckboxes');
+    var autoArea = document.getElementById('kelasAutoText');
+    
+    // Reset tampilan
+    if(jenis === 'PAI' || jenis === 'PJOK'){
+        // Sembunyikan checkbox, tampilkan text otomatis
+        checkboxArea.classList.add('hidden');
+        autoArea.classList.remove('hidden');
+        
+        // Uncheck semua checkbox untuk keamanan data
+        document.querySelectorAll('input[name="regKelas"]').forEach(cb => cb.checked = false);
+    } else {
+        // Tampilkan checkbox, sembunyikan text otomatis
+        checkboxArea.classList.remove('hidden');
+        autoArea.classList.add('hidden');
+    }
+}
+
 // ================= AUTH: REGISTER =================
 function doRegister(){
     var npsn = document.getElementById('regNpsn').value.trim();
@@ -290,13 +341,24 @@ function doRegister(){
     var jenis = document.getElementById('regJenis').value;
     var pass = document.getElementById('regPass').value;
     var conf = document.getElementById('regPassConfirm').value;
-    var kelasSelect = document.getElementById('regKelas');
-    var selectedKelas = Array.from(kelasSelect.selectedOptions).map(opt => opt.value);
     var rombel = document.getElementById('regRombel').value;
 
+    // Validasi Dasar
     if(!npsn || !nip || !nama || !jenis || !pass) return showToast('Lengkapi semua data','error');
     if(pass !== conf) return showToast('Password tidak cocok','error');
-    if(selectedKelas.length === 0) return showToast('Pilih minimal satu kelas','error');
+    if(!rombel) return showToast('Pilih Rombel','error');
+
+    // Logika Penentuan Kelas
+    var selectedKelas = [];
+    if(jenis === 'PAI' || jenis === 'PJOK'){
+        // Otomatis Kelas 1-6
+        selectedKelas = ['Kelas 1', 'Kelas 2', 'Kelas 3', 'Kelas 4', 'Kelas 5', 'Kelas 6'];
+    } else {
+        // Ambil dari Checkbox (Guru Kelas)
+        var checkedBoxes = document.querySelectorAll('input[name="regKelas"]:checked');
+        if(checkedBoxes.length === 0) return showToast('Pilih minimal satu kelas','error');
+        checkedBoxes.forEach(cb => selectedKelas.push(cb.value));
+    }
 
     db.collection('teachers').where('nip','==',nip).get().then(snap=>{
         if(!snap.empty) return showToast('NIP sudah terdaftar','error');
@@ -306,7 +368,11 @@ function doRegister(){
         }).then(()=>{
             showToast('Registrasi Berhasil!','success');
             switchAuthTab('login');
+            // Reset Form
             document.getElementById('regPass').value=''; document.getElementById('regPassConfirm').value='';
+            document.getElementById('regJenis').value='';
+            document.querySelectorAll('input[name="regKelas"]').forEach(cb=>cb.checked=false);
+            handleJenisChange(); // Reset UI
         });
     });
 }
@@ -679,8 +745,6 @@ function refreshPrintPreview(){
     html += '</div></div></div>';
     container.innerHTML = html;
 }
-
-window.onload = initApp; // Dummy init if needed, logic is handled via window.onload or manual call in script
 </script>
 </body>
 </html>
