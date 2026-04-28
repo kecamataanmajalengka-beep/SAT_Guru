@@ -145,7 +145,10 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
     <nav class="py-4">
         <div class="nav-item active" onclick="nav('dashboard')"><i class="fas fa-home w-5"></i>Dashboard</div>
         <div class="nav-item" onclick="nav('siswa')"><i class="fas fa-users w-5"></i>Data Siswa</div>
-        <div class="nav-item" onclick="nav('soal-view')"><i class="fas fa-file-alt w-5"></i>Lihat Bank Soal</div> <!-- Dari Admin -->
+        <div class="nav-item" onclick="nav('soal-view')"><i class="fas fa-file-alt w-5"></i>Bank Soal</div>
+        <div class="nav-item" onclick="nav('kisi')"><i class="fas fa-table w-5"></i>Kisi-Kisi</div> <!-- Baru -->
+        <div class="nav-item" onclick="nav('kunci')"><i class="fas fa-key w-5"></i>Kunci Jawaban</div> <!-- Baru -->
+        <div class="nav-item" onclick="nav('print')"><i class="fas fa-print w-5"></i>Cetak Soal</div> <!-- Baru -->
         <div class="nav-item" onclick="nav('ujian')"><i class="fas fa-clock w-5"></i>Atur Ujian & Token</div>
         <div class="nav-item" onclick="nav('koreksi')"><i class="fas fa-check-double w-5"></i>Koreksi Jawaban</div>
     </nav>
@@ -182,7 +185,6 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 var db = firebase.firestore();
-// var storage = firebase.storage(); // Jika butuh upload gambar
 
 // --- DATA MASTER ---
 var MAPEL = [
@@ -206,7 +208,10 @@ var jawabanList = []; // Mengambil dari 'jawaban_siswa'
 var tokenData = null;
 
 // --- FUNGSI UTILITAS ---
-function getMapelName(id){ var m=MAPEL.find(function(x){return x.id===id;}); return m?m.nama:id; }
+function getMapelName(id){ 
+    var m=MAPEL.find(function(x){return x.id===id;}); 
+    return m?m.nama:id; 
+}
 
 function toggleLoginMode(){
     document.getElementById('registerForm').classList.toggle('hidden');
@@ -273,7 +278,6 @@ function doLoginDirect(user, pass){
 function doResetPassword(){
     var nip = prompt("Masukkan NIP untuk reset password:");
     if(!nip) return;
-    // Reset password sederhana (di real app pakai email auth)
     if(confirm("Set password default menjadi '123456' untuk NIP: " + nip + "?")){
         db.collection('users_guru').where('nip', '==', nip).get().then(snap=>{
             if(!snap.empty){
@@ -295,8 +299,15 @@ function initListeners(){
     db.collection('questions').orderBy('createdAt','asc')
     .onSnapshot(function(snap){
         soalList = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
-        // Refresh tampilan jika sedang di halaman soal
-        if(document.querySelector('.nav-item.active')?.innerText.includes('Bank Soal')) renderSoalView();
+        // Refresh tampilan jika sedang di halaman soal/kisi/kunci/print
+        var activeText = document.querySelector('.nav-item.active')?.innerText;
+        if(activeText && (activeText.includes('Bank') || activeText.includes('Kisi') || activeText.includes('Kunci') || activeText.includes('Cetak'))){
+             // Panggil render ulang
+             if(document.getElementById('soalTableBody')) renderSoalView();
+             if(document.getElementById('kisiTableBody')) renderKisi();
+             if(document.getElementById('kunciTableBody')) renderKunci();
+             if(document.getElementById('printPreviewContainer')) refreshPrintPreview();
+        }
     });
 
     // 2. Ambil Data Siswa (Filter sesuai Rombel Guru)
@@ -327,7 +338,10 @@ function nav(page){
     
     if(page==='dashboard') renderDashboard(c);
     else if(page==='siswa') renderSiswa(c);
-    else if(page==='soal-view') renderSoalView(c); // Integrasi Soal
+    else if(page==='soal-view') renderSoalView(c);
+    else if(page==='kisi') renderKisi(c); // Baru
+    else if(page==='kunci') renderKunci(c); // Baru
+    else if(page==='print') renderPrint(c); // Baru
     else if(page==='ujian') renderUjian(c);
     else if(page==='koreksi') renderKoreksi(c);
 }
@@ -393,36 +407,252 @@ function deleteSiswa(id){
 }
 
 function printKartu(){
-    // Implementasi cetak kartu sederhana (bisa dikembangkan)
     window.print();
 }
 
-// --- LIHAT SOAL (DARI KODE ADMIN) ---
+// --- LIHAT SOAL (FILTER MAPEL) ---
 function renderSoalView(c){
     if(!c) c = document.getElementById('contentArea');
     
-    // Filter sederhana berdasarkan jenis guru
-    var filteredSoal = soalList;
-    if(currentUser.jenis === 'kelas'){
-        filteredSoal = soalList.filter(s => s.kelas === currentUser.kelas);
-    }
-    // PAI/PJOK lihat semua mapel mereka (perlu filter mapel tambahan jika mau detail)
-
     c.innerHTML = '<div class="card fade-in">'+
         '<h3 class="font-bold text-lg mb-4">Bank Soal (Terintegrasi)</h3>'+
-        '<p class="text-sm text-muted mb-4">Menampilkan soal yang dibuat di Admin Pusat.</p>'+
+        '<div class="flex gap-4 mb-4 items-end">'+
+            '<div class="flex-1">'+
+                '<label class="text-xs text-muted font-bold mb-1 block">Filter Mapel</label>'+
+                '<select id="filterMapelSoal" class="input-field" onchange="refreshSoalViewList()">'+
+                    '<option value="">-- Semua Mapel --</option>'+
+                    MAPEL.map(m=>'<option value="'+m.id+'">'+m.nama+'</option>').join('')+
+                '</select>'+
+            '</div>'+
+        '</div>'+
         '<div class="overflow-x-auto"><table class="w-full text-sm text-left">'+
             '<thead class="text-xs text-muted uppercase bg-dark/50"><tr><th class="px-4 py-2">Mapel</th><th class="px-4 py-2">Kelas</th><th class="px-4 py-2">Soal</th><th class="px-4 py-2">Tipe</th></tr></thead>'+
             '<tbody id="soalTableBody"></tbody></table></div></div>';
         
+    refreshSoalViewList();
+}
+
+function refreshSoalViewList(){
+    var mapelFilter = document.getElementById('filterMapelSoal').value;
+    var filteredSoal = soalList;
+    
+    if(mapelFilter){
+        filteredSoal = soalList.filter(s => s.mapel === mapelFilter);
+    } else {
+        // Jika guru kelas, default filter ke kelasnya, kecuali dia memilih semua
+        if(currentUser.jenis === 'kelas'){
+            filteredSoal = soalList.filter(s => s.kelas === currentUser.kelas);
+        }
+    }
+
     var tb = document.getElementById('soalTableBody');
     if(filteredSoal.length===0){
-        tb.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-muted">Belum ada soal untuk kelas Anda.</td></tr>';
+        tb.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-muted">Tidak ada soal.</td></tr>';
     } else {
         tb.innerHTML = filteredSoal.map(s=>
             '<tr class="border-b border-border hover:bg-white/5"><td class="px-4 py-3">'+getMapelName(s.mapel)+'</td><td class="px-4 py-3">'+s.kelas+'</td><td class="px-4 py-3 truncate max-w-xs" title="'+s.text+'">'+s.text+'</td><td class="px-4 py-3"><span class="bg-kopAccent/20 text-kopAccent px-2 py-1 rounded text-xs uppercase">'+s.type+'</span></td></tr>'
         ).join('');
     }
+}
+
+// --- KISI-KISI (FILTER MAPEL) ---
+function renderKisi(c){
+    if(!c) c = document.getElementById('contentArea');
+    c.innerHTML = '<div class="card fade-in no-print">'+
+        '<h3 class="font-bold text-lg mb-4">Kisi-Kisi Soal</h3>'+
+        '<div class="flex gap-4 mb-4 items-end">'+
+            '<div class="flex-1">'+
+                '<label class="text-xs text-muted font-bold mb-1 block">Pilih Mapel</label>'+
+                '<select id="kisiMapelSelect" class="input-field" onchange="refreshKisiPreview()">'+
+                    MAPEL.map(m=>'<option value="'+m.id+'">'+m.nama+'</option>').join('')+
+                '</select>'+
+            '</div>'+
+            '<button onclick="printGeneric(\'kisiPreviewContainer\')" class="btn-secondary"><i class="fas fa-print mr-1"></i>Cetak</button>'+
+        '</div>'+
+        '<div id="kisiPreviewContainer" class="print-preview-wrap bg-white text-black p-8 rounded shadow-xl"></div>'+
+    '</div>';
+    refreshKisiPreview();
+}
+
+function refreshKisiPreview(){
+    var mapelId = document.getElementById('kisiMapelSelect').value;
+    var container = document.getElementById('kisiPreviewContainer');
+    if(!mapelId) return;
+
+    // Ambil soal sesuai mapel (dan kelas guru jika guru kelas)
+    var data = soalList.filter(s => s.mapel === mapelId && (currentUser.jenis!=='kelas' || s.kelas === currentUser.kelas));
+
+    var html = '<div style="font-family:\'Times New Roman\',serif;font-size:12pt;color:black;">';
+    html += '<div style="text-align:center;border-bottom:3px double #000;padding-bottom:10px;margin-bottom:20px;">';
+    html += '<h2 style="font-size:16pt;font-weight:bold;text-transform:uppercase;margin:0;">Kisi-Kisi Penulisan Soal</h2>';
+    html += '<p style="margin:5px 0;font-size:14pt;font-weight:bold;">'+getMapelName(mapelId)+'</p>';
+    html += '</div>';
+
+    html += '<table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:10pt;border:1px solid #000;">';
+    html += '<thead><tr style="background:#eee;"><th style="border:1px solid #000;padding:6px;">No</th><th style="border:1px solid #000;padding:6px;">Kelas</th><th style="border:1px solid #000;padding:6px;">Materi/Indikator</th><th style="border:1px solid #000;padding:6px;">Tipe</th></tr></thead>';
+    html += '<tbody>';
+    
+    data.forEach(function(q, i){
+        html += '<tr>';
+        html += '<td style="border:1px solid #000;padding:6px;text-align:center;">'+(i+1)+'</td>';
+        html += '<td style="border:1px solid #000;padding:6px;text-align:center;">'+q.kelas+'</td>';
+        html += '<td style="border:1px solid #000;padding:6px;">'+(q.indicator || '-')+'</td>';
+        html += '<td style="border:1px solid #000;padding:6px;text-align:center;">'+(q.type==='pg'?'PG':'Uraian')+'</td>';
+        html += '</tr>';
+    });
+    html += '</tbody></table>';
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// --- KUNCI JAWABAN (FILTER MAPEL) ---
+function renderKunci(c){
+    if(!c) c = document.getElementById('contentArea');
+    c.innerHTML = '<div class="card fade-in no-print">'+
+        '<h3 class="font-bold text-lg mb-4">Kunci Jawaban</h3>'+
+        '<div class="flex gap-4 mb-4 items-end">'+
+            '<div class="flex-1">'+
+                '<label class="text-xs text-muted font-bold mb-1 block">Pilih Mapel</label>'+
+                '<select id="kunciMapelSelect" class="input-field" onchange="refreshKunciPreview()">'+
+                    MAPEL.map(m=>'<option value="'+m.id+'">'+m.nama+'</option>').join('')+
+                '</select>'+
+            '</div>'+
+            '<button onclick="printGeneric(\'kunciPreviewContainer\')" class="btn-secondary"><i class="fas fa-print mr-1"></i>Cetak</button>'+
+        '</div>'+
+        '<div id="kunciPreviewContainer" class="print-preview-wrap bg-white text-black p-8 rounded shadow-xl"></div>'+
+    '</div>';
+    refreshKunciPreview();
+}
+
+function refreshKunciPreview(){
+    var mapelId = document.getElementById('kunciMapelSelect').value;
+    var container = document.getElementById('kunciPreviewContainer');
+    if(!mapelId) return;
+
+    var data = soalList.filter(s => s.mapel === mapelId && (currentUser.jenis!=='kelas' || s.kelas === currentUser.kelas));
+    var pg = data.filter(s=>s.type==='pg');
+
+    var html = '<div style="font-family:\'Times New Roman\',serif;font-size:12pt;color:black;">';
+    html += '<div style="text-align:center;border-bottom:3px double #000;padding-bottom:10px;margin-bottom:20px;">';
+    html += '<h2 style="font-size:16pt;font-weight:bold;text-transform:uppercase;margin:0;">Kunci Jawaban</h2>';
+    html += '<p style="margin:5px 0;font-size:14pt;font-weight:bold;">'+getMapelName(mapelId)+'</p>';
+    html += '</div>';
+
+    if(pg.length > 0){
+        html += '<table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:10pt;border:1px solid #000;">';
+        html += '<thead><tr style="background:#eee;"><th style="border:1px solid #000;padding:6px;">No</th><th style="border:1px solid #000;padding:6px;">Kelas</th><th style="border:1px solid #000;padding:6px;">Kunci</th></tr></thead>';
+        html += '<tbody>';
+        pg.forEach(function(q, i){
+            html += '<tr>';
+            html += '<td style="border:1px solid #000;padding:6px;text-align:center;">'+(i+1)+'</td>';
+            html += '<td style="border:1px solid #000;padding:6px;text-align:center;">'+q.kelas+'</td>';
+            html += '<td style="border:1px solid #000;padding:6px;text-align:center;font-weight:bold;">'+(q.answer || '-')+'</td>';
+            html += '</tr>';
+        });
+        html += '</tbody></table>';
+    } else {
+        html += '<p class="text-center mt-4">Tidak ada soal Pilihan Ganda.</p>';
+    }
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// --- CETAK SOAL (FILTER MAPEL) ---
+function renderPrint(c){
+    if(!c) c = document.getElementById('contentArea');
+    c.innerHTML = '<div class="card fade-in no-print">'+
+        '<h3 class="font-bold text-lg mb-4">Cetak Soal Ujian</h3>'+
+        '<div class="flex gap-4 mb-4 items-end">'+
+            '<div class="flex-1">'+
+                '<label class="text-xs text-muted font-bold mb-1 block">Pilih Mapel</label>'+
+                '<select id="printMapelSelect" class="input-field" onchange="refreshPrintPreview()">'+
+                    MAPEL.map(m=>'<option value="'+m.id+'">'+m.nama+'</option>').join('')+
+                '</select>'+
+            '</div>'+
+            '<button onclick="doPrintSoal()" class="btn-primary"><i class="fas fa-print mr-1"></i>Cetak Soal</button>'+
+        '</div>'+
+        '<div id="printPreviewContainer" class="print-preview-wrap bg-gray-200 p-8 rounded shadow-xl overflow-x-auto"></div>'+
+    '</div>';
+    refreshPrintPreview();
+}
+
+function refreshPrintPreview(){
+    var mapelId = document.getElementById('printMapelSelect').value;
+    var container = document.getElementById('printPreviewContainer');
+    if(!mapelId) return;
+
+    var data = soalList.filter(s => s.mapel === mapelId && (currentUser.jenis!=='kelas' || s.kelas === currentUser.kelas));
+    
+    // Format Soal untuk Cetak (Sama seperti kode Admin)
+    var pg = data.filter(s=>s.type==='pg');
+    var uraian = data.filter(s=>s.type==='uraian');
+    var logoUrl = 'https://www.image2url.com/r2/default/images/1776680731558-aaedfd5c-6674-4989-a7a4-c15f6291acac.jpeg';
+
+    var html = '<div class="print-preview-sheet" style="background:white;color:black;width:210mm;padding:1.5cm;font-family:\'Times New Roman\',serif;font-size:12pt;min-height:297mm;">';
+    
+    // Kop Surat
+    html += '<div style="text-align:center;border-bottom:3px double #000;padding-bottom:12px;margin-bottom:24px;display:flex;flex-direction:column;align-items:center;">';
+    html += '<div style="display:flex;align-items:center;gap:16px;">';
+    html += '<img src="'+logoUrl+'" style="height:75px;width:auto;">';
+    html += '<div style="text-align:center;"><h1 style="font-size:13pt;font-weight:bold;text-transform:uppercase;margin:0;">Pemerintah Kabupaten Majalengka</h1><h1 style="font-size:13pt;font-weight:bold;text-transform:uppercase;margin:0;">Dinas Pendidikan</h1><h2 style="font-size:16pt;font-weight:bold;text-transform:uppercase;margin:0;">Korek Api Kecamatan Majalengka</h2></div>';
+    html += '</div></div>';
+
+    // Judul
+    html += '<div style="text-align:center;margin-bottom:20px;"><h3 style="font-size:14pt;font-weight:bold;text-decoration:uppercase;text-decoration:underline;margin:0;">UJIAN SUMATIF AKHIR TAHUN</h3>';
+    html += '<p style="font-size:12pt;font-weight:bold;margin:5px 0 0 0;">'+getMapelName(mapelId)+'</p></div>';
+
+    // Soal PG
+    if(pg.length > 0){
+        html += '<div style="font-weight:bold;font-size:12pt;border-bottom:2px solid #000;padding-bottom:4px;margin-bottom:15px;margin-top:10px;">I. Pilihan Ganda</div>';
+        pg.forEach(function(q, i){
+            html += '<div style="margin-bottom:24px;page-break-inside:avoid;">';
+            html += '<div style="font-weight:bold;margin-right:8px;display:inline-block;float:left;width:30px;">'+(i+1)+'.</div>';
+            html += '<div style="display:block;margin-left:30px;">'+q.text+'</div>';
+            if(q.image) html += '<div style="margin-left:30px;margin-top:8px;"><img src="'+q.image+'" style="max-width:100%;max-height:200px;border:1px solid #ccc;"></div>';
+            html += '<div style="margin-top:8px;margin-left:30px;">';
+            (q.options||[]).forEach(function(opt, oi){
+                var letter = ['A','B','C','D','E'][oi] || String.fromCharCode(65+oi);
+                html += '<div style="margin-bottom:4px;"><span style="font-weight:bold;margin-right:8px;">'+letter+'.</span>'+opt+'</div>';
+            });
+            html += '</div></div>';
+        });
+    }
+
+    // Soal Uraian
+    if(uraian.length > 0){
+        html += '<div style="font-weight:bold;font-size:12pt;border-bottom:2px solid #000;padding-bottom:4px;margin-bottom:15px;margin-top:30px;">II. Uraian</div>';
+        uraian.forEach(function(q, i){
+            html += '<div style="margin-bottom:24px;page-break-inside:avoid;">';
+            html += '<div style="font-weight:bold;margin-right:8px;display:inline-block;float:left;width:30px;">'+(i+1)+'.</div>';
+            html += '<div style="display:block;margin-left:30px;">'+q.text+'</div>';
+            if(q.image) html += '<div style="margin-left:30px;margin-top:8px;"><img src="'+q.image+'" style="max-width:100%;max-height:200px;border:1px solid #ccc;"></div>';
+            html += '<div style="margin-top:8px;margin-left:30px;border:1px dashed #bbb;height:80px;background-color:#fafafa;"></div>';
+            html += '</div>';
+        });
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function doPrintSoal(){
+    var sheet = document.querySelector('#printPreviewContainer .print-preview-sheet');
+    if(!sheet) return alert("Preview kosong");
+    
+    var iframe = document.createElement('iframe');
+    iframe.style.position='fixed'; iframe.style.left='-9999px'; iframe.style.top='0'; iframe.style.width='210mm'; iframe.style.height='297mm';
+    document.body.appendChild(iframe);
+    var doc=iframe.contentDocument||iframe.contentWindow.document;
+    doc.open();
+    doc.write('<!DOCTYPE html><html><head><style>@page{size:A4 portrait;margin:1.5cm 2cm 2cm 2cm}body{margin:0;padding:0;font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.4;color:black;background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>');
+    doc.write(sheet.innerHTML);
+    doc.write('</body></html>');
+    doc.close();
+    setTimeout(function(){
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        setTimeout(function(){document.body.removeChild(iframe);},3000);
+    },500);
 }
 
 // --- ATUR UJIAN & TOKEN ---
@@ -432,43 +662,55 @@ function renderUjian(c){
         '<h3 class="font-bold text-lg mb-4">Atur Ujian</h3>'+
         '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">'+
             '<div>'+
-                '<label class="text-xs text-muted font-bold mb-1 block">Set Token Ujian</label>'+
-                '<input type="text" id="tokenInput" class="input-field mb-2" value="'+(tokenData?tokenData.token:'')+'" placeholder="Masukkan Token">'+
-                '<button onclick="setToken()" class="btn-primary w-full">Simpan Token</button>'+
+                '<label class="text-xs text-muted font-bold mb-1 block">Kode Token</label>'+
+                '<input type="text" id="tokenInput" class="input-field mb-2" value="'+(tokenData?tokenData.token:'')+'" placeholder="Contoh: MTK123">'+
             '</div>'+
             '<div>'+
-                '<label class="text-xs text-muted font-bold mb-1 block">Durasi Ujian (Menit)</label>'+
+                '<label class="text-xs text-muted font-bold mb-1 block">Durasi (Menit)</label>'+
                 '<input type="number" id="durasiInput" class="input-field mb-2" value="'+(tokenData?tokenData.durasi:60)+'">'+
-                '<button onclick="setDurasi()" class="btn-secondary w-full">Update Durasi</button>'+
             '</div>'+
         '</div>'+
-        '<div class="mt-4 p-4 bg-dark/50 rounded border border-border">'+
-            '<h4 class="text-sm font-bold text-warning mb-2">STATUS SAAT INI:</h4>'+
-            '<p class="text-sm">Token Aktif: <span class="font-bold text-kopAccent">'+(tokenData?tokenData.token:'TIDAK ADA')+'</span></p>'+
-            '<p class="text-sm">Durasi: <span class="font-bold text-info">'+(tokenData?tokenData.durasi:'-')+' Menit</span></p>'+
+        '<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">'+
+            '<div>'+
+                '<label class="text-xs text-muted font-bold mb-1 block">Pilih Mapel Ujian</label>'+
+                '<select id="mapelTokenSelect" class="input-field">'+
+                    MAPEL.map(m=>'<option value="'+m.id+'">'+m.nama+'</option>').join('')+
+                '</select>'+
+            '</div>'+
+            '<div>'+
+                '<label class="text-xs text-muted font-bold mb-1 block">Pilih Kelas Ujian</label>'+
+                <select id="kelasTokenSelect" class="input-field">'+
+                    KELAS.map(k=>'<option value="'+k+'">'+k+'</option>').join('')+
+                '</select>'+
+            '</div>'+
+        </div>'+
+        '<div class="mt-4">'+
+            '<button onclick="setToken()" class="btn-primary w-full">Simpan & Aktifkan Token</button>'+
         '</div>'+
     '</div>';
 }
 
 function setToken(){
     var t = document.getElementById('tokenInput').value;
+    var d = parseInt(document.getElementById('durasiInput').value);
+    var m = document.getElementById('mapelTokenSelect').value;
+    var k = document.getElementById('kelasTokenSelect').value;
+
+    if(!t || !d) return alert("Lengkapi data token");
+
     db.collection('token_ujian').doc('active_token').set({
-        token: t, 
-        durasi: parseInt(document.getElementById('durasiInput').value)||60,
+        token: t.toUpperCase(),
+        durasi: d,
+        mapel: m,
+        kelas: k,
         guruId: currentUser.id,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, {merge: true}).then(()=>alert("Token Berhasil Disimpan!"));
-}
-function setDurasi(){
-    var d = document.getElementById('durasiInput').value;
-    db.collection('token_ujian').doc('active_token').update({durasi: parseInt(d)});
+    }).then(()=>alert("Token Berhasil Disimpan & Diaktifkan!"));
 }
 
 // --- KOREKSI JAWABAN ---
 function renderKoreksi(c){
     if(!c) c = document.getElementById('contentArea');
-    
-    // Filter jawaban yang sesuai rombel guru ini
     var myAnswers = jawabanList.filter(j => j.rombel === currentUser.rombel);
 
     c.innerHTML = '<div class="card fade-in">'+
@@ -487,7 +729,7 @@ function renderKoreksi(c){
                         <span class="font-bold text-kopAccent">${j.namaSiswa}</span>
                         <span class="text-xs text-muted ml-2">(${j.kelasSiswa})</span>
                     </div>
-                    <span class="text-xs bg-info/20 text-info px-2 py-1 rounded">${j.waktuKirim?j.waktuKirim.toDate().toLocaleString():''}</span>
+                    <span class="text-xs bg-info/20 text-info px-2 py-1 rounded">${getMapelName(j.mapel)}</span>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
                     <div>
@@ -497,7 +739,7 @@ function renderKoreksi(c){
                     <div>
                         <h5 class="text-xs font-bold text-muted uppercase">Uraian (Manual)</h5>
                         <textarea id="essayNote-${j.id}" class="input-field text-xs mt-1" rows="2" placeholder="Catatan koreksi...">${j.essayNote||''}</textarea>
-                        <div class="mt-2 flex gap-2">
+                        <div class="mt-2">
                             <button onclick="saveKoreksi('${j.id}')" class="btn-primary text-xs py-1 px-2">Simpan Nilai</button>
                             <button onclick="viewJawaban('${j.id}')" class="btn-secondary text-xs py-1 px-2">Lihat Detail</button>
                         </div>
@@ -510,7 +752,6 @@ function renderKoreksi(c){
 
 function saveKoreksi(id){
     var note = document.getElementById('essayNote-'+id).value;
-    // Di sistem nyata, di sini juga input skor manual untuk uraian
     db.collection('jawaban_siswa').doc(id).update({
         essayNote: note,
         status: 'Dikoreksi',
@@ -534,6 +775,28 @@ function openModal(html){
 }
 function closeModal(){
     document.getElementById('modalOverlay').classList.add('hidden');
+}
+
+// --- CETAK UMUM ---
+function printGeneric(containerId){
+    var sheet = document.getElementById(containerId);
+    if(!sheet) return;
+    var printContent = sheet.innerHTML;
+    
+    var iframe = document.createElement('iframe');
+    iframe.style.position='fixed'; iframe.style.left='-9999px'; iframe.style.top='0'; iframe.style.width='210mm'; iframe.style.height='297mm';
+    document.body.appendChild(iframe);
+    var doc=iframe.contentDocument||iframe.contentWindow.document;
+    doc.open();
+    doc.write('<!DOCTYPE html><html><head><style>@page{size:A4 portrait;margin:1cm}body{margin:0;padding:0;font-family:"Times New Roman",Times,serif;font-size:12pt;color:black;background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>');
+    doc.write(printContent);
+    doc.write('</body></html>');
+    doc.close();
+    setTimeout(function(){
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        setTimeout(function(){document.body.removeChild(iframe);},3000);
+    },500);
 }
 </script>
 </body>
