@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistem Ujian Sekolah - Panel Guru</title>
+<title>Sistem Ujian Sekolah - Panel Guru (Integrated)</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -62,6 +62,8 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
 .nav-item{padding:11px 20px;cursor:pointer;border-left:3px solid transparent;transition:all .2s;display:flex;align-items:center;gap:12px;font-size:14px;color:#7a8ba5;user-select:none}
 .nav-item:hover{background:rgba(42,63,95,0.3);color:#e8ecf1}
 .nav-item.active{background:rgba(201,168,76,0.08);border-left-color:#c9a84c;color:#c9a84c;font-weight:600}
+
+/* Styling for PAJ Items */
 .nav-item.paj-item { border-left-color: #ef4444; color: #ef4444; font-weight: 600; }
 .nav-item.paj-item:hover { background: rgba(239, 68, 68, 0.1); color: #f87171; }
 
@@ -93,7 +95,7 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
     @page { size: A4 portrait; margin: 1.5cm 2cm 2cm 2cm; }
     body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-family: 'Times New Roman', Times, serif !important; font-size: 12pt; line-height: 1.4; }
     #sidebar, #mainArea > header, .sidebar-overlay, .no-print, #toastContainer, .login-container, .card { display: none !important; }
-    #mainArea { margin: 0 !important; padding: 0 !important; width: 100% !important; background: white !important; height: auto !important; overflow: visible !important; }
+    #mainArea { margin: 0 !important; padding: 0 !important; width: 100% !important; height: auto !important; background: white !important; overflow: visible !important; }
     #pageContent { padding: 0 !important; margin: 0 !important; width: 100% !important; background: white !important; color: black !important; overflow: visible !important; }
     .print-preview-wrap { display: none !important; }
     .print-only { display: block !important; }
@@ -134,7 +136,7 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
 .print-preview-sheet .opsi-wrapper { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-left: 35px; }
 .print-preview-sheet .opsi-row { display: flex; align-items: flex-start; gap: 5px; font-size: 12pt; }
 .print-preview-sheet .opsi-label { font-weight: bold; min-width: 20px; }
-.print-preview-sheet .opsi-label::after { content: '.'; }
+.print-preview-sheet .opsi-label::after { content: '.'; } 
 .print-preview-sheet .answer-lines { margin-top: 8px; margin-left: 35px; border: 1px dashed #ccc; height: 80px; background-color: #fafafa; }
 .print-preview-sheet .login-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
 .print-preview-sheet .login-card-item { border: 2px solid #000; padding: 20px; border-radius: 8px; text-align: center; background: white; color: black; margin-bottom: 0; }
@@ -167,7 +169,7 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
                 <i class="fas fa-graduation-cap"></i>
             </div>
             <h1 class="font-display text-2xl font-bold text-light">Panel Guru</h1>
-            <p class="text-muted text-sm">Sistem Ujian Sekolah</p>
+            <p class="text-muted text-sm">Sistem Ujian Sekolah (SAT & PAJ)</p>
         </div>
 
         <!-- Tab Navigasi -->
@@ -271,7 +273,7 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
      MODAL RESET PASSWORD
      ========================= -->
 <div id="modalReset" class="modal-overlay hidden">
-    <div class="modal-content">
+    <div class="modal-content" style="background:#182538; border:1px solid #2a3f5f; border-radius:16px; padding:32px; max-width:500px; width:100%;">
         <h3 class="font-display text-lg font-bold text-light mb-4 text-center">Reset Password</h3>
         <div class="space-y-4">
             <div>
@@ -346,26 +348,28 @@ var MAPEL_LIST = [
     {id:'sbd',nama:'Seni Budaya',singkat:'Seni'},
     {id:'ipas',nama:'IPAS',singkat:'IPAS'},
     {id:'bsd',nama:'Bahasa Sunda',singkat:'B.Sunda'},
-    {id:'bing',nama:'Bahasa Inggris',singkat:'B.Inggris'},
-    {id:'pai',nama:'PAI',singkat:'PAI'},
-    {id:'pjok',nama:'PJOK',singkat:'PJOK'}
+    {id:'bing',nama:'Bahasa Inggris',singkat:'B.Inggris'}
 ];
 var KELAS_LIST = ['Kelas 1','Kelas 2','Kelas 3','Kelas 4','Kelas 5','Kelas 6'];
 
-function getMapelName(id){ var m=MAPEL_LIST.find(function(x){return x.id===id;}); return m?m.nama:id; }
-function getMapelSingkat(id){ var m=MAPEL_LIST.find(function(x){return x.id===id;}); return m?m.singkat:id; }
+function getMapelName(id){ 
+    if(id === 'pai') return 'Pendidikan Agama Islam (PAI)';
+    if(id === 'pjok') return 'PJOK';
+    var m=MAPEL_LIST.find(function(x){return x.id===id;}); 
+    return m?m.nama:id; 
+}
 function escHtml(s){ if(!s) return ''; var d=document.createElement('div'); d.textContent=String(s); return d.innerHTML; }
 
 // ================================================================
 // STATE & AUTH
 // ================================================================
-var currentUser = null; // { nip, nama, role, kelas, mapel, rombel, npsn, sekolah }
-var questions = [];
-var pajQuestions = []; 
+var currentUser = null; 
+var questions = []; // Bank Soal SAT (Questions)
+var pajQuestions = []; // Bank Soal PAJ (Questions_paj) - INTEGRATED
 var students = []; 
 var examTokens = []; 
 var results = []; 
-var usersCache = []; // Cache data user untuk cek login cepat
+var usersCache = []; 
 
 var unsubQ = null, unsubPAJ = null, unsubSiswa = null, unsubToken = null, unsubResult = null, unsubGuru = null;
 
@@ -403,7 +407,6 @@ function switchAuthTab(tab){
     if(tab==='login'){
         document.getElementById('formLogin').classList.remove('hidden');
         document.getElementById('tabLogin').className = 'flex-1 py-2 text-sm font-bold rounded-md transition-all bg-kopAccent text-kop';
-        // Reset field sekolah saat pindah tab
         document.getElementById('loginSchoolName').value = "";
         document.getElementById('loginSchoolName').style.color = "#e8ecf1";
         document.getElementById('loginSchoolName').disabled = true;
@@ -427,21 +430,15 @@ function toggleRegFields(){
     }
 }
 
-// Populate Mapel Select for Registration (Exclude PAI/PJOK)
 function initRegMapel(){
     var sel = document.getElementById('regMapel');
     var h = '<option value="">-- Pilih Mapel --</option>';
     MAPEL_LIST.forEach(function(m){
-        if(m.id !== 'pai' && m.id !== 'pjok'){
-            h += '<option value="'+m.id+'">'+m.nama+'</option>';
-        }
+        h += '<option value="'+m.id+'">'+m.nama+'</option>';
     });
     sel.innerHTML = h;
 }
 
-// ================================================================
-// FITUR CEK NAMA SEKOLAH SAAT LOGIN
-// ================================================================
 function checkSchoolName(){
     var npsn = document.getElementById('loginNpsn').value.trim();
     var schoolInput = document.getElementById('loginSchoolName');
@@ -454,17 +451,14 @@ function checkSchoolName(){
         return;
     }
 
-    // Cari user dengan NPSN tersebut di cache lokal (usersCache)
     var userFound = usersCache.find(function(u){ return u.npsn === npsn; });
     
     if(userFound){
-        // Jika ditemukan, tampilkan nama sekolah
-        schoolInput.value = userFound.sekolah || userFound.nama_sekolah; // Support backward compatible field
-        schoolInput.style.color = "#c9a84c"; // Warna emas (Sudah Terdaftar)
+        schoolInput.value = userFound.sekolah || userFound.nama_sekolah;
+        schoolInput.style.color = "#c9a84c"; 
     } else {
-        // Jika tidak ditemukan, tampilkan status belum terdaftar
         schoolInput.value = "BELUM TERDAFTAR";
-        schoolInput.style.color = "#ef4444"; // Warna merah
+        schoolInput.style.color = "#ef4444"; 
     }
 }
 
@@ -480,14 +474,13 @@ function doRegister(){
     var rombel = document.getElementById('regRombel').value;
     var pass = document.getElementById('regPass').value;
 
-    // Validasi: Tidak validasi NPSN, wajib isi sekolah
     if(!npsn || !sekolah || !nama || !nip || !rombel || !pass){ showToast('Lengkapi semua data!','error'); return; }
 
     var data = {
         nip: nip,
         nama: nama,
         npsn: npsn,
-        sekolah: sekolah, // Menyimpan nama sekolah
+        sekolah: sekolah,
         role: role, 
         rombel: rombel,
         password: pass,
@@ -509,7 +502,6 @@ function doRegister(){
         showToast('Registrasi Berhasil! Silakan Login.');
         switchAuthTab('login');
         document.getElementById('loginNip').value = nip;
-        // Refresh cache user agar cek login langsung update
         usersCache.push(data); 
     }).catch(function(e){
         showToast('Gagal: '+(e.message||'NIP sudah terdaftar'),'error');
@@ -523,24 +515,17 @@ function doLogin(){
     
     if(!nip || !pass){ showToast('Isi NIP dan Password','error'); return; }
 
-    // Validasi NPSN: Jika user ketik NPSN, kita cek apakah ada user dengan NPSN tersebut
-    // Jika field sekolah sudah tertulis "BELUM TERDAFTAR" (merah), berarti NPSN belum pernah dipakai registrasi
     var schoolInputVal = document.getElementById('loginSchoolName').value;
     if(schoolInputVal === "BELUM TERDAFTAR"){
         showToast('NPSN ini belum terdaftar di sistem. Silakan Registrasi terlebih dahulu.','error');
         return;
     }
 
-    // Lanjut cek NIP & Password
     db.collection('users_guru').doc(nip).get().then(function(doc){
         if(!doc.exists){ showToast('NIP tidak ditemukan','error'); return; }
         var data = doc.data();
-        // Opsional: Validasi NPSN di sisi server juga untuk keamanan ekstra
-        // if(data.npsn !== npsn) { showToast('NPSN tidak sesuai dengan akun','error'); return; }
-        
         if(data.password !== pass){ showToast('Password Salah','error'); return; }
         
-        // Login Sukses
         currentUser = data;
         enterMainApp();
     }).catch(function(){ showToast('Error Login','error'); });
@@ -581,53 +566,33 @@ function enterMainApp(){
 }
 
 // ================================================================
-// MENU GENERATOR (UPDATED LOGIC PAJ)
+// MENU GENERATOR (FIXED LOGIC SAT & PAJ)
 // ================================================================
 function generateMenu(){
     var nav = document.getElementById('sidebarNav');
     var html = '';
     
+    // MENU UTAMA
     html += '<div class="nav-header">Utama</div>';
     html += '<div class="nav-item active" data-page="dashboard"><i class="fas fa-th-large w-5 text-center"></i>Dashboard</div>';
     html += '<div class="nav-item" data-page="data-siswa"><i class="fas fa-users w-5 text-center"></i>Data Siswa</div>';
     
-    // Bank Soal
-    if(currentUser.role === 'kelas'){
-        html += '<div class="nav-header mt-4">Bank Soal</div>';
-        html += '<div class="nav-item" data-page="bank-soal"><i class="fas fa-book w-5 text-center"></i>Bank Soal</div>';
-    } else if (currentUser.role === 'pai'){
-        html += '<div class="nav-header mt-4">Bank Soal PAI</div>';
-        html += '<div class="nav-item" data-page="bank-soal"><i class="fas fa-book w-5 text-center text-info"></i>Bank Soal PAI</div>';
-    } else if (currentUser.role === 'pjok'){
-        html += '<div class="nav-header mt-4">Bank Soal PJOK</div>';
-        html += '<div class="nav-item" data-page="bank-soal"><i class="fas fa-book w-5 text-center text-success"></i>Bank Soal PJOK</div>';
-    }
+    // --- KELOMPOK: BANK SOAL & UJIAN SAT ---
+    // Muncul untuk SEMUA GURU
+    html += '<div class="nav-header mt-4">Bank Soal & Ujian SAT</div>';
+    html += '<div class="nav-item" data-page="bank-soal"><i class="fas fa-book w-5 text-center"></i>Bank Soal SAT</div>';
+    html += '<div class="nav-item" data-page="token"><i class="fas fa-key w-5 text-center"></i>Token Ujian</div>';
+    html += '<div class="nav-item" data-page="koreksi"><i class="fas fa-check-double w-5 text-center"></i>Koreksi & Nilai</div>';
 
-    // Ujian Regular
-    if(currentUser.role === 'kelas'){
-        html += '<div class="nav-header mt-4">Ujian</div>';
-        html += '<div class="nav-item" data-page="token"><i class="fas fa-key w-5 text-center"></i>Token & Jadwal</div>';
-        html += '<div class="nav-item" data-page="koreksi"><i class="fas fa-check-double w-5 text-center"></i>Koreksi & Nilai</div>';
-    } else if (currentUser.role === 'pai'){
-        html += '<div class="nav-header mt-4">Ujian PAI</div>';
-        html += '<div class="nav-item" data-page="token"><i class="fas fa-key w-5 text-center text-info"></i>Token PAI</div>';
-        html += '<div class="nav-item" data-page="koreksi"><i class="fas fa-check-double w-5 text-center text-info"></i>Nilai PAI</div>';
-    } else if (currentUser.role === 'pjok'){
-        html += '<div class="nav-header mt-4">Ujian PJOK</div>';
-        html += '<div class="nav-item" data-page="token"><i class="fas fa-key w-5 text-center text-success"></i>Token PJOK</div>';
-        html += '<div class="nav-item" data-page="koreksi"><i class="fas fa-check-double w-5 text-center text-success"></i>Nilai PJOK</div>';
-    }
+    // --- KELOMPOK: PENILAIAN AKHIR JENJANG (PAJ) ---
+    // Logika: Muncul JIKA (Guru Kelas 6) ATAU (Guru PAI / PJOK)
+    var showPAJ = false;
+    if(currentUser.role === 'kelas' && currentUser.kelas === 'Kelas 6') showPAJ = true;
+    if(currentUser.role === 'pai' || currentUser.role === 'pjok') showPAJ = true;
 
-    // Logic PAJ Kelas 6
-    var isTeachingGrade6 = false;
-    if(currentUser.role === 'kelas' && currentUser.kelas === 'Kelas 6'){
-        isTeachingGrade6 = true;
-    } else if (currentUser.role === 'pai' || currentUser.role === 'pjok') {
-        isTeachingGrade6 = true;
-    }
-
-    if(isTeachingGrade6){
-        html += '<div class="nav-header mt-4 text-danger">Ujian PAJ (Kls 6)</div>';
+    if(showPAJ){
+        html += '<div class="nav-header mt-4 text-danger">Penilaian Akhir Jenjang</div>';
+        html += '<div class="nav-item paj-item" data-page="bank-soal-paj"><i class="fas fa-book w-5 text-center"></i>Bank Soal PAJ</div>';
         html += '<div class="nav-item paj-item" data-page="token-paj"><i class="fas fa-key w-5 text-center"></i>Token PAJ</div>';
         html += '<div class="nav-item paj-item" data-page="koreksi-paj"><i class="fas fa-check-double w-5 text-center"></i>Nilai PAJ</div>';
     }
@@ -645,37 +610,58 @@ function generateMenu(){
 }
 
 // ================================================================
-// MAIN APP LOGIC (FILTERED)
+// MAIN APP LOGIC (INTEGRATED LISTENERS)
 // ================================================================
 function initFirebaseListeners(){
-    // Listener untuk cache user (Login Page)
+    // Listener Guru (Untuk Login NPSN)
     unsubGuru = db.collection('users_guru').onSnapshot(function(snap){
         usersCache = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
-        // Panggil ulang fungsi cek sekolah jika user sedang ngetik di form login
         var npsn = document.getElementById('loginNpsn')?.value;
         if(npsn && document.getElementById('loginNpsn').offsetParent !== null) {
             checkSchoolName();
         }
     });
 
-    // Listener Soal
+    // 1. Listener Soal SAT (Questions)
+    // Diakses oleh: Guru Kelas (Filter Mapel & Kelas) DAN Guru PAI/PJOK (Filter Mapel)
     var qRef = db.collection('questions');
-    if(currentUser.role === 'kelas'){
-        qRef = qRef.where('mapel','==',currentUser.mapel).where('kelas','==',currentUser.kelas);
-    } else {
-        qRef = qRef.where('mapel','==',currentUser.mapel); 
-    }
     
+    if(currentUser.role === 'kelas'){
+        // Guru Kelas: Ambil soal mapelnya & kelasnya
+        qRef = qRef.where('mapel','==',currentUser.mapel).where('kelas','==',currentUser.kelas);
+    } else if (currentUser.role === 'pai' || currentUser.role === 'pjok') {
+        // Guru PAI/PJOK: Ambil soal mapelnya (Kelas bebas/tidak difilter kelas karena ujian SAT bisa lintas kelas)
+        qRef = qRef.where('mapel','==',currentUser.mapel);
+    } else {
+        // Admin atau lainnya: Ambil semua
+        qRef = qRef;
+    }
+
     unsubQ = qRef.orderBy('createdAt','asc').onSnapshot(function(snap){
         questions = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
         refreshCurrentView();
     });
 
-    unsubPAJ = db.collection('questions_paj').orderBy('createdAt','asc').onSnapshot(function(snap){
+    // 2. Listener Soal PAJ (Questions_paj) - INTEGRASI
+    // Diakses oleh: Guru Kelas 6 DAN Guru PAI/PJOK
+    var pajRef = db.collection('questions_paj');
+    
+    if(currentUser.role === 'kelas' && currentUser.kelas === 'Kelas 6'){
+        // Guru Kelas 6: Ambil soal PAJ kelas 6 (semua mapel untuk melihat soal PAJ siswa)
+        pajRef = pajRef.where('kelas','==','Kelas 6'); 
+    } else if (currentUser.role === 'pai' || currentUser.role === 'pjok') {
+        // Guru PAI/PJOK: Ambil soal PAJ untuk mapelnya khusus Kelas 6
+        pajRef = pajRef.where('mapel','==',currentUser.mapel).where('kelas','==','Kelas 6');
+    } else {
+        pajRef = pajRef.where('kelas','==','null_impossible'); // Kosongkan jika tidak berhak
+    }
+    
+    unsubPAJ = pajRef.orderBy('createdAt','asc').onSnapshot(function(snap){
         pajQuestions = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
         refreshCurrentView();
     });
 
+    // Listener Siswa, Token, Result (Standard)
     unsubSiswa = db.collection('students').orderBy('nama','asc').onSnapshot(function(snap){
         students = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
         refreshCurrentView();
@@ -699,12 +685,14 @@ function refreshCurrentView(){
     switch(activePage){
         case 'dashboard': renderDashboard(c); break;
         case 'data-siswa': renderDataSiswa(c); break;
-        case 'bank-soal': renderBankSoal(c); break;
-        case 'token': renderToken(c, false); break;
-        case 'token-paj': renderToken(c, true); break;
-        case 'koreksi': renderKoreksi(c, false); break;
-        case 'koreksi-paj': renderKoreksi(c, true); break;
-        case 'print': renderPrint(c, false); break;
+        case 'bank-soal': renderBankSoal(c, false); break; // SAT
+        case 'bank-soal-paj': renderBankSoal(c, true); break; // PAJ
+        case 'token': renderToken(c, false); break; // SAT
+        case 'token-paj': renderToken(c, true); break; // PAJ
+        case 'koreksi': renderKoreksi(c, false); break; // SAT
+        case 'koreksi-paj': renderKoreksi(c, true); break; // PAJ
+        case 'print': renderPrint(c, false); break; // Default SAT
+        case 'print-paj': renderPrint(c, true); break; // PAJ
         case 'kisi': renderKisi(c); break;
     }
 }
@@ -714,7 +702,7 @@ function navigateTo(page){
     var t = document.querySelector('.nav-item[data-page="'+page+'"]');
     if(t) t.classList.add('active');
     
-    var titles = {dashboard:'Dashboard','data-siswa':'Data Siswa','bank-soal':'Bank Soal','token':'Token Ujian','token-paj':'Token PAJ','koreksi':'Koreksi & Nilai','koreksi-paj':'Nilai PAJ','print':'Cetak Naskah','kisi':'Kisi-Kisi'};
+    var titles = {dashboard:'Dashboard','data-siswa':'Data Siswa','bank-soal':'Bank Soal SAT','bank-soal-paj':'Bank Soal PAJ','token':'Token Ujian','token-paj':'Token PAJ','koreksi':'Koreksi & Nilai','koreksi-paj':'Nilai PAJ','print':'Cetak Naskah','print-paj':'Cetak Naskah PAJ','kisi':'Kisi-Kisi'};
     document.getElementById('pageTitle').textContent = titles[page] || page;
     refreshCurrentView();
 }
@@ -730,38 +718,31 @@ function renderDashboard(c){
 
     c.innerHTML = '<div class="fade-in grid grid-cols-2 md:grid-cols-4 gap-4">' +
         '<div class="card text-center border-l-4 border-info"><div class="text-3xl font-bold text-info">'+totalSiswa+'</div><div class="text-xs text-muted mt-1">Total Siswa</div></div>' +
-        '<div class="card text-center border-l-4 border-kopAccent"><div class="text-3xl font-bold text-kopAccent">'+mySAT+'</div><div class="text-xs text-muted mt-1">Soal Tersedia</div></div>' +
+        '<div class="card text-center border-l-4 border-kopAccent"><div class="text-3xl font-bold text-kopAccent">'+mySAT+'</div><div class="text-xs text-muted mt-1">Soal SAT</div></div>' +
         '<div class="card text-center border-l-4 border-danger"><div class="text-3xl font-bold text-danger">'+myPAJ+'</div><div class="text-xs text-muted mt-1">Soal PAJ</div></div>' +
         '<div class="card text-center border-l-4 border-success"><div class="text-3xl font-bold text-success">'+myResults+'</div><div class="text-xs text-muted mt-1">Hasil Masuk</div></div>' +
     '</div>';
 }
 
-function renderBankSoal(c){
-    var title = currentUser.role === 'kelas' ? 'Bank Soal ('+getMapelName(currentUser.mapel)+')' : 'Bank Soal';
-    
-    var extraFilter = '';
-    if(currentUser.role !== 'kelas'){
-        extraFilter = '<div class="mb-4"><label class="text-xs text-muted mb-1 block">Filter Kelas (View)</label><select id="bankFilterKelas" class="input-field" onchange="renderBankList()"><option value="">Semua Kelas</option>'+KELAS_LIST.map(k=>'<option value="'+k+'">'+k+'</option>').join('')+'</select></div>';
-    }
+function renderBankSoal(c, isPAJ){
+    var title = isPAJ ? 'Bank Soal PAJ' : 'Bank Soal SAT';
+    var dataList = isPAJ ? pajQuestions : questions;
 
     c.innerHTML = '<div class="fade-in card">' +
-        '<h3 class="font-display text-lg font-bold text-light mb-4">'+title+'</h3>' +
-        extraFilter +
+        '<div class="flex justify-between items-center mb-4">' +
+            '<h3 class="font-display text-lg font-bold text-light">'+title+'</h3>' +
+            '<button onclick="showToast(\'Silakan gunakan Panel Admin untuk menambah soal secara manual.\', \'info\')" class="btn-primary text-xs"><i class="fas fa-info-circle"></i> Info Input</button>' +
+        '</div>' +
         '<div id="bankListContainer" class="space-y-2 max-h-[70vh] overflow-y-auto pr-2"></div></div>';
     
-    setTimeout(renderBankList, 100);
+    setTimeout(function(){ renderBankList(dataList, document.getElementById('bankListContainer')); }, 100);
 }
 
-function renderBankList(){
-    var container = document.getElementById('bankListContainer');
-    var list = questions; 
-    
-    if(currentUser.role !== 'kelas' && currentUser.role !== 'admin'){
-        var kelas = document.getElementById('bankFilterKelas').value;
-        if(kelas) list = list.filter(q=>q.kelas===kelas);
+function renderBankList(list, container){
+    if(!list.length){ 
+        container.innerHTML='<div class="text-center py-10 text-muted bg-dark/20 rounded border border-dashed border-border"><i class="fas fa-inbox text-4xl mb-3 block opacity-30"></i>Belum ada soal di bank ini.</div>'; 
+        return; 
     }
-
-    if(list.length===0){ container.innerHTML='<p class="text-center text-muted py-10">Belum ada soal.</p>'; return; }
     container.innerHTML = list.map(function(q){
         var badge = q.type==='pg' ? 'bg-kopAccent/20 text-kopAccent' : 'bg-info/20 text-info';
         return '<div class="p-3 bg-dark/30 rounded border-l-2 border-'+(q.type==='pg'?'kopAccent':'info')+' flex justify-between items-start">' +
@@ -776,8 +757,7 @@ function renderDataSiswa(c){
         '<div class="flex flex-wrap gap-4 mb-4">' +
             '<input type="text" id="addNama" class="input-field flex-1" placeholder="Nama Siswa">' +
             '<input type="text" id="addNisn" class="input-field w-40" placeholder="NISN">' +
-            '<select id="addKelas" class="input-field w-40">'+makeKelasOpt(currentUser.kelas)+'</select>' +
-            '<select id="addRombel" class="input-field w-32"><option value="A">A</option><option value="B">B</option><option value="C">C</option></select>' +
+            '<select id="addKelas" class="input-field w-40"><option value="">Pilih Kelas</option>'+KELAS_LIST.map(k=>'<option value="'+k+'">'+k+'</option>').join('')+'</select>' +
             '<button onclick="addSiswa()" class="btn-primary"><i class="fas fa-plus"></i> Tambah</button>' +
         '</div>' +
         '<div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-dark/50 text-muted"><tr><th class="p-2">Nama</th><th class="p-2">NISN</th><th class="p-2">Kelas</th><th class="p-2 text-center">Aksi</th></tr></thead><tbody id="siswaTableBody"></tbody></table></div>' +
@@ -802,31 +782,16 @@ function addSiswa(){
     var nama = document.getElementById('addNama').value.trim();
     var nisn = document.getElementById('addNisn').value.trim();
     var kelas = document.getElementById('addKelas').value;
-    var rombel = document.getElementById('addRombel').value;
     if(!nama || !nisn || !kelas){ showToast('Lengkapi data','error'); return; }
+    // Default rombel A jika guru kelas, atau input manual (sederhana)
+    var rombel = currentUser.role === 'kelas' ? currentUser.rombel : 'A'; 
     db.collection('students').add({nama,nisn,kelas,rombel,createdAt:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){ showToast('Siswa ditambahkan'); document.getElementById('addNama').value=''; }).catch();
 }
 function delSiswa(id){ if(confirm('Hapus siswa?')) db.collection('students').doc(id).delete().then(()=>showToast('Terhapus')).catch(); }
 
-function makeKelasOpt(def){
-    if(currentUser.role === 'kelas') return '<option value="'+currentUser.kelas+'" selected>'+currentUser.kelas+'</option>';
-    var h = '<option value="">-- Pilih --</option>';
-    KELAS_LIST.forEach(function(k){ h += '<option value="'+k+'"'+(k===def?' selected':'')+'>'+k+'</option>'; });
-    return h;
-}
-
-// (Fungsi Token, Koreksi, Print, Kisi sama seperti sebelumnya, saya singkat di sini agar kode tidak terlalu panjang)
-// Kode lengkapnya sudah ada di blok utama di atas.
-
-// Logic Token & Koreksi tetap sama...
+// Logic Token & Koreksi
 function renderToken(c, isPAJ){
     var title = isPAJ ? 'Token PAJ' : 'Token Ujian';
-    if(isPAJ){
-        var allowed = false;
-        if(currentUser.role === 'kelas' && currentUser.kelas === 'Kelas 6') allowed = true;
-        if(currentUser.role === 'pai' || currentUser.role === 'pjok') allowed = true;
-        if(!allowed){ c.innerHTML='<div class="text-center p-10 text-muted">Akses PAJ hanya untuk pengajar Kelas 6.</div>'; return; }
-    }
     c.innerHTML = '<div class="fade-in card">' +
         '<h3 class="font-display text-lg font-bold text-light mb-4">'+title+'</h3>' +
         '<div class="grid md:grid-cols-4 gap-4 mb-6 bg-dark/30 p-4 rounded">' +
@@ -856,12 +821,6 @@ function genToken(isPAJ){
 function delToken(id){ if(confirm('Hapus token?')) db.collection('exam_tokens').doc(id).delete().then(()=>showToast('Terhapus')).catch(); }
 
 function renderKoreksi(c, isPAJ){
-    if(isPAJ){
-        var allowed = false;
-        if(currentUser.role === 'kelas' && currentUser.kelas === 'Kelas 6') allowed = true;
-        if(currentUser.role === 'pai' || currentUser.role === 'pjok') allowed = true;
-        if(!allowed){ c.innerHTML='<div class="text-center p-10 text-muted">Akses PAJ hanya untuk pengajar Kelas 6.</div>'; return; }
-    }
     c.innerHTML = '<div class="fade-in grid md:grid-cols-2 gap-6">' +
         '<div class="card h-fit"><h3 class="font-bold text-kopAccent mb-4">Aksi Cetak</h3>' +
             '<button onclick="printLoginCards('+isPAJ+')" class="btn-secondary w-full mb-2"><i class="fas fa-id-card mr-2"></i>Kartu Login</button>' +
@@ -933,14 +892,10 @@ function printNilai(isPAJ){
     w.document.write('</body></html>');
     w.document.close();
 }
+
+// PRINT SOAL (FIXED: NO INDICATOR)
 function renderPrint(c, isPAJ){
-    var title = isPAJ ? 'Cetak Soal PAJ' : 'Cetak Soal Ujian';
-    if(isPAJ){
-        var allowed = false;
-        if(currentUser.role === 'kelas' && currentUser.kelas === 'Kelas 6') allowed = true;
-        if(currentUser.role === 'pai' || currentUser.role === 'pjok') allowed = true;
-        if(!allowed){ c.innerHTML='<div class="text-center p-10 text-muted">Akses PAJ hanya untuk pengajar Kelas 6.</div>'; return; }
-    }
+    var title = isPAJ ? 'Cetak Soal PAJ' : 'Cetak Soal SAT';
     c.innerHTML = '<div class="fade-in no-print">' +
         '<div class="card mb-6">' +
             '<h3 class="font-display text-lg font-bold text-light mb-4"><i class="fas fa-print mr-2 text-kopAccent"></i>'+title+'</h3>' +
@@ -963,8 +918,8 @@ function refreshPrintPreview(isPAJ){
 
     var html = '<div class="print-preview-sheet"><div class="print-page">' +
         '<div class="kop-surat"><div style="display:flex;align-items:center;justify-content:center;gap:20px"><img src="'+logo+'" alt="Logo" style="height:80px"><div style="text-align:center"><h1 style="font-size:16pt;font-weight:bold;text-transform:uppercase;margin:0">PEMERINTAH KABUPATEN MAJALENGKA</h1><h2 style="font-size:18pt;font-weight:bold;text-transform:uppercase;margin:0">KOREK API KECAMATAN MAJALENGKA</h2></div></div></div>' +
-        '<div style="text-align:center;margin-bottom:20px"><h3 style="font-size:14pt;font-weight:bold;text-decoration:underline;text-transform:uppercase;margin:0">'+(isPAJ?'Penilaian Akhir Jenjang (PAJ)':'Sumatif Akhir Tahun')+'</h3><p style="font-size:12pt;margin:5px 0;font-weight:bold">'+getMapelName(isPAJ?'pai':currentUser.mapel)+'</p></div>' +
-        '<div style="margin-bottom:20px"><table style="width:100%;font-size:12pt"><tr><td width="100">Nama</td><td width="12">:</td><td style="border-bottom:1px dotted #000"></td></tr><tr><td>Kelas</td><td>:</td><td>'+(isPAJ?'Kelas 6':currentUser.kelas)+'</td></tr><tr><td>Rombel</td><td>:</td><td>'+currentUser.rombel+'</td></tr></table></div>';
+        '<div style="text-align:center;margin-bottom:20px"><h3 style="font-size:14pt;font-weight:bold;text-decoration:underline;text-transform:uppercase;margin:0">'+(isPAJ?'Penilaian Akhir Jenjang (PAJ)':'Sumatif Akhir Tahun')+'</h3><p style="font-size:12pt;margin:5px 0 0;font-weight:bold">'+getMapelName(isPAJ?'pai':currentUser.mapel)+'</p></div>' +
+        '<div style="margin-bottom:20px"><table style="width:100%;font-size:12pt"><tr><td width="100">Nama</td><td width="12">:</td><td style="border-bottom:1px dotted #000"></td></tr><tr><td>Kelas</td><td>:</td><td>'+(isPAJ?'Kelas 6':currentUser.kelas)+'</td></tr><tr><td>Rombel</td><td>:</td><td>'+currentUser.rombel+'</td></tr><tr><td>Hari / Tanggal</td><td>:</td><td class="dot-cell"></td></tr></table></div>';
     if(tp) html += '<div style="margin-bottom:20px;padding:10px;border-left:4px solid #000;background:#f9f9f9"><strong>Tujuan Pembelajaran:</strong><br><em>'+escHtml(tp)+'</em></div>';
 
     if(pg.length){
@@ -995,7 +950,7 @@ function doPrintSoal(isPAJ){
     var doc=iframe.contentDocument||iframe.contentWindow.document;
     doc.open();
     doc.write('<!DOCTYPE html><html><head><title>Cetak</title>');
-    doc.write('<style>@page{size:A4 portrait;margin:1.5cm 2cm 2cm 2cm}body{margin:0;padding:0;font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.4;color:black;background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact}.kop-surat{text-align:center;padding-bottom:12px;margin-bottom:24px;border-bottom:3px double #000}.kop-surat img{height:80px}.section-heading{font-weight:bold;font-size:12pt;border-bottom:2px solid #000;padding-bottom:4px;margin-bottom:10px}.soal-item{margin-bottom:20px;page-break-inside:avoid}.soal-num{float:left;font-weight:bold;width:30px}.soal-text{margin-left:30px}.opsi-wrapper{margin-left:30px;margin-top:5px}.opsi-row{margin-bottom:5px}.answer-lines{margin-left:30px;border:1px dashed #bbb;height:80px;background:#fafafa}.clearfix::after{content:"";display:table;clear:both}');
+    doc.write('<style>@page{size:A4 portrait;margin:1.5cm 2cm 2cm 2cm}body{margin:0;padding:0;font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.4;color:black;background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact}.kop-surat{text-align:center;padding-bottom:12px;margin-bottom:24px;border-bottom:3px double #000}.kop-surat img{height:80px}.section-heading{font-weight:bold;font-size:12pt;border-bottom:2px solid #000;padding-bottom:4px;margin-bottom:10px;text-align:left}.soal-item{margin-bottom:20px;page-break-inside:avoid}.soal-num{float:left;font-weight:bold;width:35px;flex-shrink:0}.soal-text{margin-left:35px;display:block}.opsi-wrapper{margin-top:8px;display:grid;grid-template-columns:1fr 1fr;column-gap:24px;row-gap:6px;margin-left:35px}.opsi-row{margin-bottom:5px;display:flex;align-items:flex-start;gap:8px;font-size:12pt}.opsi-label{font-weight:bold;min-width:20px;flex-shrink:0;}.opsi-label::after{content:"."}.answer-lines{margin-top:8px;margin-left:35px;border:1px dashed #bbb;height:80px;border-radius:4px;background-color:#fafafa}.clearfix::after{content:"";display:table;clear:both}.ttd-section{display:none}');
     doc.write('</style></head><body>');
     doc.write(sheet.innerHTML);
     doc.write('</body></html>');
@@ -1009,7 +964,7 @@ function doPrintSoal(isPAJ){
 function renderKisi(c){
     c.innerHTML = '<div class="fade-in no-print card"><h3 class="font-bold text-kopAccent mb-4">Kisi-Kisi Soal</h3><div id="kisiPrev" class="print-preview-wrap"></div></div>';
     var qList = questions; 
-    var html = '<div class="print-preview-sheet"><table class="print-table" style="width:100%;border-collapse:collapse;margin-top:12px;font-size:10pt"><thead><tr><th style="border:1px solid #000;padding:6px">No</th><th style="border:1px solid #000;padding:6px">TP</th><th style="border:1px solid #000;padding:6px">Indikator</th><th style="border:1px solid #000;padding:6px">Tipe</th><th style="border:1px solid #000;padding:6px">Skor</th></tr></thead><tbody>';
+    var html = '<div class="print-preview-sheet"><table class="print-table" style="width:100%;border-collapse:collapse;margin-top:12px;font-size:10pt;table-layout:fixed"><thead><tr><th style="border:1px solid #000;padding:6px">No</th><th style="border:1px solid #000;padding:6px">TP</th><th style="border:1px solid #000;padding:6px">Indikator</th><th style="border:1px solid #000;padding:6px">Tipe</th><th style="border:1px solid #000;padding:6px">Skor</th></tr></thead><tbody>';
     qList.forEach(function(q,i){ html+='<tr><td style="text-align:center;border:1px solid #000;padding:6px">'+(i+1)+'</td><td style="border:1px solid #000;padding:6px">'+escHtml(q.tp||'-')+'</td><td style="border:1px solid #000;padding:6px">'+escHtml(q.indicator||'-')+'</td><td style="text-align:center;border:1px solid #000;padding:6px">'+(q.type==='pg'?'PG':'Uraian')+'</td><td style="text-align:center;border:1px solid #000;padding:6px">'+q.score+'</td></tr>'; });
     html+='</tbody></table></div>';
     document.getElementById('kisiPrev').innerHTML=html;
