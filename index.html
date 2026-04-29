@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistem Ujian Sekolah - Panel Guru (Read Only)</title>
+<title>Panel Guru - Sistem Ujian Sekolah</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -15,23 +15,26 @@
 tailwind.config={
     theme:{
         extend:{
-            colors:{
-                kop:'#1a2744',
-                kopAccent:'#c9a84c',
-                dark:'#0f1923',
-                card:'#182538',
-                cardHover:'#1f3350',
-                border:'#2a3f5f',
-                muted:'#7a8ba5',
-                light:'#e8ecf1',
-                success:'#22c55e',
-                danger:'#ef4444',
-                warning:'#f59e0b',
-                info:'#06b6d4'
-            },
             fontFamily:{
                 display:['Playfair Display','serif'],
-                body:['Source Sans 3','sans-serif']
+                sans:['Inter','sans-serif']
+            },
+            colors:{
+                brand: {
+                    50:'#f0fdfa',
+                    100:'#ccfbf1',
+                    200:'#99f6e4',
+                    300:'#5eead4',
+                    400:'#2dd4bf',
+                    500:'#14b8a6',
+                    600:'#0d9488',
+                    700:'#0f766e',
+                    800:'#115e59',
+                    900:'#134e4a',
+                },
+                dark: '#0f172a',
+                card: '#1e293b',
+                border: '#334155'
             }
         }
     }
@@ -39,115 +42,126 @@ tailwind.config={
 </script>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min-height:100vh}
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#182538}::-webkit-scrollbar-thumb{background:#2a3f5f;border-radius:3px}
+body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #1e293b; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
 
-/* Login Layout */
-.login-container{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f1923 0%,#1a2744 100%);position:relative;overflow:hidden}
-.login-bg-blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.4}
-.blob-1{width:400px;height:400px;background:#c9a84c;top:-100px;left:-100px}
-.blob-2{width:300px;height:300px;background:#06b6d4;bottom:-50px;right:-50px}
-.login-card{background:rgba(24,37,56,0.9);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);padding:2.5rem;border-radius:1.5rem;width:100%;max-w-md;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);position:relative;z-index:10}
-
-/* Main Layout */
-.sidebar{width:260px;min-height:100vh;background:linear-gradient(180deg,#1a2744 0%,#0f1923 100%);border-right:1px solid #2a3f5f;position:fixed;left:0;top:0;z-index:40;transition:transform .3s ease;overflow-y:auto}
-.main-content{margin-left:260px;transition:margin-left .3s ease}
-.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:35;display:none}
-.sidebar-overlay.active{display:block}
-
-/* Nav Items */
-.nav-header{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#4b5563;font-weight:700;margin:16px 20px 8px 20px}
-.nav-item{padding:11px 20px;cursor:pointer;border-left:3px solid transparent;transition:all .2s;display:flex;align-items:center;gap:12px;font-size:14px;color:#7a8ba5;user-select:none}
-.nav-item:hover{background:rgba(42,63,95,0.3);color:#e8ecf1}
-.nav-item.active{background:rgba(201,168,76,0.08);border-left-color:#c9a84c;color:#c9a84c;font-weight:600}
-
-/* Styling for PAJ Items */
-.nav-item.paj-item { border-left-color: #ef4444; color: #ef4444; font-weight: 600; }
-.nav-item.paj-item:hover { background: rgba(239, 68, 68, 0.1); color: #f87171; }
-
-/* Buttons & Inputs */
-.btn-primary{background:linear-gradient(135deg,#c9a84c,#b8943f);color:#1a2744;font-weight:700;padding:10px 24px;border-radius:8px;border:none;cursor:pointer;transition:all .2s;font-size:14px;display:inline-flex;align-items:center;justify-content:center}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(201,168,76,0.3)}
-.btn-primary:disabled{opacity:0.6;cursor:not-allowed}
-.btn-secondary{background:transparent;border:1px solid #2a3f5f;color:#e8ecf1;padding:8px 16px;border-radius:8px;cursor:pointer;transition:all .2s;font-size:14px;display:inline-flex;align-items:center;justify-content:center}
-.btn-secondary:hover{border-color:#c9a84c;color:#c9a84c}
-.btn-danger{background:rgba(239,68,68,0.1);border:1px solid #ef4444;color:#ef4444;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .2s}
-.btn-danger:hover{background:#ef4444;color:white}
-.btn-link{background:transparent;color:#9ca3af;padding:0;text-decoration:underline;cursor:pointer;font-size:12px}
-.btn-link:hover{color:#e5e7eb}
-
-.input-field{background:#0f1923;border:1px solid #2a3f5f;color:#e8ecf1;padding:10px 14px;border-radius:8px;width:100%;font-size:14px;transition:border-color .2s}
-.input-field:focus{outline:none;border-color:#c9a84c;box-shadow:0 0 0 2px rgba(201,168,76,0.15)}
-.card{background:#182538;border:1px solid #2a3f5f;border-radius:12px;padding:20px}
-.loading-spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:#c9a84c;animation:spin 1s ease-in-out infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* Toast */
-.toast{position:fixed;top:20px;right:20px;z-index:9999;padding:14px 20px;border-radius:10px;font-size:14px;font-weight:600;animation:slideIn .3s ease;max-width:400px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
-.toast-success{background:#166534;color:white;border:1px solid #22c55e}
-.toast-error{background:#7f1d1d;color:white;border:1px solid #ef4444}
-@keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
-
-/* Print Styles */
-@media print {
-    @page { size: A4 portrait; margin: 1.5cm 2cm 2cm 2cm; }
-    body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-family: 'Times New Roman', Times, serif !important; font-size: 12pt; line-height: 1.4; }
-    #sidebar, #mainArea > header, .sidebar-overlay, .no-print, #toastContainer, .login-container, .card { display: none !important; }
-    #mainArea { margin: 0 !important; padding: 0 !important; width: 100% !important; height: auto !important; background: white !important; overflow: visible !important; }
-    #pageContent { padding: 0 !important; margin: 0 !important; width: 100% !important; background: white !important; color: black !important; overflow: visible !important; }
-    .print-preview-wrap { display: none !important; }
-    .print-only { display: block !important; }
-    
-    .kop-surat { text-align: center; padding-bottom: 12px; margin-bottom: 24px; border-bottom: 3px double #000; }
-    .kop-text h1 { font-family: 'Times New Roman', serif; font-size: 16pt; font-weight: bold; text-transform: uppercase; margin: 0; }
-    .kop-text h2 { font-family: 'Times New Roman', serif; font-size: 18pt; font-weight: bold; text-transform: uppercase; margin: 0; }
-    .kop-sub { font-size: 10pt; font-style: normal; }
-    
-    .section-heading { font-weight: bold; font-size: 12pt; border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 15px; margin-top: 10px; text-align: left; }
-    .soal-item { margin-bottom: 24px; page-break-inside: avoid; }
-    .soal-num { float: left; font-weight: bold; width: 35px; }
-    .soal-text { margin-left: 35px; display: block; }
-    
-    .opsi-wrapper { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-left: 35px; }
-    .opsi-row { display: flex; align-items: flex-start; gap: 5px; font-size: 12pt; }
-    .opsi-label { font-weight: bold; min-width: 20px; }
-    .opsi-label::after { content: "."; }
-    
-    .answer-lines { margin-top: 8px; margin-left: 35px; border: 1px dashed #bbb; height: 80px; background-color: #fafafa; }
-    .clearfix::after { content: ""; display: table; clear: both; }
-
-    .login-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .login-card-item { border: 2px solid #000; padding: 15px; text-align: center; page-break-inside: avoid; }
-    .lc-header { font-weight: bold; font-size: 14pt; margin-bottom: 10px; border-bottom: 2px solid #000; padding-bottom: 5px; font-family: 'Times New Roman', serif; }
-    .lc-body { font-size: 12pt; margin-bottom: 5px; font-family: 'Times New Roman', serif; text-align: left; }
-    .lc-token { font-size: 18pt; font-weight: bold; letter-spacing: 2px; margin: 10px 0; background: #eee; padding: 8px; border: 1px solid #000; font-family: 'Courier New', monospace; }
+/* LOGIN / REGISTER WRAPPER */
+.login-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: radial-gradient(circle at top right, #0f766e 0%, transparent 40%),
+                radial-gradient(circle at bottom left, #1e3a8a 0%, transparent 40%),
+                #0f172a;
+    padding: 20px;
+}
+.auth-card {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 32px;
+    width: 100%;
+    max-width: 440px; /* Lebar Proporsional & Profesional */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transition: height 0.3s ease;
+}
+.input-group label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.form-input, .form-select {
+    width: 100%;
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: white;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+.form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: #2dd4bf;
+    box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2);
+}
+.form-input:disabled {
+    background: #1e293b;
+    color: #64748b;
+    cursor: not-allowed;
+}
+.btn-auth {
+    width: 100%;
+    background: linear-gradient(135deg, #0d9488, #0f766e);
+    color: white;
+    font-weight: 600;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+}
+.btn-auth:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
+}
+.tab-btn {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #94a3b8;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+.tab-btn.active {
+    color: #2dd4bf;
+    border-bottom-color: #2dd4bf;
 }
 
-/* Print Preview */
-.print-preview-wrap { background: #e5e7eb; padding: 40px; border-radius: 8px; display: flex; justify-content: center; overflow-x: auto; margin-top: 20px; }
-.print-preview-sheet { background: white; color: black; width: 210mm; min-height: 297mm; padding: 1.5cm 2cm 2cm 2cm; box-shadow: 0 4px 20px rgba(0,0,0,0.2); font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.4; }
-.print-preview-sheet .kop-surat { text-align: center; padding-bottom: 12px; margin-bottom: 24px; border-bottom: 3px double #000; }
-.print-preview-sheet .section-heading { font-weight: bold; font-size: 12pt; border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 15px; margin-top: 10px; text-align: left; }
-.print-preview-sheet .soal-item { margin-bottom: 24px; page-break-inside: avoid; }
-.print-preview-sheet .soal-num { float: left; font-weight: bold; width: 35px; }
-.print-preview-sheet .soal-text { margin-left: 35px; display: block; }
-.print-preview-sheet .opsi-wrapper { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-left: 35px; }
-.print-preview-sheet .opsi-row { display: flex; align-items: flex-start; gap: 5px; font-size: 12pt; }
-.print-preview-sheet .opsi-label { font-weight: bold; min-width: 20px; }
-.print-preview-sheet .opsi-label::after { content: '.'; } 
-.print-preview-sheet .answer-lines { margin-top: 8px; margin-left: 35px; border: 1px dashed #ccc; height: 80px; background-color: #fafafa; }
-.print-preview-sheet .login-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-.print-preview-sheet .login-card-item { border: 2px solid #000; padding: 20px; border-radius: 8px; text-align: center; background: white; color: black; margin-bottom: 0; }
-.print-preview-sheet .lc-header { font-weight: bold; font-size: 16pt; margin-bottom: 15px; border-bottom: 3px double #000; padding-bottom: 10px; font-family: 'Times New Roman', serif; }
-.print-preview-sheet .lc-body { font-size: 14pt; margin: 8px 0; font-family: 'Times New Roman', serif; text-align: left; }
-.print-preview-sheet .lc-token { font-size: 20pt; font-weight: bold; letter-spacing: 3px; margin: 15px 0; padding: 10px; border: 2px dashed #000; font-family: 'Courier New', monospace; }
+/* MAIN LAYOUT */
+.sidebar { width: 260px; min-height: 100vh; background: #1e293b; border-right: 1px solid #334155; position: fixed; left: 0; top: 0; z-index: 40; transition: transform 0.3s ease; }
+.main-content { margin-left: 260px; min-height: 100vh; background: #0f172a; }
+.nav-item { padding: 12px 24px; cursor: pointer; color: #94a3b8; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 12px; transition: all 0.2s; border-left: 3px solid transparent; }
+.nav-item:hover { background: #334155; color: #f1f5f9; }
+.nav-item.active { background: rgba(45, 212, 191, 0.1); color: #2dd4bf; border-left-color: #2dd4bf; }
+.nav-header { padding: 16px 24px 8px; font-size: 0.7rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; }
 
-/* Mobile */
-@media(max-width:1023px){
-    .sidebar{transform:translateX(-260px)}
-    .sidebar.mobile-open{transform:translateX(0)}
-    .main-content{margin-left:0!important}
+/* PAJ STYLING */
+.paj-text { color: #f43f5e; }
+.nav-item.paj-active { background: rgba(244, 63, 94, 0.1); color: #f43f5e; border-left-color: #f43f5e; }
+
+/* COMPONENTS */
+.card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px; }
+.stat-card { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; border-radius: 12px; background: #1e293b; border: 1px solid #334155; }
+.stat-value { font-size: 2rem; font-weight: 700; color: white; }
+.stat-label { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; }
+
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 12px; color: #94a3b8; font-weight: 600; font-size: 0.8rem; border-bottom: 1px solid #334155; }
+td { padding: 12px; border-bottom: 1px solid #1e293b; color: #cbd5e1; font-size: 0.9rem; }
+tr:hover td { background: #334155; }
+
+/* TOAST */
+.toast { position: fixed; top: 20px; right: 20px; padding: 16px 24px; border-radius: 8px; color: white; font-weight: 500; z-index: 9999; animation: slideIn 0.3s ease; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* MOBILE */
+@media (max-width: 1024px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.mobile-open { transform: translateX(0); }
+    .main-content { margin-left: 0; }
 }
 </style>
 </head>
@@ -155,174 +169,208 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
 
 <div id="toastContainer"></div>
 
-<!-- =========================
-     LOGIN & REGISTRASI PAGE
+<!-- ========================= 
+     LOGIN & REGISTER PAGE
      ========================= -->
-<div id="loginPage" class="login-container">
-    <div class="login-bg-blob blob-1"></div>
-    <div class="login-bg-blob blob-2"></div>
-    
-    <div class="login-card fade-in">
+<div id="loginPage" class="login-wrapper">
+    <div class="auth-card">
+        <!-- Header -->
         <div class="text-center mb-6">
-            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-kopAccent to-yellow-600 flex items-center justify-center text-kop text-2xl shadow-lg">
-                <i class="fas fa-graduation-cap"></i>
+            <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
+                <i class="fas fa-graduation-cap text-xl"></i>
             </div>
-            <h1 class="font-display text-2xl font-bold text-light">Panel Guru</h1>
-            <p class="text-muted text-sm">Sistem Ujian Sekolah (SAT & PAJ)</p>
+            <h1 class="text-xl font-display font-bold text-white">Panel Guru</h1>
+            <p class="text-slate-400 text-xs mt-1">Sistem Ujian Sekolah Terintegrasi</p>
         </div>
 
-        <!-- Tab Navigasi -->
-        <div class="flex mb-6 bg-dark/50 p-1 rounded-lg">
-            <button onclick="switchAuthTab('login')" id="tabLogin" class="flex-1 py-2 text-sm font-bold rounded-md transition-all bg-kopAccent text-kop">Login</button>
-            <button onclick="switchAuthTab('register')" id="tabRegister" class="flex-1 py-2 text-sm font-bold rounded-md transition-all text-muted hover:text-light">Registrasi</button>
+        <!-- Tabs -->
+        <div class="flex border-b border-border mb-6">
+            <div onclick="switchAuthTab('login')" id="tabLogin" class="tab-btn active">Masuk</div>
+            <div onclick="switchAuthTab('register')" id="tabRegister" class="tab-btn">Daftar Akun</div>
         </div>
 
-        <!-- Form Login -->
+        <!-- FORM LOGIN -->
         <div id="formLogin" class="space-y-4">
-            <div>
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">NPSN Sekolah</label>
-                <input type="text" id="loginNpsn" class="input-field" placeholder="Masukkan NPSN" onkeyup="checkSchoolName()">
+            <div class="input-group">
+                <label>NPSN Sekolah</label>
+                <div class="relative">
+                    <i class="fas fa-school absolute left-3 top-3 text-slate-500 text-sm"></i>
+                    <input type="text" id="loginNpsn" class="form-input pl-9" placeholder="Masukkan NPSN" onkeyup="checkSchoolName()">
+                </div>
             </div>
-            <div>
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">Nama Sekolah</label>
-                <input type="text" id="loginSchoolName" class="input-field" value="" disabled placeholder="Menunggu NPSN..." style="background:#1a2744; opacity:0.7">
+            <div class="input-group">
+                <label>Nama Sekolah</label>
+                <div class="relative">
+                    <i class="fas fa-building absolute left-3 top-3 text-slate-500 text-sm"></i>
+                    <input type="text" id="loginSchoolName" class="form-input pl-9 bg-slate-800/50 border-slate-700 text-slate-400 cursor-not-allowed" disabled placeholder="Menunggu NPSN...">
+                </div>
             </div>
-            <div>
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">NIP / NIK</label>
-                <input type="text" id="loginNip" class="input-field" placeholder="Masukkan NIP / NIK">
+            <div class="input-group">
+                <label>NIP / NIK</label>
+                <div class="relative">
+                    <i class="fas fa-id-card absolute left-3 top-3 text-slate-500 text-sm"></i>
+                    <input type="text" id="loginNip" class="form-input pl-9" placeholder="Nomor Induk Pegawai" onkeydown="if(event.key==='Enter')doLogin()">
+                </div>
             </div>
-            <div>
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">Password</label>
-                <input type="password" id="loginPass" class="input-field" placeholder="Masukkan Password">
+            <div class="input-group">
+                <label>Password</label>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-3 top-3 text-slate-500 text-sm"></i>
+                    <input type="password" id="loginPass" class="form-input pl-9" placeholder="Masukkan Password" onkeydown="if(event.key==='Enter')doLogin()">
+                </div>
             </div>
-            <button onclick="doLogin()" class="btn-primary w-full mt-2">Masuk</button>
-            <div class="text-center mt-3">
-                <button onclick="openResetModal()" class="btn-link">Lupa Password?</button>
+
+            <button onclick="doLogin()" class="btn-auth mt-2">
+                <i class="fas fa-sign-in-alt mr-2"></i> Masuk Panel
+            </button>
+            
+            <div class="text-center mt-4 pt-4 border-t border-slate-700">
+                <button onclick="openResetModal()" class="text-xs text-brand-400 hover:text-brand-300 font-medium transition-colors">Lupa Password?</button>
             </div>
         </div>
 
-        <!-- Form Registrasi -->
+        <!-- FORM REGISTRASI -->
         <div id="formRegister" class="hidden space-y-3">
-            <div>
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">NPSN Sekolah</label>
-                <input type="text" id="regNpsn" class="input-field" placeholder="Contoh: 202xxxxx">
+            <div class="input-group">
+                <label>NPSN Sekolah</label>
+                <input type="text" id="regNpsn" class="form-input" placeholder="Contoh: 202xxxxx">
             </div>
-            <div>
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">Nama Sekolah</label>
-                <input type="text" id="regSchool" class="input-field" placeholder="Nama Lengkap Sekolah">
+            <div class="input-group">
+                <label>Nama Sekolah</label>
+                <input type="text" id="regSchool" class="form-input" placeholder="Nama Lengkap Sekolah">
             </div>
-            <div>
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">Nama Lengkap</label>
-                <input type="text" id="regNama" class="input-field" placeholder="Nama Lengkap & Gelar">
+            <div class="input-group">
+                <label>Nama Lengkap Guru</label>
+                <input type="text" id="regNama" class="form-input" placeholder="Nama & Gelar">
             </div>
-            <div>
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">NIP / NIK</label>
-                <input type="text" id="regNip" class="input-field" placeholder="Nomor Induk Pegawai">
+            <div class="input-group">
+                <label>NIP / NIK</label>
+                <input type="text" id="regNip" class="form-input" placeholder="Nomor Induk">
             </div>
-            <div>
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">Jenis Guru</label>
-                <select id="regRole" class="input-field" onchange="toggleRegFields()">
+            <div class="input-group">
+                <label>Jenis Guru</label>
+                <select id="regRole" class="form-select" onchange="toggleRegFields()">
                     <option value="kelas">Guru Kelas (Wali Kelas)</option>
                     <option value="pai">Guru PAI</option>
                     <option value="pjok">Guru PJOK</option>
                 </select>
             </div>
             
-            <!-- Dinamis: Kelas untuk Guru Kelas -->
+            <!-- DINAMIS: GURU KELAS -->
             <div id="regKelasWrapper">
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">Pilih Kelas Ampu</label>
-                <select id="regKelas" class="input-field">
-                    <option value="Kelas 1">Kelas 1</option>
-                    <option value="Kelas 2">Kelas 2</option>
-                    <option value="Kelas 3">Kelas 3</option>
-                    <option value="Kelas 4">Kelas 4</option>
-                    <option value="Kelas 5">Kelas 5</option>
-                    <option value="Kelas 6">Kelas 6</option>
-                </select>
+                <div class="input-group">
+                    <label>Pilih Kelas Ampu</label>
+                    <select id="regKelas" class="form-select">
+                        <option value="Kelas 1">Kelas 1</option>
+                        <option value="Kelas 2">Kelas 2</option>
+                        <option value="Kelas 3">Kelas 3</option>
+                        <option value="Kelas 4">Kelas 4</option>
+                        <option value="Kelas 5">Kelas 5</option>
+                        <option value="Kelas 6">Kelas 6</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- Dinamis: Mapel untuk Guru Kelas -->
             <div id="regMapelWrapper">
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">Mapel Diampu (Kecuali PAI/PJOK)</label>
-                <select id="regMapel" class="input-field">
-                    <!-- Diisi via JS -->
-                </select>
+                <div class="input-group">
+                    <label>Mapel Diampu (Kecuali PAI/PJOK)</label>
+                    <select id="regMapel" class="form-select">
+                        <!-- Diisi via JS -->
+                    </select>
+                </div>
             </div>
 
-            <!-- Wajib: Rombel -->
-            <div>
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">Pilih Rombel</label>
-                <select id="regRombel" class="input-field">
+            <!-- WAJIB: ROMBEL -->
+            <div class="input-group">
+                <label>Pilih Rombel</label>
+                <select id="regRombel" class="form-select">
                     <option value="A">Rombel A</option>
                     <option value="B">Rombel B</option>
                     <option value="C">Rombel C</option>
                 </select>
             </div>
 
-            <div>
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">Password</label>
-                <input type="password" id="regPass" class="input-field" placeholder="Buat Password Baru">
+            <div class="input-group">
+                <label>Password Baru</label>
+                <input type="password" id="regPass" class="form-input" placeholder="Buat Password">
             </div>
-            <button onclick="doRegister()" class="btn-primary w-full mt-2">Daftar Akun</button>
+            <button onclick="doRegister()" class="btn-auth mt-2">
+                <i class="fas fa-user-plus mr-2"></i> Daftar Akun
+            </button>
         </div>
     </div>
 </div>
 
-<!-- =========================
-     MODAL RESET PASSWORD
-     ========================= -->
-<div id="modalReset" class="modal-overlay hidden">
-    <div class="modal-content" style="background:#182538; border:1px solid #2a3f5f; border-radius:16px; padding:32px; max-width:500px; width:100%;">
-        <h3 class="font-display text-lg font-bold text-light mb-4 text-center">Reset Password</h3>
+<!-- MODAL RESET PASSWORD -->
+<div id="modalReset" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+    <div class="bg-card border border-border p-8 rounded-xl w-full max-w-md shadow-2xl">
+        <h3 class="text-xl font-display font-bold text-white mb-4 text-center">Reset Password</h3>
         <div class="space-y-4">
-            <div>
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">NIP / NIK Terdaftar</label>
-                <input type="text" id="resetNip" class="input-field" placeholder="Masukkan NIP / NIK Anda">
+            <div class="input-group">
+                <label>NIP Terdaftar</label>
+                <input type="text" id="resetNip" class="form-input">
             </div>
-            <div>
-                <label class="text-xs text-muted font-bold uppercase mb-1 block">Password Baru</label>
-                <input type="password" id="resetPass" class="input-field" placeholder="Masukkan Password Baru">
+            <div class="input-group">
+                <label>Password Baru</label>
+                <input type="password" id="resetPass" class="form-input">
             </div>
-            <div class="flex gap-2 pt-2">
-                <button onclick="closeModal()" class="btn-secondary flex-1">Batal</button>
-                <button onclick="doResetPassword()" class="btn-primary flex-1">Reset</button>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeModal()" class="flex-1 bg-slate-700 text-white py-2 rounded-lg hover:bg-slate-600">Batal</button>
+                <button onclick="doResetPassword()" class="flex-1 bg-brand-600 text-white py-2 rounded-lg hover:bg-brand-700">Reset</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- =========================
-     MAIN APP (HIDDEN UNTIL LOGIN)
+<!-- ========================= 
+     MAIN APP 
      ========================= -->
 <div id="mainApp" class="hidden">
-<aside id="sidebar" class="sidebar">
-    <div class="p-5 border-b border-border">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-kopAccent to-yellow-600 flex items-center justify-center flex-shrink-0"><i class="fas fa-chalkboard-teacher text-kop text-lg"></i></div>
-            <div>
-                <h2 class="font-display text-kopAccent font-bold text-sm leading-tight">PANEL GURU</h2>
-                <p id="sidebarInfo" class="text-muted text-xs truncate w-32">Loading...</p>
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar flex flex-col">
+        <div class="p-6 border-b border-border">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-brand-500 flex items-center justify-center flex-shrink-0 text-white">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div>
+                    <h2 class="font-display font-bold text-brand-400 text-sm">PANEL GURU</h2>
+                    <p id="sidebarInfo" class="text-xs text-slate-400 truncate w-32">Loading...</p>
+                </div>
             </div>
         </div>
-    </div>
-    <nav class="py-4" id="sidebarNav">
-        <!-- MENU DINAMIS DIBUAT OLEH JS SESUAI HAK AKSES -->
-    </nav>
-    <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
-        <button onclick="doLogout()" class="btn-secondary w-full text-xs py-2" type="button"><i class="fas fa-sign-out-alt mr-1"></i>Keluar</button>
-    </div>
-</aside>
+        
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebarNav">
+            <!-- MENU INJECTED BY JS -->
+        </nav>
 
-<div id="mainArea" class="main-content min-h-screen">
-    <header class="sticky top-0 z-30 bg-dark/80 backdrop-blur-xl border-b border-border px-4 md:px-6 py-3 flex items-center justify-between no-print">
-        <div class="flex items-center gap-3">
-            <button onclick="toggleSidebar()" class="text-muted hover:text-light transition-colors" type="button"><i class="fas fa-bars text-lg"></i></button>
-            <h2 id="pageTitle" class="font-display text-base md:text-lg font-bold text-light">Dashboard</h2>
+        <div class="p-4 border-t border-border">
+            <button onclick="doLogout()" class="w-full bg-slate-800 text-slate-300 py-2 rounded-lg text-sm hover:bg-slate-700 hover:text-white transition-all border border-slate-700">
+                <i class="fas fa-sign-out-alt mr-2"></i> Keluar
+            </button>
         </div>
-        <div class="flex items-center gap-3"><span id="syncStatus" class="text-xs text-kopAccent"><i class="fas fa-wifi mr-1"></i>Online</span></div>
-    </header>
-    <div class="p-4 md:p-6" id="pageContent"></div>
-</div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="main-content">
+        <!-- HEADER -->
+        <header class="sticky top-0 z-30 bg-card/80 backdrop-blur-xl border-b border-border px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white lg:hidden"><i class="fas fa-bars text-lg"></i></button>
+                <h2 id="pageTitle" class="font-display text-xl font-bold text-white">Dashboard</h2>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="flex h-2 w-2 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+                </span>
+                <span class="text-xs text-brand-400 font-medium">Online</span>
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT -->
+        <div class="p-6" id="pageContent"></div>
+    </main>
 </div>
 
 <script>
@@ -360,11 +408,11 @@ function getMapelName(id){
 function escHtml(s){ if(!s) return ''; var d=document.createElement('div'); d.textContent=String(s); return d.innerHTML; }
 
 // ================================================================
-// STATE & AUTH
+// STATE
 // ================================================================
 var currentUser = null; 
-var questions = []; // Bank Soal SAT (Questions)
-var pajQuestions = []; // Bank Soal PAJ (Questions_paj) - INTEGRATED
+var questions = []; // From 'questions' (SAT)
+var pajQuestions = []; // From 'questions_paj' (PAJ)
 var students = []; 
 var examTokens = []; 
 var results = []; 
@@ -373,45 +421,44 @@ var usersCache = [];
 var unsubQ = null, unsubPAJ = null, unsubSiswa = null, unsubToken = null, unsubResult = null, unsubGuru = null;
 
 // ================================================================
-// MODAL UTILS
-// ================================================================
-function openResetModal(){
-    document.getElementById('modalReset').classList.remove('hidden');
-}
-function closeModal(){
-    document.getElementById('modalReset').classList.add('hidden');
-}
-
-// ================================================================
-// UTILS
+// UTILITIES
 // ================================================================
 function showToast(msg, type){
     type = type || 'success';
     var c = document.getElementById('toastContainer');
     var t = document.createElement('div');
-    var icon = type==='success'?'check-circle':type==='error'?'times-circle':'info-circle';
-    t.className = 'toast toast-' + type;
-    t.innerHTML = '<i class="fas fa-' + icon + ' flex-shrink-0"></i><span>' + msg + '</span>';
+    t.className = 'toast ' + (type==='error'?'bg-rose-600':'bg-emerald-600');
+    t.innerHTML = '<i class="fas fa-'+(type==='error'?'times-circle':'check-circle')+'"></i><span>' + msg + '</span>';
     c.appendChild(t);
-    setTimeout(function(){ if(t.parentNode) t.remove(); }, 3500);
+    setTimeout(function(){ if(t.parentNode) t.remove(); }, 3000);
+}
+
+function initRegMapel(){
+    var sel = document.getElementById('regMapel');
+    var h = '';
+    MAPEL_LIST.forEach(function(m){
+        h += '<option value="'+m.id+'">'+m.nama+'</option>';
+    });
+    sel.innerHTML = h;
 }
 
 function switchAuthTab(tab){
     document.getElementById('formLogin').classList.add('hidden');
     document.getElementById('formRegister').classList.add('hidden');
     
-    document.getElementById('tabLogin').className = 'flex-1 py-2 text-sm font-bold rounded-md transition-all text-muted hover:text-light';
-    document.getElementById('tabRegister').className = 'flex-1 py-2 text-sm font-bold rounded-md transition-all text-muted hover:text-light';
-    
-    if(tab==='login'){
+    document.getElementById('tabLogin').classList.remove('active');
+    document.getElementById('tabRegister').classList.remove('active');
+
+    if(tab === 'login'){
         document.getElementById('formLogin').classList.remove('hidden');
-        document.getElementById('tabLogin').className = 'flex-1 py-2 text-sm font-bold rounded-md transition-all bg-kopAccent text-kop';
+        document.getElementById('tabLogin').classList.add('active');
+        // Reset login fields
         document.getElementById('loginSchoolName').value = "";
-        document.getElementById('loginSchoolName').style.color = "#e8ecf1";
-        document.getElementById('loginSchoolName').disabled = true;
-    } else if(tab==='register'){
+        document.getElementById('loginSchoolName').classList.remove('text-brand-400');
+        document.getElementById('loginSchoolName').classList.add('text-slate-400');
+    } else {
         document.getElementById('formRegister').classList.remove('hidden');
-        document.getElementById('tabRegister').className = 'flex-1 py-2 text-sm font-bold rounded-md transition-all bg-kopAccent text-kop';
+        document.getElementById('tabRegister').classList.add('active');
     }
 }
 
@@ -429,24 +476,15 @@ function toggleRegFields(){
     }
 }
 
-function initRegMapel(){
-    var sel = document.getElementById('regMapel');
-    var h = '<option value="">-- Pilih Mapel --</option>';
-    MAPEL_LIST.forEach(function(m){
-        h += '<option value="'+m.id+'">'+m.nama+'</option>';
-    });
-    sel.innerHTML = h;
-}
-
 function checkSchoolName(){
     var npsn = document.getElementById('loginNpsn').value.trim();
     var schoolInput = document.getElementById('loginSchoolName');
     
     if(npsn.length === 0){
         schoolInput.value = "";
-        schoolInput.style.color = "#e8ecf1";
+        schoolInput.classList.remove('text-brand-400');
+        schoolInput.classList.add('text-slate-400');
         schoolInput.disabled = true;
-        schoolInput.placeholder = "Menunggu NPSN...";
         return;
     }
 
@@ -454,11 +492,20 @@ function checkSchoolName(){
     
     if(userFound){
         schoolInput.value = userFound.sekolah || userFound.nama_sekolah;
-        schoolInput.style.color = "#c9a84c"; 
+        schoolInput.classList.remove('text-slate-400');
+        schoolInput.classList.add('text-brand-400');
     } else {
         schoolInput.value = "BELUM TERDAFTAR";
-        schoolInput.style.color = "#ef4444"; 
+        schoolInput.classList.remove('text-brand-400');
+        schoolInput.classList.add('text-rose-400');
     }
+}
+
+function openResetModal(){ document.getElementById('modalReset').classList.remove('hidden'); }
+function closeModal(){ document.getElementById('modalReset').classList.add('hidden'); }
+
+function toggleSidebar(){
+    document.getElementById('sidebar').classList.toggle('mobile-open');
 }
 
 // ================================================================
@@ -501,7 +548,8 @@ function doRegister(){
         showToast('Registrasi Berhasil! Silakan Login.');
         switchAuthTab('login');
         document.getElementById('loginNip').value = nip;
-        usersCache.push(data); 
+        // Update cache agar checkSchoolName langsung jalan
+        usersCache.push(data);
     }).catch(function(e){
         showToast('Gagal: '+(e.message||'NIP sudah terdaftar'),'error');
     });
@@ -516,7 +564,7 @@ function doLogin(){
 
     var schoolInputVal = document.getElementById('loginSchoolName').value;
     if(schoolInputVal === "BELUM TERDAFTAR"){
-        showToast('NPSN ini belum terdaftar di sistem. Silakan Registrasi terlebih dahulu.','error');
+        showToast('NPSN ini belum terdaftar. Silakan hubungi Admin.','error');
         return;
     }
 
@@ -527,7 +575,7 @@ function doLogin(){
         
         currentUser = data;
         enterMainApp();
-    }).catch(function(){ showToast('Error Login','error'); });
+    }).catch(function(){ showToast('Terjadi kesalahan sistem','error'); });
 }
 
 function doResetPassword(){
@@ -536,7 +584,7 @@ function doResetPassword(){
     if(!nip || !pass){ showToast('Lengkapi data','error'); return; }
     
     db.collection('users_guru').doc(nip).update({password: pass}).then(function(){
-        showToast('Password berhasil direset. Silakan login.');
+        showToast('Password berhasil direset');
         closeModal();
     }).catch(function(){ showToast('NIP tidak ditemukan','error'); });
 }
@@ -558,14 +606,13 @@ function enterMainApp(){
     document.getElementById('mainApp').classList.remove('hidden');
     
     document.getElementById('sidebarInfo').textContent = currentUser.nama + ' ('+currentUser.role.toUpperCase()+')';
-
     generateMenu();
     initFirebaseListeners();
     navigateTo('dashboard');
 }
 
 // ================================================================
-// MENU GENERATOR (FIXED LOGIC SAT & PAJ)
+// MENU GENERATOR
 // ================================================================
 function generateMenu(){
     var nav = document.getElementById('sidebarNav');
@@ -576,29 +623,26 @@ function generateMenu(){
     html += '<div class="nav-item active" data-page="dashboard"><i class="fas fa-th-large w-5 text-center"></i>Dashboard</div>';
     html += '<div class="nav-item" data-page="data-siswa"><i class="fas fa-users w-5 text-center"></i>Data Siswa</div>';
     
-    // --- KELOMPOK: BANK SOAL & UJIAN SAT ---
-    // Muncul untuk SEMUA GURU
-    html += '<div class="nav-header mt-4">Bank Soal & Ujian SAT</div>';
+    // MENU SAT
+    html += '<div class="nav-header mt-6">Ujian SAT</div>';
     html += '<div class="nav-item" data-page="bank-soal"><i class="fas fa-book w-5 text-center"></i>Bank Soal SAT</div>';
     html += '<div class="nav-item" data-page="token"><i class="fas fa-key w-5 text-center"></i>Token Ujian</div>';
-    html += '<div class="nav-item" data-page="koreksi"><i class="fas fa-check-double w-5 text-center"></i>Koreksi & Nilai</div>';
+    html += '<div class="nav-item" data-page="koreksi"><i class="fas fa-check-double w-5 text-center"></i>Nilai & Koreksi</div>';
 
-    // --- KELOMPOK: PENILAIAN AKHIR JENJANG (PAJ) ---
-    // Logika: Muncul JIKA (Guru Kelas 6) ATAU (Guru PAI / PJOK)
+    // MENU PAJ
     var showPAJ = false;
     if(currentUser.role === 'kelas' && currentUser.kelas === 'Kelas 6') showPAJ = true;
     if(currentUser.role === 'pai' || currentUser.role === 'pjok') showPAJ = true;
 
     if(showPAJ){
-        html += '<div class="nav-header mt-4 text-danger">Penilaian Akhir Jenjang</div>';
+        html += '<div class="nav-header mt-6 paj-text">Ujian PAJ (Kls 6)</div>';
         html += '<div class="nav-item paj-item" data-page="bank-soal-paj"><i class="fas fa-book w-5 text-center"></i>Bank Soal PAJ</div>';
         html += '<div class="nav-item paj-item" data-page="token-paj"><i class="fas fa-key w-5 text-center"></i>Token PAJ</div>';
         html += '<div class="nav-item paj-item" data-page="koreksi-paj"><i class="fas fa-check-double w-5 text-center"></i>Nilai PAJ</div>';
     }
 
-    html += '<div class="nav-header mt-4">Laporan</div>';
+    html += '<div class="nav-header mt-6">Laporan</div>';
     html += '<div class="nav-item" data-page="print"><i class="fas fa-print w-5 text-center"></i>Cetak Naskah</div>';
-    html += '<div class="nav-item" data-page="kisi"><i class="fas fa-table w-5 text-center"></i>Kisi-Kisi</div>';
     
     nav.innerHTML = html;
     
@@ -609,50 +653,36 @@ function generateMenu(){
 }
 
 // ================================================================
-// MAIN APP LOGIC (INTEGRATED LISTENERS)
+// FIREBASE LISTENERS (INTEGRATED)
 // ================================================================
 function initFirebaseListeners(){
-    // Listener Guru (Untuk Login NPSN)
     unsubGuru = db.collection('users_guru').onSnapshot(function(snap){
         usersCache = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
         var npsn = document.getElementById('loginNpsn')?.value;
-        if(npsn && document.getElementById('loginNpsn').offsetParent !== null) {
-            checkSchoolName();
-        }
+        if(npsn && document.getElementById('loginNpsn').offsetParent !== null) checkSchoolName();
     });
 
-    // 1. Listener Soal SAT (Questions) - DIBACA DARI KODE 2
-    // Diakses oleh: Guru Kelas (Filter Mapel & Kelas) DAN Guru PAI/PJOK (Filter Mapel)
+    // 1. SAT QUESTIONS
     var qRef = db.collection('questions');
-    
     if(currentUser.role === 'kelas'){
-        // Guru Kelas: Ambil soal mapelnya & kelasnya
         qRef = qRef.where('mapel','==',currentUser.mapel).where('kelas','==',currentUser.kelas);
     } else if (currentUser.role === 'pai' || currentUser.role === 'pjok') {
-        // Guru PAI/PJOK: Ambil soal mapelnya (Kelas bebas/tidak difilter kelas karena ujian SAT bisa lintas kelas)
         qRef = qRef.where('mapel','==',currentUser.mapel);
-    } else {
-        // Admin atau lainnya: Ambil semua
-        qRef = qRef;
     }
-
+    
     unsubQ = qRef.orderBy('createdAt','asc').onSnapshot(function(snap){
         questions = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
         refreshCurrentView();
     });
 
-    // 2. Listener Soal PAJ (Questions_paj) - INTEGRASI DARI KODE 2
-    // Diakses oleh: Guru Kelas 6 DAN Guru PAI/PJOK
+    // 2. PAJ QUESTIONS
     var pajRef = db.collection('questions_paj');
-    
     if(currentUser.role === 'kelas' && currentUser.kelas === 'Kelas 6'){
-        // Guru Kelas 6: Ambil soal PAJ kelas 6 (semua mapel untuk melihat soal PAJ siswa)
         pajRef = pajRef.where('kelas','==','Kelas 6'); 
     } else if (currentUser.role === 'pai' || currentUser.role === 'pjok') {
-        // Guru PAI/PJOK: Ambil soal PAJ untuk mapelnya khusus Kelas 6
         pajRef = pajRef.where('mapel','==',currentUser.mapel).where('kelas','==','Kelas 6');
     } else {
-        pajRef = pajRef.where('kelas','==','null_impossible'); // Kosongkan jika tidak berhak
+        pajRef = pajRef.where('kelas','==','null_impossible'); 
     }
     
     unsubPAJ = pajRef.orderBy('createdAt','asc').onSnapshot(function(snap){
@@ -660,7 +690,6 @@ function initFirebaseListeners(){
         refreshCurrentView();
     });
 
-    // Listener Siswa, Token, Result (Standard)
     unsubSiswa = db.collection('students').orderBy('nama','asc').onSnapshot(function(snap){
         students = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
         refreshCurrentView();
@@ -684,15 +713,14 @@ function refreshCurrentView(){
     switch(activePage){
         case 'dashboard': renderDashboard(c); break;
         case 'data-siswa': renderDataSiswa(c); break;
-        case 'bank-soal': renderBankSoal(c, false); break; // SAT (Read Only)
-        case 'bank-soal-paj': renderBankSoal(c, true); break; // PAJ (Read Only)
-        case 'token': renderToken(c, false); break; // SAT
-        case 'token-paj': renderToken(c, true); break; // PAJ
-        case 'koreksi': renderKoreksi(c, false); break; // SAT
-        case 'koreksi-paj': renderKoreksi(c, true); break; // PAJ
-        case 'print': renderPrint(c, false); break; // Default SAT
-        case 'print-paj': renderPrint(c, true); break; // PAJ
-        case 'kisi': renderKisi(c); break;
+        case 'bank-soal': renderBankSoal(c, false); break;
+        case 'bank-soal-paj': renderBankSoal(c, true); break;
+        case 'token': renderToken(c, false); break;
+        case 'token-paj': renderToken(c, true); break;
+        case 'koreksi': renderKoreksi(c, false); break;
+        case 'koreksi-paj': renderKoreksi(c, true); break;
+        case 'print': renderPrint(c, false); break;
+        case 'print-paj': renderPrint(c, true); break;
     }
 }
 
@@ -701,7 +729,13 @@ function navigateTo(page){
     var t = document.querySelector('.nav-item[data-page="'+page+'"]');
     if(t) t.classList.add('active');
     
-    var titles = {dashboard:'Dashboard','data-siswa':'Data Siswa','bank-soal':'Bank Soal SAT','bank-soal-paj':'Bank Soal PAJ','token':'Token Ujian','token-paj':'Token PAJ','koreksi':'Koreksi & Nilai','koreksi-paj':'Nilai PAJ','print':'Cetak Naskah','print-paj':'Cetak Naskah PAJ','kisi':'Kisi-Kisi'};
+    var titles = {
+        dashboard:'Dashboard', data_siswa:'Data Siswa', 
+        bank_soal:'Bank Soal SAT', bank_soal_paj:'Bank Soal PAJ',
+        token:'Token Ujian', token_paj:'Token PAJ',
+        koreksi:'Nilai & Koreksi', koreksi_paj:'Nilai PAJ',
+        print:'Cetak Naskah', print_paj:'Cetak PAJ'
+    };
     document.getElementById('pageTitle').textContent = titles[page] || page;
     refreshCurrentView();
 }
@@ -715,51 +749,58 @@ function renderDashboard(c){
     var myPAJ = pajQuestions.length; 
     var myResults = results.length; 
 
-    c.innerHTML = '<div class="fade-in grid grid-cols-2 md:grid-cols-4 gap-4">' +
-        '<div class="card text-center border-l-4 border-info"><div class="text-3xl font-bold text-info">'+totalSiswa+'</div><div class="text-xs text-muted mt-1">Total Siswa</div></div>' +
-        '<div class="card text-center border-l-4 border-kopAccent"><div class="text-3xl font-bold text-kopAccent">'+mySAT+'</div><div class="text-xs text-muted mt-1">Soal SAT</div></div>' +
-        '<div class="card text-center border-l-4 border-danger"><div class="text-3xl font-bold text-danger">'+myPAJ+'</div><div class="text-xs text-muted mt-1">Soal PAJ</div></div>' +
-        '<div class="card text-center border-l-4 border-success"><div class="text-3xl font-bold text-success">'+myResults+'</div><div class="text-xs text-muted mt-1">Hasil Masuk</div></div>' +
+    c.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">' +
+        '<div class="stat-card border-l-4 border-brand-500"><div class="stat-value text-brand-400">'+totalSiswa+'</div><div class="stat-label">Total Siswa</div></div>' +
+        '<div class="stat-card border-l-4 border-blue-500"><div class="stat-value text-blue-400">'+mySAT+'</div><div class="stat-label">Soal SAT</div></div>' +
+        '<div class="stat-card border-l-4 border-rose-500"><div class="stat-value text-rose-400">'+myPAJ+'</div><div class="stat-label">Soal PAJ</div></div>' +
+        '<div class="stat-card border-l-4 border-emerald-500"><div class="stat-value text-emerald-400">'+myResults+'</div><div class="stat-label">Hasil Masuk</div></div>' +
     '</div>';
 }
 
 function renderBankSoal(c, isPAJ){
-    var title = isPAJ ? 'Bank Soal PAJ (Read Only)' : 'Bank Soal SAT (Read Only)';
+    var title = isPAJ ? 'Bank Soal PAJ' : 'Bank Soal SAT';
     var dataList = isPAJ ? pajQuestions : questions;
 
-    c.innerHTML = '<div class="fade-in card">' +
-        '<div class="flex justify-between items-center mb-4">' +
-            '<h3 class="font-display text-lg font-bold text-light">'+title+'</h3>' +
-            '<span class="text-xs text-muted bg-dark/50 px-2 py-1 rounded"><i class="fas fa-lock mr-1"></i>Soal dikelola oleh Admin</span>' +
+    c.innerHTML = '<div class="card">' +
+        '<div class="flex justify-between items-center mb-6">' +
+            '<h3 class="font-display text-xl font-bold text-white">'+title+'</h3>' +
+            '<div class="flex items-center gap-2 px-3 py-1 bg-slate-800 rounded-full text-xs text-slate-400 border border-slate-700"><i class="fas fa-lock"></i> Managed by Admin</div>' +
         '</div>' +
-        '<div id="bankListContainer" class="space-y-2 max-h-[70vh] overflow-y-auto pr-2"></div></div>';
+        '<div id="bankListContainer" class="space-y-3 max-h-[70vh] overflow-y-auto pr-2"></div></div>';
     
     setTimeout(function(){ renderBankList(dataList, document.getElementById('bankListContainer')); }, 100);
 }
 
 function renderBankList(list, container){
     if(!list.length){ 
-        container.innerHTML='<div class="text-center py-10 text-muted bg-dark/20 rounded border border-dashed border-border"><i class="fas fa-inbox text-4xl mb-3 block opacity-30"></i>Belum ada soal di bank ini (Silakan buat di Admin).</div>'; 
+        container.innerHTML='<div class="text-center py-12 text-slate-500 bg-slate-800/50 rounded-xl border border-dashed border-slate-700"><i class="fas fa-inbox text-4xl mb-3 opacity-30 block"></i>Belum ada soal. Soal dibuat oleh Admin.</div>'; 
         return; 
     }
     container.innerHTML = list.map(function(q){
-        var badge = q.type==='pg' ? 'bg-kopAccent/20 text-kopAccent' : 'bg-info/20 text-info';
-        return '<div class="p-3 bg-dark/30 rounded border-l-2 border-'+(q.type==='pg'?'kopAccent':'info')+' flex justify-between items-start">' +
-            '<div><span class="text-xs px-2 py-0.5 rounded '+badge+' font-bold">'+(q.type==='pg'?'PG':'Uraian')+'</span> <span class="text-xs text-muted ml-2">'+q.kelas+'</span><p class="mt-1 text-sm truncate">'+escHtml(q.text)+'</p></div>' +
-            '<div class="text-xs text-muted">Skor: '+(q.score||1)+'</div></div>';
+        var badge = q.type==='pg' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+        return '<div class="p-4 bg-slate-800/50 rounded-lg border border-slate-700 flex justify-between items-start">' +
+            '<div class="flex-1 pr-4">' +
+                '<div class="flex items-center gap-2 mb-2">' +
+                    '<span class="px-2 py-0.5 rounded text-xs font-semibold border '+badge+'">'+(q.type==='pg'?'PILIHAN GANDA':'URAIAN')+'</span>' +
+                    '<span class="text-xs text-slate-500">'+q.kelas+'</span>' +
+                '</div>' +
+                '<p class="text-sm text-slate-200 line-clamp-2">'+escHtml(q.text)+'</p>' +
+            '</div>' +
+            '<div class="text-xs font-mono text-slate-500">Skor: '+(q.score||1)+'</div>' +
+        '</div>';
     }).join('');
 }
 
 function renderDataSiswa(c){
-    c.innerHTML = '<div class="fade-in card">' +
-        '<h3 class="font-display text-lg font-bold text-light mb-4">Data Siswa</h3>' +
-        '<div class="flex flex-wrap gap-4 mb-4">' +
-            '<input type="text" id="addNama" class="input-field flex-1" placeholder="Nama Siswa">' +
-            '<input type="text" id="addNisn" class="input-field w-40" placeholder="NISN">' +
-            '<select id="addKelas" class="input-field w-40"><option value="">Pilih Kelas</option>'+KELAS_LIST.map(k=>'<option value="'+k+'">'+k+'</option>').join('')+'</select>' +
-            '<button onclick="addSiswa()" class="btn-primary"><i class="fas fa-plus"></i> Tambah</button>' +
+    c.innerHTML = '<div class="card">' +
+        '<h3 class="font-display text-xl font-bold text-white mb-6">Data Siswa</h3>' +
+        '<div class="flex flex-wrap gap-4 mb-6 p-4 bg-slate-800/50 rounded-lg border border-slate-700">' +
+            '<input type="text" id="addNama" class="form-input" placeholder="Nama Siswa">' +
+            '<input type="text" id="addNisn" class="form-input w-48" placeholder="NISN">' +
+            '<select id="addKelas" class="form-select w-40"><option value="">Pilih Kelas</option>'+KELAS_LIST.map(k=>'<option value="'+k+'">'+k+'</option>').join('')+'</select>' +
+            '<button onclick="addSiswa()" class="bg-brand-600 hover:bg-brand-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"><i class="fas fa-plus mr-2"></i>Tambah</button>' +
         '</div>' +
-        '<div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-dark/50 text-muted"><tr><th class="p-2">Nama</th><th class="p-2">NISN</th><th class="p-2">Kelas</th><th class="p-2 text-center">Aksi</th></tr></thead><tbody id="siswaTableBody"></tbody></table></div>' +
+        '<div class="table-container"><table class="w-full"><thead><tr><th class="p-3">Nama</th><th class="p-3">NISN</th><th class="p-3">Kelas</th><th class="p-3 text-center">Aksi</th></tr></thead><tbody id="siswaTableBody"></tbody></table></div>' +
     '</div>';
     renderSiswaTable();
 }
@@ -771,9 +812,9 @@ function renderSiswaTable(){
         viewSiswa = students.filter(s=>s.kelas === currentUser.kelas && s.rombel === currentUser.rombel);
     }
     
-    if(viewSiswa.length===0){ tb.innerHTML='<tr><td colspan="4" class="p-4 text-center text-muted">Tidak ada siswa di kelas/rombel ini.</td></tr>'; return; }
+    if(viewSiswa.length===0){ tb.innerHTML='<tr><td colspan="4" class="p-6 text-center text-slate-500">Tidak ada data siswa.</td></tr>'; return; }
     tb.innerHTML = viewSiswa.map(function(s){
-        return '<tr class="border-b border-border"><td class="p-2">'+escHtml(s.nama)+'</td><td class="p-2">'+s.nisn+'</td><td class="p-2">'+s.kelas+'</td><td class="p-2 text-center"><button onclick="delSiswa(\''+s.id+'\')" class="text-danger hover:text-white"><i class="fas fa-trash"></i></button></td></tr>';
+        return '<tr class="border-b border-slate-800"><td class="p-3 font-medium text-white">'+escHtml(s.nama)+'</td><td class="p-3 text-slate-400">'+s.nisn+'</td><td class="p-3 text-slate-400">'+s.kelas+'</td><td class="p-3 text-center"><button onclick="delSiswa(\''+s.id+'\')" class="text-rose-500 hover:text-rose-400 p-2"><i class="fas fa-trash-alt"></i></button></td></tr>';
     }).join('');
 }
 
@@ -782,50 +823,56 @@ function addSiswa(){
     var nisn = document.getElementById('addNisn').value.trim();
     var kelas = document.getElementById('addKelas').value;
     if(!nama || !nisn || !kelas){ showToast('Lengkapi data','error'); return; }
-    // Default rombel A jika guru kelas, atau input manual (sederhana)
     var rombel = currentUser.role === 'kelas' ? currentUser.rombel : 'A'; 
     db.collection('students').add({nama,nisn,kelas,rombel,createdAt:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){ showToast('Siswa ditambahkan'); document.getElementById('addNama').value=''; }).catch();
 }
-function delSiswa(id){ if(confirm('Hapus siswa?')) db.collection('students').doc(id).delete().then(()=>showToast('Terhapus')).catch(); }
+function delSiswa(id){ if(confirm('Hapus siswa ini?')) db.collection('students').doc(id).delete().then(()=>showToast('Terhapus')).catch(); }
 
-// Logic Token & Koreksi
+// LOGIC TOKEN & KOREKSI
 function renderToken(c, isPAJ){
-    var title = isPAJ ? 'Token PAJ' : 'Token Ujian';
-    c.innerHTML = '<div class="fade-in card">' +
-        '<h3 class="font-display text-lg font-bold text-light mb-4">'+title+'</h3>' +
-        '<div class="grid md:grid-cols-4 gap-4 mb-6 bg-dark/30 p-4 rounded">' +
-            '<div><label class="text-xs text-muted">Mapel</label><input type="text" class="input-field" value="'+getMapelName(isPAJ?'pai':currentUser.mapel)+'" disabled></div>' +
-            '<div><label class="text-xs text-muted">Kelas</label><input type="text" class="input-field" value="'+(isPAJ?'Kelas 6':currentUser.kelas)+'" disabled></div>' +
-            '<div><label class="text-xs text-muted">Durasi (Menit)</label><input type="number" id="tokDurasi" class="input-field" value="60"></div>' +
-            '<div class="flex items-end"><button onclick="genToken('+isPAJ+')" class="btn-primary w-full">Buat Token</button></div>' +
+    var title = isPAJ ? 'Token PAJ' : 'Token Ujian SAT';
+    c.innerHTML = '<div class="card">' +
+        '<h3 class="font-display text-xl font-bold text-white mb-6">'+title+'</h3>' +
+        '<div class="grid md:grid-cols-4 gap-4 mb-8 p-6 bg-slate-800/50 rounded-xl border border-slate-700">' +
+            '<div><label class="block text-xs text-slate-400 mb-1 uppercase">Mapel</label><input type="text" class="form-input" value="'+getMapelName(isPAJ?'pai':currentUser.mapel)+'" disabled></div>' +
+            '<div><label class="block text-xs text-slate-400 mb-1 uppercase">Kelas</label><input type="text" class="form-input" value="'+(isPAJ?'Kelas 6':currentUser.kelas)+'" disabled></div>' +
+            '<div><label class="block text-xs text-slate-400 mb-1 uppercase">Durasi (Menit)</label><input type="number" id="tokDurasi" class="form-input" value="60"></div>' +
+            '<div class="flex items-end"><button onclick="genToken('+isPAJ+')" class="btn-auth">Buat Token</button></div>' +
         '</div>' +
-        '<div id="tokenList" class="space-y-2"></div></div>';
+        '<div id="tokenList" class="space-y-3"></div></div>';
     renderTokenList(isPAJ);
 }
+
 function renderTokenList(isPAJ){
     var list = examTokens.filter(t=>t.isPAJ===isPAJ && t.mapel===(isPAJ?'pai':currentUser.mapel) && t.kelas===(isPAJ?'Kelas 6':currentUser.kelas));
     list = list.filter(t=>t.rombel === currentUser.rombel);
     var container = document.getElementById('tokenList');
-    if(!list.length){ container.innerHTML='<p class="text-center text-muted">Belum ada token.</p>'; return; }
-    container.innerHTML = list.map(t=>'<div class="flex justify-between items-center bg-dark/30 p-3 rounded border border-border"><div><span class="font-mono font-bold text-lg tracking-widest text-kopAccent">'+t.token+'</span></div><button onclick="delToken(\''+t.id+'\')" class="text-danger hover:text-white"><i class="fas fa-trash"></i></button></div>').join('');
+    if(!list.length){ container.innerHTML='<div class="text-center py-8 text-slate-500">Belum ada token ujian aktif.</div>'; return; }
+    container.innerHTML = list.map(t=>
+        '<div class="flex justify-between items-center bg-slate-800/50 p-4 rounded-lg border border-slate-700">' +
+            '<div><span class="font-mono text-xl font-bold text-brand-400 tracking-widest">'+t.token+'</span><span class="text-xs text-slate-500 ml-3">'+t.durasi+' Menit</span></div>' +
+            '<button onclick="delToken(\''+t.id+'\')" class="text-rose-500 hover:text-rose-400 px-3 py-1 border border-rose-500/50 rounded hover:bg-rose-500/10 transition-colors"><i class="fas fa-trash mr-1"></i>Hapus</button>' +
+        '</div>'
+    ).join('');
 }
+
 function genToken(isPAJ){
     var durasi = document.getElementById('tokDurasi').value;
     var token = Math.floor(100000 + Math.random() * 900000).toString();
     var data = {
         token: token, mapel: isPAJ ? 'pai' : currentUser.mapel, kelas: isPAJ ? 'Kelas 6' : currentUser.kelas, durasi: parseInt(durasi), isPAJ: isPAJ, rombel: currentUser.rombel, createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
-    db.collection('exam_tokens').add(data).then(function(){ showToast('Token: '+token); }).catch();
+    db.collection('exam_tokens').add(data).then(function(){ showToast('Token Berhasil: '+token); }).catch();
 }
-function delToken(id){ if(confirm('Hapus token?')) db.collection('exam_tokens').doc(id).delete().then(()=>showToast('Terhapus')).catch(); }
+function delToken(id){ if(confirm('Hapus token ini?')) db.collection('exam_tokens').doc(id).delete().then(()=>showToast('Token Dihapus')).catch(); }
 
 function renderKoreksi(c, isPAJ){
-    c.innerHTML = '<div class="fade-in grid md:grid-cols-2 gap-6">' +
-        '<div class="card h-fit"><h3 class="font-bold text-kopAccent mb-4">Aksi Cetak</h3>' +
-            '<button onclick="printLoginCards('+isPAJ+')" class="btn-secondary w-full mb-2"><i class="fas fa-id-card mr-2"></i>Kartu Login</button>' +
-            '<button onclick="printNilai('+isPAJ+')" class="btn-primary w-full"><i class="fas fa-print mr-2"></i>Laporan Nilai</button>' +
+    c.innerHTML = '<div class="grid md:grid-cols-3 gap-6">' +
+        '<div class="md:col-span-1 card"><h3 class="font-bold text-brand-400 mb-4 text-lg">Aksi Cetak</h3>' +
+            '<button onclick="printLoginCards('+isPAJ+')" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-lg mb-3 text-sm font-medium transition-colors"><i class="fas fa-id-card mr-2"></i>Kartu Login</button>' +
+            '<button onclick="printNilai('+isPAJ+')" class="w-full btn-auth"><i class="fas fa-print mr-2"></i>Laporan Nilai</button>' +
         '</div>' +
-        '<div class="card h-fit"><h3 class="font-bold text-kopAccent mb-4">Status Siswa</h3><div id="korSiswaList" class="space-y-2 max-h-[400px] overflow-y-auto text-sm"></div></div>' +
+        '<div class="md:col-span-2 card"><h3 class="font-bold text-brand-400 mb-4 text-lg">Status Siswa</h3><div id="korSiswaList" class="space-y-2 max-h-[400px] overflow-y-auto"></div></div>' +
     '</div>';
     loadKorData(isPAJ);
 }
@@ -836,11 +883,11 @@ function loadKorData(isPAJ){
     var stList = students.filter(s=>s.kelas===kelasFilter && s.rombel===currentUser.rombel);
     var qList = isPAJ ? pajQuestions : questions; 
     var maxScore = qList.reduce((a,b)=>a+(b.score||0),0);
-    if(!stList.length){ container.innerHTML='<p class="text-muted">Tidak ada siswa</p>'; return; }
+    if(!stList.length){ container.innerHTML='<p class="text-slate-500">Tidak ada siswa.</p>'; return; }
     container.innerHTML = stList.map(function(s){
         var r = results.find(x=>x.siswaId===s.id && x.mapel===mapelFilter && x.isPAJ===isPAJ);
-        var status = r ? '<span class="text-success font-bold">Selesai ('+r.score+'/'+maxScore+')</span>' : '<span class="text-muted">Belum Ujian</span>';
-        return '<div class="flex justify-between items-center p-2 bg-dark/30 rounded"><span>'+s.nama+'</span><span>'+status+'</span></div>';
+        var status = r ? '<span class="text-emerald-400 font-bold">Selesai ('+r.score+'/'+maxScore+')</span>' : '<span class="text-slate-500">Belum Ujian</span>';
+        return '<div class="flex justify-between items-center p-3 bg-slate-800/50 rounded border border-slate-700"><span class="text-slate-200">'+s.nama+'</span><span>'+status+'</span></div>';
     }).join('');
 }
 function printLoginCards(isPAJ){
@@ -849,15 +896,15 @@ function printLoginCards(isPAJ){
     var stList = students.filter(s=>s.kelas===kelas && s.rombel===currentUser.rombel);
     var tokens = examTokens.filter(t=>t.mapel===mapel && t.kelas===kelas && t.isPAJ===isPAJ && t.rombel===currentUser.rombel);
     var tokenStr = tokens.length ? tokens[0].token : 'N/A';
-    var html = '<div class="print-only login-card-grid">';
+    var html = '<div style="font-family:sans-serif;display:grid;grid-template-columns:1fr 1fr;gap:30px;">';
     stList.forEach(function(s){
-        html += '<div class="login-card-item">' +
-            '<div class="lc-header">KARTU PESERTA</div>' +
-            '<div class="lc-body"><strong>Nama:</strong> '+s.nama+'</div>' +
-            '<div class="lc-body"><strong>NISN:</strong> '+s.nisn+'</div>' +
-            '<div class="lc-body"><strong>Mapel:</strong> '+getMapelName(mapel)+'</div>' +
-            '<div class="lc-body"><strong>Kelas:</strong> '+kelas+'</div>' +
-            '<div class="lc-token">TOKEN: '+tokenStr+'</div>' +
+        html += '<div style="border:2px solid #000;padding:25px;text-align:center;border-radius:8px;page-break-inside:avoid;">' +
+            '<h3 style="margin:0 0 15px 0;font-size:18px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;">KARTU PESERTA</h3>' +
+            '<div style="text-align:left;margin-bottom:10px;"><strong>Nama:</strong> '+s.nama+'</div>' +
+            '<div style="text-align:left;margin-bottom:10px;"><strong>NISN:</strong> '+s.nisn+'</div>' +
+            '<div style="text-align:left;margin-bottom:10px;"><strong>Mapel:</strong> '+getMapelName(mapel)+'</div>' +
+            '<div style="text-align:left;margin-bottom:10px;"><strong>Kelas:</strong> '+kelas+'</div>' +
+            '<div style="background:#eee;padding:10px;margin:15px 0;font-family:Courier New,monospace;font-weight:bold;letter-spacing:2px;font-size:20px;border:1px solid #000;">TOKEN: '+tokenStr+'</div>' +
             '<svg id="barcode-'+s.nisn+'"></svg>' +
         '</div>';
     });
@@ -874,15 +921,15 @@ function printNilai(isPAJ){
     var kelas = isPAJ ? 'Kelas 6' : currentUser.kelas;
     var stList = students.filter(s=>s.kelas===kelas && s.rombel===currentUser.rombel);
     var resList = results.filter(r=>r.mapel===mapel && r.kelas===kelas && r.isPAJ===isPAJ);
-    var html = '<div class="print-only" style="font-family:Times New Roman; padding:20px;">' +
-        '<h2 style="text-align:center;text-decoration:underline;">LAPORAN HASIL UJIAN</h2>' +
-        '<p style="text-align:center;">'+getMapelName(mapel)+' - '+kelas+'</p><br>' +
-        '<table style="width:100%;border-collapse:collapse" class="nilai-table"><thead><tr><th style="border:1px solid #000;padding:5px">No</th><th style="border:1px solid #000;padding:5px">Nama</th><th style="border:1px solid #000;padding:5px">Nilai</th><th style="border:1px solid #000;padding:5px">Ket</th></tr></thead><tbody>';
+    var html = '<div style="font-family:Times New Roman;padding:20px;">' +
+        '<h2 style="text-align:center;text-decoration:underline;margin-bottom:5px;">LAPORAN HASIL UJIAN</h2>' +
+        '<p style="text-align:center;margin-bottom:20px;">'+getMapelName(mapel)+' - '+kelas+'</p>' +
+        '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="border:1px solid #000;padding:5px;text-align:center">No</th><th style="border:1px solid #000;padding:5px">Nama</th><th style="border:1px solid #000;padding:5px;text-align:center">Nilai</th><th style="border:1px solid #000;padding:5px;text-align:center">Ket</th></tr></thead><tbody>';
     stList.forEach(function(s,i){
         var r = resList.find(x=>x.siswaId===s.id);
         var score = r ? r.score : 0;
-        var ket = score >= 70 ? '<span class="nilai-pass">TUNTAS</span>' : '<span class="nilai-fail">REMEDIAL</span>';
-        html += '<tr><td style="text-align:center;border:1px solid #000;padding:5px">'+(i+1)+'</td><td style="border:1px solid #000;padding:5px">'+s.nama+'</td><td style="text-align:center;font-weight:bold;border:1px solid #000;padding:5px">'+score+'</td><td style="text-align:center;border:1px solid #000;padding:5px">'+ket+'</td></tr>';
+        var ket = score >= 70 ? '<span style="color:green;font-weight:bold">TUNTAS</span>' : '<span style="color:red;font-weight:bold">REMEDIAL</span>';
+        html += '<tr><td style="text-align:center;border:1px solid #000;padding:5px">'+(i+1)+'</td><td style="border:1px solid #000;padding:5px">'+s.nama+'</td><td style="text-align:center;border:1px solid #000;padding:5px;font-weight:bold">'+score+'</td><td style="text-align:center;border:1px solid #000;padding:5px">'+ket+'</td></tr>';
     });
     html += '</tbody></table></div>';
     var w = window.open('','','width=1000,height=800');
@@ -892,18 +939,16 @@ function printNilai(isPAJ){
     w.document.close();
 }
 
-// PRINT SOAL (FIXED: NO INDICATOR)
+// PRINT PREVIEW
 function renderPrint(c, isPAJ){
     var title = isPAJ ? 'Cetak Soal PAJ' : 'Cetak Soal SAT';
-    c.innerHTML = '<div class="fade-in no-print">' +
-        '<div class="card mb-6">' +
-            '<h3 class="font-display text-lg font-bold text-light mb-4"><i class="fas fa-print mr-2 text-kopAccent"></i>'+title+'</h3>' +
-            '<div class="flex gap-4 mb-4">' +
-                '<button onclick="doPrintSoal('+isPAJ+')" class="btn-primary"><i class="fas fa-print"></i> Cetak / PDF</button>' +
-            '</div>' +
-            '<div class="mb-2"><label class="text-xs text-muted">Tujuan Pembelajaran (Opsional)</label><textarea id="prTP" class="input-field" rows="2" placeholder="Masukkan TP umum..."></textarea></div>' +
+    c.innerHTML = '<div class="card">' +
+        '<h3 class="font-display text-xl font-bold text-white mb-6">'+title+'</h3>' +
+        '<div class="flex gap-4 mb-6">' +
+            '<button onclick="doPrintSoal('+isPAJ+')" class="btn-auth"><i class="fas fa-print"></i> Cetak / PDF</button>' +
         '</div>' +
-        '<div id="printPreviewContainer" class="print-preview-wrap"><div class="print-preview-sheet">Sedang memuat...</div></div>' +
+        '<div class="mb-4"><label class="block text-xs text-slate-400 mb-1">Tujuan Pembelajaran (Opsional)</label><textarea id="prTP" class="form-input" rows="2" placeholder="Masukkan TP umum..."></textarea></div>' +
+        '<div class="bg-white p-8 rounded shadow-inner text-black min-h-[600px]" id="printPreviewContainer"><p class="text-center text-slate-400">Preview akan muncul di sini...</p></div>' +
     '</div>';
     refreshPrintPreview(isPAJ);
 }
@@ -915,58 +960,45 @@ function refreshPrintPreview(isPAJ){
     var logo = 'https://www.image2url.com/r2/default/images/1776680731558-aaedfd5c-6674-4989-a7a4-c15f6291acac.jpeg';
     var tp = document.getElementById('prTP').value;
 
-    var html = '<div class="print-preview-sheet"><div class="print-page">' +
-        '<div class="kop-surat"><div style="display:flex;align-items:center;justify-content:center;gap:20px"><img src="'+logo+'" alt="Logo" style="height:80px"><div style="text-align:center"><h1 style="font-size:16pt;font-weight:bold;text-transform:uppercase;margin:0">PEMERINTAH KABUPATEN MAJALENGKA</h1><h2 style="font-size:18pt;font-weight:bold;text-transform:uppercase;margin:0">KOREK API KECAMATAN MAJALENGKA</h2></div></div></div>' +
-        '<div style="text-align:center;margin-bottom:20px"><h3 style="font-size:14pt;font-weight:bold;text-decoration:underline;text-transform:uppercase;margin:0">'+(isPAJ?'Penilaian Akhir Jenjang (PAJ)':'Sumatif Akhir Tahun')+'</h3><p style="font-size:12pt;margin:5px 0 0;font-weight:bold">'+getMapelName(isPAJ?'pai':currentUser.mapel)+'</p></div>' +
-        '<div style="margin-bottom:20px"><table style="width:100%;font-size:12pt"><tr><td width="100">Nama</td><td width="12">:</td><td style="border-bottom:1px dotted #000"></td></tr><tr><td>Kelas</td><td>:</td><td>'+(isPAJ?'Kelas 6':currentUser.kelas)+'</td></tr><tr><td>Rombel</td><td>:</td><td>'+currentUser.rombel+'</td></tr><tr><td>Hari / Tanggal</td><td>:</td><td class="dot-cell"></td></tr></table></div>';
-    if(tp) html += '<div style="margin-bottom:20px;padding:10px;border-left:4px solid #000;background:#f9f9f9"><strong>Tujuan Pembelajaran:</strong><br><em>'+escHtml(tp)+'</em></div>';
+    var html = '<div class="font-serif text-sm leading-relaxed">' +
+        '<div class="text-center border-b-4 border-double border-black pb-4 mb-6">' +
+            '<img src="'+logo+'" alt="Logo" style="height:60px;margin:0 auto 10px;">' +
+            '<h1 class="text-lg font-bold uppercase">Pemerintah Kabupaten Majalengka</h1>' +
+            '<h2 class="text-xl font-bold uppercase">Korek Api Kecamatan Majalengka</h2>' +
+        '</div>' +
+        '<div class="text-center mb-6"><h3 class="font-bold underline uppercase text-base">'+(isPAJ?'Penilaian Akhir Jenjang (PAJ)':'Sumatif Akhir Tahun')+'</h3><p class="font-bold text-sm mt-1">'+getMapelName(isPAJ?'pai':currentUser.mapel)+'</p></div>' +
+        '<div class="mb-4 text-sm"><table style="width:100%"><tr><td width="100">Nama</td><td width="10">:</td><td style="border-bottom:1px dotted #000"></td></tr><tr><td>Kelas</td><td>:</td><td>'+(isPAJ?'Kelas 6':currentUser.kelas)+'</td></tr></table></div>';
+    if(tp) html += '<div class="mb-4 p-3 border-l-4 border-black bg-gray-100 italic text-sm"><strong>TP:</strong> '+escHtml(tp)+'</div>';
 
     if(pg.length){
-        html += '<div style="font-weight:bold;font-size:12pt;border-bottom:2px solid #000;padding-bottom:4px;margin-bottom:10px">I. Pilihan Ganda</div>';
+        html += '<div class="font-bold border-b-2 border-black pb-1 mb-4 mt-6">I. Pilihan Ganda</div>';
         pg.forEach(function(q,i){
-            html += '<div style="margin-bottom:20px;page-break-inside:avoid"><div style="font-weight:bold;float:left;width:30px">'+(i+1)+'.</div><div style="margin-left:30px">'+escHtml(q.text)+'</div>';
-            html += '<div style="margin-left:30px;margin-top:5px">';
+            html += '<div class="mb-4"><div class="font-bold float-left w-6">'+(i+1)+'.</div><div class="ml-6">'+escHtml(q.text)+'</div>';
+            html += '<div class="ml-6 mt-2 grid grid-cols-2 gap-4">';
             var letters = ['a','b','c','d','e'];
-            (q.options||[]).forEach(function(opt,oi){ html += '<div style="margin-bottom:5px"><strong>'+letters[oi]+'.</strong> '+escHtml(opt)+'</div>'; });
-            html += '</div></div><div style="clear:both"></div>';
+            (q.options||[]).forEach(function(opt,oi){ html += '<div><strong>'+letters[oi]+'.</strong> '+escHtml(opt)+'</div>'; });
+            html += '</div><div class="clear-both"></div></div>';
         });
     }
     if(uraian.length){
-        html += '<div style="font-weight:bold;font-size:12pt;border-bottom:2px solid #000;padding-bottom:4px;margin-bottom:10px;margin-top:20px">II. Uraian</div>';
+        html += '<div class="font-bold border-b-2 border-black pb-1 mb-4 mt-8">II. Uraian</div>';
         uraian.forEach(function(q,i){
-            html += '<div style="margin-bottom:20px"><div style="font-weight:bold;float:left;width:30px">'+(i+1)+'.</div><div style="margin-left:30px">'+escHtml(q.text)+'</div><div style="margin-left:30px;margin-top:10px;border:1px dashed #bbb;height:80px;background:#fafafa"></div></div><div style="clear:both"></div>';
+            html += '<div class="mb-4"><div class="font-bold float-left w-6">'+(i+1)+'.</div><div class="ml-6">'+escHtml(q.text)+'</div><div class="ml-6 mt-2 border border-dashed border-gray-400 h-20 bg-gray-50"></div></div>';
         });
     }
-    html += '</div></div>';
+    html += '</div>';
     container.innerHTML = html;
 }
 function doPrintSoal(isPAJ){
-    var sheet = document.querySelector('.print-preview-sheet');
+    var sheet = document.getElementById('printPreviewContainer');
     if(!sheet) return;
-    var iframe = document.createElement('iframe');
-    iframe.style.position='fixed'; iframe.style.left='-9999px'; iframe.style.top='0'; iframe.style.width='210mm'; iframe.style.height='297mm';
-    document.body.appendChild(iframe);
-    var doc=iframe.contentDocument||iframe.contentWindow.document;
-    doc.open();
-    doc.write('<!DOCTYPE html><html><head><title>Cetak</title>');
-    doc.write('<style>@page{size:A4 portrait;margin:1.5cm 2cm 2cm 2cm}body{margin:0;padding:0;font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.4;color:black;background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact}.kop-surat{text-align:center;padding-bottom:12px;margin-bottom:24px;border-bottom:3px double #000}.kop-surat img{height:80px}.section-heading{font-weight:bold;font-size:12pt;border-bottom:2px solid #000;padding-bottom:4px;margin-bottom:10px;text-align:left}.soal-item{margin-bottom:20px;page-break-inside:avoid}.soal-num{float:left;font-weight:bold;width:35px;flex-shrink:0}.soal-text{margin-left:35px;display:block}.opsi-wrapper{margin-top:8px;display:grid;grid-template-columns:1fr 1fr;column-gap:24px;row-gap:6px;margin-left:35px}.opsi-row{margin-bottom:5px;display:flex;align-items:flex-start;gap:8px;font-size:12pt}.opsi-label{font-weight:bold;min-width:20px;flex-shrink:0;}.opsi-label::after{content:"."}.answer-lines{margin-top:8px;margin-left:35px;border:1px dashed #bbb;height:80px;border-radius:4px;background-color:#fafafa}.clearfix::after{content:"";display:table;clear:both}.ttd-section{display:none}');
-    doc.write('</style></head><body>');
-    doc.write(sheet.innerHTML);
-    doc.write('</body></html>');
-    doc.close();
-    setTimeout(function(){
-        iframe.contentWindow.focus();
-        iframe.contentWindow.print();
-        setTimeout(function(){document.body.removeChild(iframe);},3000);
-    },500);
-}
-function renderKisi(c){
-    c.innerHTML = '<div class="fade-in no-print card"><h3 class="font-bold text-kopAccent mb-4">Kisi-Kisi Soal</h3><div id="kisiPrev" class="print-preview-wrap"></div></div>';
-    var qList = questions; 
-    var html = '<div class="print-preview-sheet"><table class="print-table" style="width:100%;border-collapse:collapse;margin-top:12px;font-size:10pt;table-layout:fixed"><thead><tr><th style="border:1px solid #000;padding:6px">No</th><th style="border:1px solid #000;padding:6px">TP</th><th style="border:1px solid #000;padding:6px">Indikator</th><th style="border:1px solid #000;padding:6px">Tipe</th><th style="border:1px solid #000;padding:6px">Skor</th></tr></thead><tbody>';
-    qList.forEach(function(q,i){ html+='<tr><td style="text-align:center;border:1px solid #000;padding:6px">'+(i+1)+'</td><td style="border:1px solid #000;padding:6px">'+escHtml(q.tp||'-')+'</td><td style="border:1px solid #000;padding:6px">'+escHtml(q.indicator||'-')+'</td><td style="text-align:center;border:1px solid #000;padding:6px">'+(q.type==='pg'?'PG':'Uraian')+'</td><td style="text-align:center;border:1px solid #000;padding:6px">'+q.score+'</td></tr>'; });
-    html+='</tbody></table></div>';
-    document.getElementById('kisiPrev').innerHTML=html;
+    var w = window.open('','','width=1000,height=800');
+    w.document.write('<html><head><title>Cetak</title>');
+    w.document.write('<style>@page{size:A4;margin:1.5cm}body{font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.4}</style>');
+    w.document.write('</head><body onload="window.print();window.close();">');
+    w.document.write(sheet.innerHTML);
+    w.document.write('</body></html>');
+    w.document.close();
 }
 
 // INIT
