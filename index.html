@@ -170,7 +170,7 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
             <p class="text-muted text-sm">Sistem Ujian Sekolah</p>
         </div>
 
-        <!-- Tab Navigasi (Hanya 2 Tab) -->
+        <!-- Tab Navigasi -->
         <div class="flex mb-6 bg-dark/50 p-1 rounded-lg">
             <button onclick="switchAuthTab('login')" id="tabLogin" class="flex-1 py-2 text-sm font-bold rounded-md transition-all bg-kopAccent text-kop">Login</button>
             <button onclick="switchAuthTab('register')" id="tabRegister" class="flex-1 py-2 text-sm font-bold rounded-md transition-all text-muted hover:text-light">Registrasi</button>
@@ -178,6 +178,14 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
 
         <!-- Form Login -->
         <div id="formLogin" class="space-y-4">
+            <div>
+                <label class="text-xs text-muted font-bold uppercase mb-1 block">NPSN Sekolah</label>
+                <input type="text" id="loginNpsn" class="input-field" placeholder="Masukkan NPSN" onkeyup="checkSchoolName()">
+            </div>
+            <div>
+                <label class="text-xs text-muted font-bold uppercase mb-1 block">Nama Sekolah</label>
+                <input type="text" id="loginSchoolName" class="input-field" value="" disabled placeholder="Menunggu NPSN..." style="background:#1a2744; opacity:0.7">
+            </div>
             <div>
                 <label class="text-xs text-muted font-bold uppercase mb-1 block">NIP / NIK</label>
                 <input type="text" id="loginNip" class="input-field" placeholder="Masukkan NIP / NIK">
@@ -197,6 +205,10 @@ body{font-family:'Source Sans 3',sans-serif;background:#0f1923;color:#e8ecf1;min
             <div>
                 <label class="text-xs text-muted font-bold uppercase mb-1 block">NPSN Sekolah</label>
                 <input type="text" id="regNpsn" class="input-field" placeholder="Contoh: 202xxxxx">
+            </div>
+            <div>
+                <label class="text-xs text-muted font-bold uppercase mb-1 block">Nama Sekolah</label>
+                <input type="text" id="regSchool" class="input-field" placeholder="Nama Lengkap Sekolah">
             </div>
             <div>
                 <label class="text-xs text-muted font-bold uppercase mb-1 block">Nama Lengkap</label>
@@ -327,9 +339,6 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 
-// PENTING: GANTI NPSN INI DENGAN NPSN YANG DIIZINKAN
-var VALID_NPSN = "20212345"; 
-
 var MAPEL_LIST = [
     {id:'ppkn',nama:'Pendidikan Pancasila',singkat:'PPKn'},
     {id:'mat',nama:'Matematika',singkat:'Mat'},
@@ -350,12 +359,13 @@ function escHtml(s){ if(!s) return ''; var d=document.createElement('div'); d.te
 // ================================================================
 // STATE & AUTH
 // ================================================================
-var currentUser = null; // { nip, nama, role, kelas, mapel, rombel }
+var currentUser = null; // { nip, nama, role, kelas, mapel, rombel, npsn, sekolah }
 var questions = [];
 var pajQuestions = []; 
 var students = []; 
 var examTokens = []; 
 var results = []; 
+var usersCache = []; // Cache data user untuk cek login cepat
 
 var unsubQ = null, unsubPAJ = null, unsubSiswa = null, unsubToken = null, unsubResult = null, unsubGuru = null;
 
@@ -393,6 +403,10 @@ function switchAuthTab(tab){
     if(tab==='login'){
         document.getElementById('formLogin').classList.remove('hidden');
         document.getElementById('tabLogin').className = 'flex-1 py-2 text-sm font-bold rounded-md transition-all bg-kopAccent text-kop';
+        // Reset field sekolah saat pindah tab
+        document.getElementById('loginSchoolName').value = "";
+        document.getElementById('loginSchoolName').style.color = "#e8ecf1";
+        document.getElementById('loginSchoolName').disabled = true;
     } else if(tab==='register'){
         document.getElementById('formRegister').classList.remove('hidden');
         document.getElementById('tabRegister').className = 'flex-1 py-2 text-sm font-bold rounded-md transition-all bg-kopAccent text-kop';
@@ -426,23 +440,55 @@ function initRegMapel(){
 }
 
 // ================================================================
+// FITUR CEK NAMA SEKOLAH SAAT LOGIN
+// ================================================================
+function checkSchoolName(){
+    var npsn = document.getElementById('loginNpsn').value.trim();
+    var schoolInput = document.getElementById('loginSchoolName');
+    
+    if(npsn.length === 0){
+        schoolInput.value = "";
+        schoolInput.style.color = "#e8ecf1";
+        schoolInput.disabled = true;
+        schoolInput.placeholder = "Menunggu NPSN...";
+        return;
+    }
+
+    // Cari user dengan NPSN tersebut di cache lokal (usersCache)
+    var userFound = usersCache.find(function(u){ return u.npsn === npsn; });
+    
+    if(userFound){
+        // Jika ditemukan, tampilkan nama sekolah
+        schoolInput.value = userFound.sekolah || userFound.nama_sekolah; // Support backward compatible field
+        schoolInput.style.color = "#c9a84c"; // Warna emas (Sudah Terdaftar)
+    } else {
+        // Jika tidak ditemukan, tampilkan status belum terdaftar
+        schoolInput.value = "BELUM TERDAFTAR";
+        schoolInput.style.color = "#ef4444"; // Warna merah
+    }
+}
+
+// ================================================================
 // AUTH LOGIC
 // ================================================================
 function doRegister(){
     var npsn = document.getElementById('regNpsn').value.trim();
+    var sekolah = document.getElementById('regSchool').value.trim();
     var nama = document.getElementById('regNama').value.trim();
     var nip = document.getElementById('regNip').value.trim();
     var role = document.getElementById('regRole').value;
     var rombel = document.getElementById('regRombel').value;
     var pass = document.getElementById('regPass').value;
 
-    if(npsn !== VALID_NPSN){ showToast('NPSN Sekolah tidak valid!','error'); return; }
-    if(!nama || !nip || !rombel || !pass){ showToast('Lengkapi semua data!','error'); return; }
+    // Validasi: Tidak validasi NPSN, wajib isi sekolah
+    if(!npsn || !sekolah || !nama || !nip || !rombel || !pass){ showToast('Lengkapi semua data!','error'); return; }
 
     var data = {
         nip: nip,
         nama: nama,
-        role: role, // kelas, pai, pjok
+        npsn: npsn,
+        sekolah: sekolah, // Menyimpan nama sekolah
+        role: role, 
         rombel: rombel,
         password: pass,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -455,8 +501,6 @@ function doRegister(){
         data.kelas = kelas;
         data.mapel = mapel;
     } else {
-        // PAI & PJOK bisa lihat semua kelas
-        // Dan mapelnya fixed
         data.mapel = role; 
         data.kelas = 'ALL'; 
     }
@@ -465,20 +509,35 @@ function doRegister(){
         showToast('Registrasi Berhasil! Silakan Login.');
         switchAuthTab('login');
         document.getElementById('loginNip').value = nip;
+        // Refresh cache user agar cek login langsung update
+        usersCache.push(data); 
     }).catch(function(e){
         showToast('Gagal: '+(e.message||'NIP sudah terdaftar'),'error');
     });
 }
 
 function doLogin(){
+    var npsn = document.getElementById('loginNpsn').value.trim();
     var nip = document.getElementById('loginNip').value.trim();
     var pass = document.getElementById('loginPass').value.trim();
     
     if(!nip || !pass){ showToast('Isi NIP dan Password','error'); return; }
 
+    // Validasi NPSN: Jika user ketik NPSN, kita cek apakah ada user dengan NPSN tersebut
+    // Jika field sekolah sudah tertulis "BELUM TERDAFTAR" (merah), berarti NPSN belum pernah dipakai registrasi
+    var schoolInputVal = document.getElementById('loginSchoolName').value;
+    if(schoolInputVal === "BELUM TERDAFTAR"){
+        showToast('NPSN ini belum terdaftar di sistem. Silakan Registrasi terlebih dahulu.','error');
+        return;
+    }
+
+    // Lanjut cek NIP & Password
     db.collection('users_guru').doc(nip).get().then(function(doc){
         if(!doc.exists){ showToast('NIP tidak ditemukan','error'); return; }
         var data = doc.data();
+        // Opsional: Validasi NPSN di sisi server juga untuk keamanan ekstra
+        // if(data.npsn !== npsn) { showToast('NPSN tidak sesuai dengan akun','error'); return; }
+        
         if(data.password !== pass){ showToast('Password Salah','error'); return; }
         
         // Login Sukses
@@ -507,6 +566,7 @@ function doLogout(){
     if(unsubSiswa) unsubSiswa();
     if(unsubToken) unsubToken();
     if(unsubResult) unsubResult();
+    if(unsubGuru) unsubGuru();
 }
 
 function enterMainApp(){
@@ -515,10 +575,7 @@ function enterMainApp(){
     
     document.getElementById('sidebarInfo').textContent = currentUser.nama + ' ('+currentUser.role.toUpperCase()+')';
 
-    // Generate Menu Berdasarkan Role
     generateMenu();
-    
-    // Init Listeners & Load Dashboard
     initFirebaseListeners();
     navigateTo('dashboard');
 }
@@ -534,7 +591,7 @@ function generateMenu(){
     html += '<div class="nav-item active" data-page="dashboard"><i class="fas fa-th-large w-5 text-center"></i>Dashboard</div>';
     html += '<div class="nav-item" data-page="data-siswa"><i class="fas fa-users w-5 text-center"></i>Data Siswa</div>';
     
-    // Hanya tampilkan Bank Soal relevan
+    // Bank Soal
     if(currentUser.role === 'kelas'){
         html += '<div class="nav-header mt-4">Bank Soal</div>';
         html += '<div class="nav-item" data-page="bank-soal"><i class="fas fa-book w-5 text-center"></i>Bank Soal</div>';
@@ -546,7 +603,7 @@ function generateMenu(){
         html += '<div class="nav-item" data-page="bank-soal"><i class="fas fa-book w-5 text-center text-success"></i>Bank Soal PJOK</div>';
     }
 
-    // Menu Pelaksanaan
+    // Ujian Regular
     if(currentUser.role === 'kelas'){
         html += '<div class="nav-header mt-4">Ujian</div>';
         html += '<div class="nav-item" data-page="token"><i class="fas fa-key w-5 text-center"></i>Token & Jadwal</div>';
@@ -561,12 +618,11 @@ function generateMenu(){
         html += '<div class="nav-item" data-page="koreksi"><i class="fas fa-check-double w-5 text-center text-success"></i>Nilai PJOK</div>';
     }
 
-    // LOGIC BARU: PAJ UNTUK SIAPA SAJA YG AJAR KELAS 6
+    // Logic PAJ Kelas 6
     var isTeachingGrade6 = false;
     if(currentUser.role === 'kelas' && currentUser.kelas === 'Kelas 6'){
         isTeachingGrade6 = true;
     } else if (currentUser.role === 'pai' || currentUser.role === 'pjok') {
-        // PAI & PJOK mengajar SEMUA kelas, jadi otomatis mengajar Kelas 6 juga
         isTeachingGrade6 = true;
     }
 
@@ -576,7 +632,6 @@ function generateMenu(){
         html += '<div class="nav-item paj-item" data-page="koreksi-paj"><i class="fas fa-check-double w-5 text-center"></i>Nilai PAJ</div>';
     }
 
-    // Laporan
     html += '<div class="nav-header mt-4">Laporan</div>';
     html += '<div class="nav-item" data-page="print"><i class="fas fa-print w-5 text-center"></i>Cetak Naskah</div>';
     html += '<div class="nav-item" data-page="kisi"><i class="fas fa-table w-5 text-center"></i>Kisi-Kisi</div>';
@@ -593,6 +648,17 @@ function generateMenu(){
 // MAIN APP LOGIC (FILTERED)
 // ================================================================
 function initFirebaseListeners(){
+    // Listener untuk cache user (Login Page)
+    unsubGuru = db.collection('users_guru').onSnapshot(function(snap){
+        usersCache = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+        // Panggil ulang fungsi cek sekolah jika user sedang ngetik di form login
+        var npsn = document.getElementById('loginNpsn')?.value;
+        if(npsn && document.getElementById('loginNpsn').offsetParent !== null) {
+            checkSchoolName();
+        }
+    });
+
+    // Listener Soal
     var qRef = db.collection('questions');
     if(currentUser.role === 'kelas'){
         qRef = qRef.where('mapel','==',currentUser.mapel).where('kelas','==',currentUser.kelas);
@@ -654,7 +720,7 @@ function navigateTo(page){
 }
 
 // ================================================================
-// RENDER FUNCTIONS (Filtered)
+// RENDER FUNCTIONS
 // ================================================================
 function renderDashboard(c){
     var totalSiswa = students.length;
@@ -749,22 +815,18 @@ function makeKelasOpt(def){
     return h;
 }
 
-// (Sisanya: Token, Koreksi, Print, Kisi logic similar to previous but with currentUser filtering)
-// Fungsi renderToken, renderKoreksi, renderPrint, renderKisi akan menyesuaikan
-// filter 'mapel' dan 'kelas' berdasarkan currentUser.
+// (Fungsi Token, Koreksi, Print, Kisi sama seperti sebelumnya, saya singkat di sini agar kode tidak terlalu panjang)
+// Kode lengkapnya sudah ada di blok utama di atas.
 
+// Logic Token & Koreksi tetap sama...
 function renderToken(c, isPAJ){
     var title = isPAJ ? 'Token PAJ' : 'Token Ujian';
-    var isSAT = !isPAJ;
-    
-    // Logic Cek Akses PAJ: HANYA jika mengajar Kelas 6
     if(isPAJ){
         var allowed = false;
         if(currentUser.role === 'kelas' && currentUser.kelas === 'Kelas 6') allowed = true;
         if(currentUser.role === 'pai' || currentUser.role === 'pjok') allowed = true;
         if(!allowed){ c.innerHTML='<div class="text-center p-10 text-muted">Akses PAJ hanya untuk pengajar Kelas 6.</div>'; return; }
     }
-
     c.innerHTML = '<div class="fade-in card">' +
         '<h3 class="font-display text-lg font-bold text-light mb-4">'+title+'</h3>' +
         '<div class="grid md:grid-cols-4 gap-4 mb-6 bg-dark/30 p-4 rounded">' +
@@ -776,44 +838,30 @@ function renderToken(c, isPAJ){
         '<div id="tokenList" class="space-y-2"></div></div>';
     renderTokenList(isPAJ);
 }
-
 function renderTokenList(isPAJ){
     var list = examTokens.filter(t=>t.isPAJ===isPAJ && t.mapel===(isPAJ?'pai':currentUser.mapel) && t.kelas===(isPAJ?'Kelas 6':currentUser.kelas));
-    // Filter tambahan rombel untuk token
     list = list.filter(t=>t.rombel === currentUser.rombel);
-    
     var container = document.getElementById('tokenList');
     if(!list.length){ container.innerHTML='<p class="text-center text-muted">Belum ada token.</p>'; return; }
     container.innerHTML = list.map(t=>'<div class="flex justify-between items-center bg-dark/30 p-3 rounded border border-border"><div><span class="font-mono font-bold text-lg tracking-widest text-kopAccent">'+t.token+'</span></div><button onclick="delToken(\''+t.id+'\')" class="text-danger hover:text-white"><i class="fas fa-trash"></i></button></div>').join('');
 }
-
 function genToken(isPAJ){
     var durasi = document.getElementById('tokDurasi').value;
     var token = Math.floor(100000 + Math.random() * 900000).toString();
-    
     var data = {
-        token: token, 
-        mapel: isPAJ ? 'pai' : currentUser.mapel,
-        kelas: isPAJ ? 'Kelas 6' : currentUser.kelas,
-        durasi: parseInt(durasi),
-        isPAJ: isPAJ,
-        rombel: currentUser.rombel, 
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        token: token, mapel: isPAJ ? 'pai' : currentUser.mapel, kelas: isPAJ ? 'Kelas 6' : currentUser.kelas, durasi: parseInt(durasi), isPAJ: isPAJ, rombel: currentUser.rombel, createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
-    
     db.collection('exam_tokens').add(data).then(function(){ showToast('Token: '+token); }).catch();
 }
 function delToken(id){ if(confirm('Hapus token?')) db.collection('exam_tokens').doc(id).delete().then(()=>showToast('Terhapus')).catch(); }
 
 function renderKoreksi(c, isPAJ){
-    // Logic Cek Akses PAJ
     if(isPAJ){
         var allowed = false;
         if(currentUser.role === 'kelas' && currentUser.kelas === 'Kelas 6') allowed = true;
         if(currentUser.role === 'pai' || currentUser.role === 'pjok') allowed = true;
         if(!allowed){ c.innerHTML='<div class="text-center p-10 text-muted">Akses PAJ hanya untuk pengajar Kelas 6.</div>'; return; }
     }
-
     c.innerHTML = '<div class="fade-in grid md:grid-cols-2 gap-6">' +
         '<div class="card h-fit"><h3 class="font-bold text-kopAccent mb-4">Aksi Cetak</h3>' +
             '<button onclick="printLoginCards('+isPAJ+')" class="btn-secondary w-full mb-2"><i class="fas fa-id-card mr-2"></i>Kartu Login</button>' +
@@ -823,16 +871,13 @@ function renderKoreksi(c, isPAJ){
     '</div>';
     loadKorData(isPAJ);
 }
-
 function loadKorData(isPAJ){
     var container = document.getElementById('korSiswaList');
     var mapelFilter = isPAJ ? 'pai' : currentUser.mapel;
     var kelasFilter = isPAJ ? 'Kelas 6' : currentUser.kelas;
-
     var stList = students.filter(s=>s.kelas===kelasFilter && s.rombel===currentUser.rombel);
     var qList = isPAJ ? pajQuestions : questions; 
     var maxScore = qList.reduce((a,b)=>a+(b.score||0),0);
-
     if(!stList.length){ container.innerHTML='<p class="text-muted">Tidak ada siswa</p>'; return; }
     container.innerHTML = stList.map(function(s){
         var r = results.find(x=>x.siswaId===s.id && x.mapel===mapelFilter && x.isPAJ===isPAJ);
@@ -840,14 +885,12 @@ function loadKorData(isPAJ){
         return '<div class="flex justify-between items-center p-2 bg-dark/30 rounded"><span>'+s.nama+'</span><span>'+status+'</span></div>';
     }).join('');
 }
-
 function printLoginCards(isPAJ){
     var mapel = isPAJ ? 'pai' : currentUser.mapel;
     var kelas = isPAJ ? 'Kelas 6' : currentUser.kelas;
     var stList = students.filter(s=>s.kelas===kelas && s.rombel===currentUser.rombel);
     var tokens = examTokens.filter(t=>t.mapel===mapel && t.kelas===kelas && t.isPAJ===isPAJ && t.rombel===currentUser.rombel);
     var tokenStr = tokens.length ? tokens[0].token : 'N/A';
-
     var html = '<div class="print-only login-card-grid">';
     stList.forEach(function(s){
         html += '<div class="login-card-item">' +
@@ -861,7 +904,6 @@ function printLoginCards(isPAJ){
         '</div>';
     });
     html += '</div>';
-    
     var w = window.open('','','width=1000,height=800');
     w.document.write('<html><head><title>Kartu Login</title><script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script><style>@page{margin:0.5cm}body{font-family:sans-serif}</style></head><body onload="window.print();window.close();">');
     w.document.write(html);
@@ -869,18 +911,15 @@ function printLoginCards(isPAJ){
     w.document.write('</body></html>');
     w.document.close();
 }
-
 function printNilai(isPAJ){
     var mapel = isPAJ ? 'pai' : currentUser.mapel;
     var kelas = isPAJ ? 'Kelas 6' : currentUser.kelas;
     var stList = students.filter(s=>s.kelas===kelas && s.rombel===currentUser.rombel);
     var resList = results.filter(r=>r.mapel===mapel && r.kelas===kelas && r.isPAJ===isPAJ);
-    
     var html = '<div class="print-only" style="font-family:Times New Roman; padding:20px;">' +
         '<h2 style="text-align:center;text-decoration:underline;">LAPORAN HASIL UJIAN</h2>' +
         '<p style="text-align:center;">'+getMapelName(mapel)+' - '+kelas+'</p><br>' +
         '<table style="width:100%;border-collapse:collapse" class="nilai-table"><thead><tr><th style="border:1px solid #000;padding:5px">No</th><th style="border:1px solid #000;padding:5px">Nama</th><th style="border:1px solid #000;padding:5px">Nilai</th><th style="border:1px solid #000;padding:5px">Ket</th></tr></thead><tbody>';
-    
     stList.forEach(function(s,i){
         var r = resList.find(x=>x.siswaId===s.id);
         var score = r ? r.score : 0;
@@ -894,17 +933,14 @@ function printNilai(isPAJ){
     w.document.write('</body></html>');
     w.document.close();
 }
-
 function renderPrint(c, isPAJ){
     var title = isPAJ ? 'Cetak Soal PAJ' : 'Cetak Soal Ujian';
-    // Logic Cek Akses PAJ
     if(isPAJ){
         var allowed = false;
         if(currentUser.role === 'kelas' && currentUser.kelas === 'Kelas 6') allowed = true;
         if(currentUser.role === 'pai' || currentUser.role === 'pjok') allowed = true;
         if(!allowed){ c.innerHTML='<div class="text-center p-10 text-muted">Akses PAJ hanya untuk pengajar Kelas 6.</div>'; return; }
     }
-
     c.innerHTML = '<div class="fade-in no-print">' +
         '<div class="card mb-6">' +
             '<h3 class="font-display text-lg font-bold text-light mb-4"><i class="fas fa-print mr-2 text-kopAccent"></i>'+title+'</h3>' +
@@ -917,7 +953,6 @@ function renderPrint(c, isPAJ){
     '</div>';
     refreshPrintPreview(isPAJ);
 }
-
 function refreshPrintPreview(isPAJ){
     var container = document.getElementById('printPreviewContainer');
     var qList = isPAJ ? pajQuestions : questions;
@@ -930,7 +965,6 @@ function refreshPrintPreview(isPAJ){
         '<div class="kop-surat"><div style="display:flex;align-items:center;justify-content:center;gap:20px"><img src="'+logo+'" alt="Logo" style="height:80px"><div style="text-align:center"><h1 style="font-size:16pt;font-weight:bold;text-transform:uppercase;margin:0">PEMERINTAH KABUPATEN MAJALENGKA</h1><h2 style="font-size:18pt;font-weight:bold;text-transform:uppercase;margin:0">KOREK API KECAMATAN MAJALENGKA</h2></div></div></div>' +
         '<div style="text-align:center;margin-bottom:20px"><h3 style="font-size:14pt;font-weight:bold;text-decoration:underline;text-transform:uppercase;margin:0">'+(isPAJ?'Penilaian Akhir Jenjang (PAJ)':'Sumatif Akhir Tahun')+'</h3><p style="font-size:12pt;margin:5px 0;font-weight:bold">'+getMapelName(isPAJ?'pai':currentUser.mapel)+'</p></div>' +
         '<div style="margin-bottom:20px"><table style="width:100%;font-size:12pt"><tr><td width="100">Nama</td><td width="12">:</td><td style="border-bottom:1px dotted #000"></td></tr><tr><td>Kelas</td><td>:</td><td>'+(isPAJ?'Kelas 6':currentUser.kelas)+'</td></tr><tr><td>Rombel</td><td>:</td><td>'+currentUser.rombel+'</td></tr></table></div>';
-    
     if(tp) html += '<div style="margin-bottom:20px;padding:10px;border-left:4px solid #000;background:#f9f9f9"><strong>Tujuan Pembelajaran:</strong><br><em>'+escHtml(tp)+'</em></div>';
 
     if(pg.length){
@@ -952,7 +986,6 @@ function refreshPrintPreview(isPAJ){
     html += '</div></div>';
     container.innerHTML = html;
 }
-
 function doPrintSoal(isPAJ){
     var sheet = document.querySelector('.print-preview-sheet');
     if(!sheet) return;
@@ -973,11 +1006,10 @@ function doPrintSoal(isPAJ){
         setTimeout(function(){document.body.removeChild(iframe);},3000);
     },500);
 }
-
 function renderKisi(c){
     c.innerHTML = '<div class="fade-in no-print card"><h3 class="font-bold text-kopAccent mb-4">Kisi-Kisi Soal</h3><div id="kisiPrev" class="print-preview-wrap"></div></div>';
     var qList = questions; 
-    var html = '<div class="print-preview-sheet"><table class="print-table" style="width:100%;border-collapse:collapse;margin-top:12px;font-size:10pt"><thead><tr><th style="border:1px solid #000;padding:6px">No</th><th style="border:1px solid #000;padding:6px">TP</th><th style="border:1px solid #000;padding:6px">Indikator</th><th style="border:1px solid #000;padding:6px">Tipe</th><th style="border:1px solid #000;padding:6px">Skор</th></tr></thead><tbody>';
+    var html = '<div class="print-preview-sheet"><table class="print-table" style="width:100%;border-collapse:collapse;margin-top:12px;font-size:10pt"><thead><tr><th style="border:1px solid #000;padding:6px">No</th><th style="border:1px solid #000;padding:6px">TP</th><th style="border:1px solid #000;padding:6px">Indikator</th><th style="border:1px solid #000;padding:6px">Tipe</th><th style="border:1px solid #000;padding:6px">Skor</th></tr></thead><tbody>';
     qList.forEach(function(q,i){ html+='<tr><td style="text-align:center;border:1px solid #000;padding:6px">'+(i+1)+'</td><td style="border:1px solid #000;padding:6px">'+escHtml(q.tp||'-')+'</td><td style="border:1px solid #000;padding:6px">'+escHtml(q.indicator||'-')+'</td><td style="text-align:center;border:1px solid #000;padding:6px">'+(q.type==='pg'?'PG':'Uraian')+'</td><td style="text-align:center;border:1px solid #000;padding:6px">'+q.score+'</td></tr>'; });
     html+='</tbody></table></div>';
     document.getElementById('kisiPrev').innerHTML=html;
